@@ -1,24 +1,19 @@
 <?php if(!$this->groupRoots): ?>
  – Keine Startpunkte zugewiesen
-
 <?php else: ?>
 <ul class="cca-lr-groupRoots">
 <?php foreach($this->groupRoots as $groupRoot): ?>
 <li>
 <?php echo $groupRoot['title']; ?> [<?php echo $groupRoot['language']; ?>]
-
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>"
-    title="Übersetzungsreferenzen bearbeiten"
+    title="<?php echo $GLOBALS['TL_LANG']['MSC']['cca_lr_group']; ?>"
   ><?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/link.png'); ?></a>
-
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>&filter=incomplete"
-    title="Unvollständige Übersetzungsreferenzen bearbeiten"
+    title="<?php echo $GLOBALS['TL_LANG']['MSC']['cca_lr_group_incomplete']; ?>"
   ><?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/link_break.png'); ?></a>
-
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>&filter=ambiguous"
-    title="Fehlerhafte Übersetzungsreferenzen bearbeiten"
+    title="<?php echo $GLOBALS['TL_LANG']['MSC']['cca_lr_group_ambiguous']; ?>"
   ><?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/link_error.png'); ?></a>
-
 </li>
 <?php endforeach; ?>
 </ul>
