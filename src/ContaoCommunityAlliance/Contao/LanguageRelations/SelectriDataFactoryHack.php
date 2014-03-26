@@ -28,7 +28,7 @@ SQL;
 		$return = $dc->row($dc->strPalette);
 
 		// readd the callback
-		$field['input_field_callback'] = array(__CLASS__, __METHOD__);
+		$field['input_field_callback'] = array(__CLASS__, __FUNCTION__);
 
 		return $return;
 	}
