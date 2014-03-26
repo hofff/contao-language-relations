@@ -1,0 +1,35 @@
+{
+	"name": "contao-community-alliance/language-relations",
+	"description": "Maintaining relations between translated pages.",
+	"keywords": [ "utility", "translation", "page", "tree", "contao" ],
+	"type": "contao-module",
+	"license": "LGPL-3.0+",
+	"authors": [
+		{
+			"name": "Oliver Hoff",
+			"email": "oliver@hofff.com",
+			"homepage": "http://hofff.com/",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"php": ">=5.3",
+		"contao/core": ">=2.11,<4",
+		"backboneit/contao-selectri": ">=1,<2",
+		"contao-community-alliance/root-relations": ">=1,<2"
+	},
+	"autoload": {
+		"psr-0": {
+			"ContaoCommunityAlliance": "src/"
+		}
+	},
+	"extra": {
+		"contao": {
+			"sources": {
+				"contao-module": "system/modules/cca-language-relations"
+			},
+			"runonce": [
+			]
+		}
+	}
+}
