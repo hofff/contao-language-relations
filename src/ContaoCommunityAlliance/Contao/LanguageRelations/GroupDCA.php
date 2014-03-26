@@ -2,10 +2,46 @@
 
 namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 
+use ContaoCommunityAlliance\Contao\RootRelations\ControllerProxy;
+
 /**
  * @author Oliver Hoff
  */
 class GroupDCA {
+
+	public function keyEditRelations() {
+		$fields = array('cca_lr_pageInfo', 'cca_lr_relations');
+		$roots = array_unique(array_map('intval', array_filter((array) $_GET['roots'], function($root) { return $root >= 1; })));
+
+		switch($_GET['filter']) {
+			case 'incomplete':
+			case 'ambiguous':
+				throw new \Exception('not yet implemented');
+				break;
+
+			default:
+				if($roots) {
+					$wildcards = rtrim(str_repeat('?,', count('roots')), ',');
+					$sql = 'SELECT id FROM tl_page WHERE cca_rr_root IN (' . $wildcards . ')';
+					$result = \Database::getInstance()->prepare($sql)->execute($roots);
+					$ids = $result->fetchEach('id');
+				}
+				break;
+		}
+
+		if(!$ids) {
+			ControllerProxy::addConfirmationMessage($GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
+			ControllerProxy::redirect(ControllerProxy::getReferer());
+			return;
+		}
+
+		$session = \Session::getInstance()->getData();
+		$session['CURRENT']['IDS'] = $ids;
+		$session['CURRENT']['tl_page'] = $fields;
+		\Session::getInstance()->setData($session);
+
+		ControllerProxy::redirect('contao/main.php?do=cca_lr_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
+	}
 
 	public function labelGroup($row, $label) {
 		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';

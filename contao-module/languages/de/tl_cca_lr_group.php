@@ -17,3 +17,5 @@ $GLOBALS['TL_LANG']['tl_cca_lr_group']['roots']
 
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['notGrouped']
 	= 'Keiner Gruppe zugewiesen';
+$GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']
+	= 'Keine Seiten zu bearbeiten';
