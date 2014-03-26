@@ -15,8 +15,11 @@ class GroupDCA {
 
 		switch($_GET['filter']) {
 			case 'incomplete':
+				$ids = LanguageRelations::getIncompleteRelatedPages($roots[0]);
+				break;
+
 			case 'ambiguous':
-				throw new \Exception('not yet implemented');
+				$ids = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
 				break;
 
 			default:
