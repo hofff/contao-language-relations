@@ -9,6 +9,12 @@ foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'ro
 }
 unset($palettes);
 
+$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_pageInfo'] = array(
+	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['cca_lr_pageInfo'],
+	'exclude'	=> true,
+	'input_field_callback'=> array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'inputFieldPageInfo'),
+);
+
 $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = array(
 	'label'		=> &$GLOBALS['TL_LANG']['tl_page']['cca_lr_relations'],
 	'exclude'	=> true,

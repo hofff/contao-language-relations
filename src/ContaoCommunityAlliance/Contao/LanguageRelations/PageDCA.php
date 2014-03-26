@@ -7,6 +7,12 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
  */
 class PageDCA {
 
+	public function inputFieldPageInfo($dc, $xlabel) {
+		$tpl = new \BackendTemplate('cca_lr_pageInfo');
+		$tpl->setData($dc->activeRecord->row());
+		return $tpl->parse();
+	}
+
 	private $relations = array();
 
 	public function onsubmitPage($dc) {
