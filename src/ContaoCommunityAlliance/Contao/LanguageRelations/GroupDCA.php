@@ -24,12 +24,20 @@ class GroupDCA {
 
 	public function getRootsOptions() {
 		$sql = <<<SQL
-SELECT		page.id, page.title, page.language,
-			grp.id AS grpID, grp.title AS grpTitle
-FROM		tl_page			AS page
-LEFT JOIN	tl_cca_lr_group	AS grp	ON grp.id = page.cca_lr_group
+SELECT		page.id,
+			page.title,
+			page.language,
+			grp.id				AS grpID,
+			grp.title			AS grpTitle
+
+FROM		tl_page				AS page
+LEFT JOIN	tl_cca_lr_group		AS grp			ON grp.id = page.cca_lr_group
+
 WHERE		page.type = ?
-ORDER BY	grp.title IS NOT NULL, grp.title, page.title
+
+ORDER BY	grp.title IS NOT NULL,
+			grp.title,
+			page.title
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached('root');
 
