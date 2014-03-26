@@ -1,0 +1,12 @@
+<?php if(!$this->groupRoots): ?>
+ – Keine Startpunkte zugewiesen
+
+<?php else: ?>
+<ul class="cca-lr-groupRoots">
+<?php foreach($this->groupRoots as $groupRoot): ?>
+<li>
+<?php echo $groupRoot['title']; ?> [<?php echo $groupRoot['language']; ?>]
+</li>
+<?php endforeach; ?>
+</ul>
+<?php endif; ?>

@@ -21,6 +21,7 @@ $GLOBALS['TL_DCA']['tl_cca_lr_group'] = array(
 		'label' => array(
 			'fields'		=> array('title'),
 			'format'		=> '%s',
+			'label_callback'=> array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'labelGroup')
 		),
 		'global_operations' => array(
 		),

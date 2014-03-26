@@ -7,6 +7,21 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
  */
 class GroupDCA {
 
+	public function labelGroup($row, $label) {
+		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';
+		$result = \Database::getInstance()->prepare($sql)->execute($row['id']);
+
+		$groupRoots = array();
+		while($result->next()) {
+			$groupRoots[] = $result->row();
+		}
+
+		$tpl = new \BackendTemplate('cca_lr_groupRoots');
+		$tpl->groupRoots = $groupRoots;
+
+		return $label . $tpl->parse();
+	}
+
 	public function getRootsOptions() {
 		$sql = <<<SQL
 SELECT		page.id, page.title, page.language,
