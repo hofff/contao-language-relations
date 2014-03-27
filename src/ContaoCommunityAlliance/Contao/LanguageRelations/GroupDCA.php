@@ -46,6 +46,10 @@ class GroupDCA {
 		ControllerProxy::redirect('contao/main.php?do=cca_lr_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
 	}
 
+	public function groupGroup($group, $mode, $field, $row, $dc) {
+		return $row['title'] . ' (ID ' . $row['id'] . ')';
+	}
+
 	public function labelGroup($row, $label) {
 		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->execute($row['id']);
@@ -58,7 +62,7 @@ class GroupDCA {
 		$tpl = new \BackendTemplate('cca_lr_groupRoots');
 		$tpl->groupRoots = $groupRoots;
 
-		return $label . $tpl->parse();
+		return $tpl->parse();
 	}
 
 	public function getRootsOptions() {

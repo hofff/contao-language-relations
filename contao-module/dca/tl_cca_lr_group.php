@@ -17,16 +17,16 @@ $GLOBALS['TL_DCA']['tl_cca_lr_group'] = array
         'sorting' => array
         (
             'mode'          => 1,
-            'fields'        => array('title'),
+            'fields'        => array('title', 'id'),
             'flag'          => 12,
             'panelLayout'   => 'filter;search,limit',
-            'disableGrouping'=> true,
         ),
         'label' => array
         (
             'fields'        => array('title'),
             'format'        => '%s',
-            'label_callback'=> array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'labelGroup')
+            'label_callback'=> array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'labelGroup'),
+            'group_callback'=> array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'groupGroup'),
         ),
         'global_operations' => array
         (
