@@ -2,6 +2,21 @@
 
 $GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'][] = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'onsubmitPage');
 
+/*
+ * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module
+ * https://github.com/contao-community-alliance/language-relations/issues/2
+ */
+if($_GET['do'] == 'cca_lr_group')
+{
+    $onsubmit = $GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
+    foreach($onsubmit as $i => $callback) if($callback[0] == 'tl_page' && $callback[1] == 'updateSitemap')
+    {
+        unset($onsubmit[$i]);
+        break;
+    }
+    unset($onsubmit);
+}
+
 $palettes = &$GLOBALS['TL_DCA']['tl_page']['palettes'];
 foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'root')
 {
