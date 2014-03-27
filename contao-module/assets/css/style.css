@@ -11,7 +11,7 @@
   }
 
   .cca-lr-pageInfo {
-    margin-top:10px;
+    margin:10px 0 4px;
     font-size:12px;
     font-weight:bold;
   }
@@ -21,7 +21,7 @@
   }
 
   .cca-lr-pageInfo + div h3 {
-    font-weight:normal;
+    display:none;
   }
   
   .cca-lr-greyed {
