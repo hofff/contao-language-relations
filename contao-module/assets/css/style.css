@@ -5,3 +5,17 @@
   .cca-lr-groupRoots li {
     padding:3px 0;
   }
+
+  .cca-lr-pageInfo {
+    margin-top:10px;
+    font-size:12px;
+    font-weight:bold;
+  }
+
+  .cca-lr-pageInfo span {
+    color:#999999;
+  }
+
+  .cca-lr-pageInfo + div h3 {
+    font-weight:normal;
+  }
