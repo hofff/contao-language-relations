@@ -17,7 +17,7 @@ JOIN		tl_page			AS grpRoots	ON grpRoots.cca_lr_group = root.cca_lr_group AND grp
 WHERE		page.id = ?
 ORDER BY	grpRoots.sorting
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->execute($dc->id);
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id);
 
 		$this->factory->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : array(-1));
 

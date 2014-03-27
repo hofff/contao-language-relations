@@ -69,7 +69,7 @@ GROUP BY	rootPageTo.id
 HAVING		COUNT(rootPageTo.id) = 1
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->execute($ids);
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($ids);
 
 		while($result->next()) if(!$primary || $result->isPrimary) {
 			$relations[$result->pageFrom][$result->rootPageTo] = $result->pageTo;
@@ -118,7 +118,7 @@ AND			rel.pageTo IS NULL
 GROUP BY	pageFrom.id
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->execute($page);
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
 
 		while($result->next()) {
 			$incompletenesses[$result->pageFrom] = $result->pageFrom;
@@ -166,7 +166,7 @@ GROUP BY	pageFrom.id, rootPageTo.id
 HAVING		COUNT(pageFrom.id) > 1
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->execute($page);
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
 
 		while($result->next()) {
 			$ambiguities[$result->pageFrom] = $result->pageFrom;

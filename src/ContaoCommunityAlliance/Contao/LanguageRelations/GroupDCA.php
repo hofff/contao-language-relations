@@ -26,7 +26,7 @@ class GroupDCA {
 				if($roots) {
 					$wildcards = rtrim(str_repeat('?,', count('roots')), ',');
 					$sql = "SELECT id FROM tl_page WHERE cca_rr_root IN ($wildcards) AND type != 'root'";
-					$result = \Database::getInstance()->prepare($sql)->execute($roots);
+					$result = \Database::getInstance()->prepare($sql)->executeUncached($roots);
 					$ids = $result->fetchEach('id');
 				}
 				break;
@@ -52,7 +52,7 @@ class GroupDCA {
 
 	public function labelGroup($row, $label) {
 		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';
-		$result = \Database::getInstance()->prepare($sql)->execute($row['id']);
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($row['id']);
 
 		$groupRoots = array();
 		while($result->next()) {
