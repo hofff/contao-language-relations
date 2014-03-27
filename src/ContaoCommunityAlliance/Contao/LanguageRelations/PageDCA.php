@@ -29,7 +29,12 @@ class PageDCA {
 					$params[] = $id;
 				}
 				\Database::getInstance()->prepare($sql)->executeUncached($params);
+
+				LanguageRelations::createReflectionRelations($dc->id);
+				LanguageRelations::createIntermediateRelations($dc->id);
 			}
+
+			unset($this->relations[$dc->id]);
 		}
 	}
 

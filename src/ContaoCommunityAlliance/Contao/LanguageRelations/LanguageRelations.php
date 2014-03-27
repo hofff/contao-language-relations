@@ -175,4 +175,90 @@ SQL;
 		return (array) $ambiguities;
 	}
 
+	/**
+	 * Create relations between the pages that the given page is related to and
+	 * the given page itself, if none exists for them in the given page'
+	 * language already.
+	 *
+	 * CARE: Does not check the validity of the origin relations!
+	 *
+	 * @param integer $page
+	 * @return integer
+	 */
+	public static function createReflectionRelations($page) {
+		if($page < 1) {
+			return 0;
+		}
+
+		$sql = <<<SQL
+
+INSERT INTO	tl_cca_lr_relation
+			(pageFrom, pageTo)
+
+SELECT		rel.pageTo, rel.pageFrom
+
+FROM		tl_cca_lr_relation	AS rel
+JOIN		tl_page				AS pageFrom			ON pageFrom.id = rel.pageFrom
+JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = pageFrom.cca_rr_root
+
+LEFT JOIN	(
+			tl_cca_lr_relation	AS refl
+	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
+	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.cca_rr_root
+)													ON refl.pageFrom = rel.pageTo
+													AND reflRootPageTo.id = rootPageFrom.id
+
+WHERE		rel.pageFrom = ?
+AND			refl.pageTo IS NULL
+
+SQL;
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+
+		return $result->affectedRows;
+	}
+
+	/**
+	 * Create relations between the pages that the given page is related to and
+	 * themselfs, if none exists for them in their respective languages already.
+	 *
+	 * CARE: Does not check the validity of the origin relations!
+	 *
+	 * @param integer $page
+	 * @return integer
+	 */
+	public static function createIntermediateRelations($page) {
+		if($page < 1) {
+			return 0;
+		}
+
+		$sql = <<<SQL
+
+INSERT INTO	tl_cca_lr_relation
+			(pageFrom, pageTo)
+
+SELECT		rel.pageTo, inter.pageTo
+
+FROM		tl_cca_lr_relation	AS rel
+JOIN		tl_cca_lr_relation	AS inter			ON inter.pageFrom = rel.pageFrom
+													AND inter.pageTo != rel.pageTo
+
+JOIN		tl_page				AS interPageTo		ON interPageTo.id = inter.pageTo
+JOIN		tl_page				AS interRootPageTo	ON interRootPageTo.id = interPageTo.cca_rr_root
+
+LEFT JOIN	(
+			tl_cca_lr_relation	AS refl
+	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
+	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.cca_rr_root
+)													ON refl.pageFrom = rel.pageTo
+													AND reflRootPageTo.id = interRootPageTo.id
+
+WHERE		rel.pageFrom = ?
+AND			refl.pageFrom IS NULL
+
+SQL;
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+
+		return $result->affectedRows;
+	}
+
 }
