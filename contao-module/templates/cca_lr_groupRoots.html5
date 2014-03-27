@@ -5,16 +5,34 @@
 <ul class="cca-lr-groupRoots">
 <?php foreach($this->groupRoots as $groupRoot): ?>
 <li>
+
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>"
     title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['editRelations']; ?>">
-    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation.png'); ?></a>
+    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation.png'); ?>
+</a>
+
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>&filter=incomplete"
-    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['editIncompleteRelations']; ?>">
-    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation-incomplete.png'); ?></a>
+<?php if(ContaoCommunityAlliance\Contao\LanguageRelations\LanguageRelations::getIncompleteRelatedPages($groupRoot['id'])): ?>
+    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['editIncompleteRelations']; ?>"
+<?php else: ?>
+    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['noIncompleteRelations']; ?>"
+    class="disabled"
+<?php endif; ?>>
+    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation-incomplete.png'); ?>
+</a>
+
 <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?php echo $groupRoot['id']; ?>&filter=ambiguous"
-    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['editAmbiguousRelations']; ?>">
-    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation-ambiguous.png'); ?></a>
-  [<?php echo $groupRoot['language']; ?>] <?php echo $groupRoot['title']; ?>
+<?php if(ContaoCommunityAlliance\Contao\LanguageRelations\LanguageRelations::getAmbiguousRelatedPages($groupRoot['id'])): ?>
+    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['editAmbiguousRelations']; ?>"
+<?php else: ?>
+    title="<?php echo $GLOBALS['TL_LANG']['tl_cca_lr_group']['noAmbiguousRelations']; ?>"
+    class="disabled"
+<?php endif; ?>>
+    <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation-ambiguous.png'); ?>
+</a>
+
+[<?php echo $groupRoot['language']; ?>] <?php echo $groupRoot['title']; ?>
+
 </li>
 <?php endforeach; ?>
 </ul>

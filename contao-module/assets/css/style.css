@@ -6,6 +6,10 @@
     padding:3px 0;
   }
 
+  .cca-lr-groupRoots a.disabled {
+    opacity:0.5;
+  }
+
   .cca-lr-pageInfo {
     margin-top:10px;
     font-size:12px;

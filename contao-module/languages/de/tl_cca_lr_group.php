@@ -26,4 +26,6 @@ $GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']           = 'Alle Seiten
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['noRootsAssigned']          = 'Keine Startpunkte zugewiesen';
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['editRelations']            = 'Übersetzungsreferenzen bearbeiten';
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['editIncompleteRelations']  = 'Unvollständige Übersetzungsreferenzen bearbeiten';
+$GLOBALS['TL_LANG']['tl_cca_lr_group']['noIncompleteRelations']    = 'Keine unvollständigen Übersetzungsreferenzen vorhanden';
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['editAmbiguousRelations']   = 'Fehlerhafte Übersetzungsreferenzen bearbeiten';
+$GLOBALS['TL_LANG']['tl_cca_lr_group']['noAmbiguousRelations']     = 'Keine fehlerhaften Übersetzungsreferenzen vorhanden';
