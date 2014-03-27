@@ -49,7 +49,7 @@ class GroupDCA {
 	}
 
 	public function groupGroup($group, $mode, $field, $row, $dc) {
-		return $row['title'] . ' (ID ' . $row['id'] . ')';
+		return $row['title'];
 	}
 
 	public function labelGroup($row, $label) {
