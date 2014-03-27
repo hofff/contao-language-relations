@@ -17,5 +17,5 @@ $GLOBALS['TL_LANG']['tl_cca_lr_group']['delete']            = array('Übersetzun
 */
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['title']             = array('Titel', 'Der Name dieser Übersetzungsgruppe');
 $GLOBALS['TL_LANG']['tl_cca_lr_group']['roots']             = array('Startpunkte', 'Die Startpunktseiten die zu dieser Übersetzungsgruppe gehören.');
-$GLOBALS['TL_LANG']['tl_cca_lr_group']['notGrouped']        = 'Keiner Gruppe zugewiesen';
-$GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']     = 'Keine Seiten zu bearbeiten';
+$GLOBALS['TL_LANG']['tl_cca_lr_group']['notGrouped']        = 'Keiner Gruppe zugewiesen.';
+$GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']     = 'Alle Seiten wurden bereits zugeordnet.';
