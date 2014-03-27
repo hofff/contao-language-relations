@@ -7,6 +7,8 @@ class SelectriDataFactoryCallbacks extends \DataContainer {
 	/** @var \SelectriContaoTableDataFactory */
 	private $factory;
 
+	private $rootLanguages;
+
 	public function inputFieldCallback($dc, $xlabel) {
 		$sql = <<<SQL
 SELECT		grpRoots.id
@@ -37,11 +39,23 @@ SQL;
 		return $this->factory;
 	}
 
+	public function formatPageNodeLabel($node) {
+		$root = $node['cca_rr_root'];
+		if(!isset($this->rootLanguages[$root])) {
+			$sql = 'SELECT language FROM tl_page WHERE id = ?';
+			$result = \Database::getInstance()->prepare($sql)->executeUncached($root);
+			$this->rootLanguages[$root] = $result->language;
+		}
+		return sprintf('<span class="cca-lr-greyed">[%s]</span> %s (ID %s)', $this->rootLanguages[$root], $node['title'], $node['id']);
+	}
+
 	protected function __construct() {
 		parent::__construct();
 		$this->factory = new \SelectriContaoTableDataFactory;
 		$this->factory->setTreeTable('tl_page');
+		$this->factory->getConfig()->addTreeColumns(array('title', 'cca_rr_root'));
 		$this->factory->getConfig()->addTreeSearchColumns('title');
+		$this->factory->getConfig()->setTreeLabelCallback(array($this, 'formatPageNodeLabel'));
 		$this->factory->getConfig()->setSelectableExpr('type != \'root\'');
 	}
 
