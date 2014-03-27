@@ -25,8 +25,8 @@ class GroupDCA {
 			default:
 				if($roots) {
 					$wildcards = rtrim(str_repeat('?,', count('roots')), ',');
-					$sql = 'SELECT id FROM tl_page WHERE cca_rr_root IN (' . $wildcards . ') AND type != ?';
-					$result = \Database::getInstance()->prepare($sql)->execute($roots, 'root');
+					$sql = "SELECT id FROM tl_page WHERE cca_rr_root IN ($wildcards) AND type != 'root'";
+					$result = \Database::getInstance()->prepare($sql)->execute($roots);
 					$ids = $result->fetchEach('id');
 				}
 				break;
