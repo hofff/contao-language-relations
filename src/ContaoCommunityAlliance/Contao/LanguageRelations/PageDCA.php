@@ -17,11 +17,11 @@ class PageDCA {
 
 	public function onsubmitPage($dc) {
 		if(isset($this->relations[$dc->id])) {
+			$sql = 'DELETE FROM tl_cca_lr_relation WHERE pageFrom = ?';
+			\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
+
 			$relations = deserialize($this->relations[$dc->id], true);
 			if($relations) {
-				$sql = 'DELETE FROM tl_cca_lr_relation WHERE pageFrom = ?';
-				\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
-
 				$wildcards = rtrim(str_repeat('(?,?),', count($relations)), ',');
 				$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . $wildcards;
 				foreach($relations as $id) {
