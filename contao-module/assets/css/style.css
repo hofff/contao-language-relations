@@ -16,14 +16,11 @@
     font-weight:bold;
   }
 
-  .cca-lr-pageInfo span {
+  .cca-lr-pageInfo span,
+  .cca-lr-greyed {
     color:#999999;
   }
 
   .cca-lr-pageInfo + div h3 {
     display:none;
-  }
-  
-  .cca-lr-greyed {
-    color:#b3b3b3;
   }
