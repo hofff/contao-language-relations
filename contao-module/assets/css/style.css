@@ -16,6 +16,10 @@
     font-weight:bold;
   }
 
+  .tl_tbox .cca-lr-pageInfo {
+    margin-top:25px;
+  }
+
   .cca-lr-pageInfo span,
   .cca-lr-greyed {
     color:#999999;
