@@ -2,7 +2,7 @@
 
 namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 
-class SelectriDataFactoryHack extends \DataContainer {
+class SelectriDataFactoryCallbacks extends \DataContainer {
 
 	/** @var \SelectriContaoTableDataFactory */
 	private $factory;

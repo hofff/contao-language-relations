@@ -44,9 +44,9 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = array
         'doNotSaveEmpty'=> true,
         'min' => 0,
         'max' => PHP_INT_MAX,
-        'data' => array(\ContaoCommunityAlliance\Contao\LanguageRelations\SelectriDataFactoryHack::getInstance(), 'getFactory'),
+        'data' => array(\ContaoCommunityAlliance\Contao\LanguageRelations\SelectriDataFactoryCallbacks::getInstance(), 'getFactory'),
     ),
-    'input_field_callback' => array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\SelectriDataFactoryHack', 'inputFieldCallback'),
+    'input_field_callback' => array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\SelectriDataFactoryCallbacks', 'inputFieldCallback'),
     'load_callback' => array
     (
         array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'loadRelations'),
