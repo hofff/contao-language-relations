@@ -42,6 +42,7 @@ SQL;
 		$this->factory = new \SelectriContaoTableDataFactory;
 		$this->factory->setTreeTable('tl_page');
 		$this->factory->getConfig()->addTreeSearchColumns('title');
+		$this->factory->getConfig()->setSelectableExpr('type != \'root\'');
 	}
 
 	private function __clone() {
