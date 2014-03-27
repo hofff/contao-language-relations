@@ -3,9 +3,11 @@
 $GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'][] = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'onsubmitPage');
 
 $palettes = &$GLOBALS['TL_DCA']['tl_page']['palettes'];
-foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'root') 
+foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'root')
 {
-    $palette .= ';{cca_lr_legend},cca_lr_pageInfo,cca_lr_relations';
+    $palette .= ';{cca_lr_legend}';
+    $_GET['do'] == 'cca_lr_group' && $palette .= ',cca_lr_pageInfo';
+    $palette .= ',cca_lr_relations';
 }
 unset($palettes);
 
