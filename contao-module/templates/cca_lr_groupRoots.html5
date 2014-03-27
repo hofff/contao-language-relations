@@ -31,7 +31,7 @@
     <?php echo $this->generateImage('system/modules/cca-language-relations/assets/images/relation-ambiguous.png'); ?>
 </a>
 
-[<?php echo $groupRoot['language']; ?>] <?php echo $groupRoot['title']; ?>
+<span>[<?php echo $groupRoot['language']; ?>] <?php echo $groupRoot['title']; ?></span>
 
 </li>
 <?php endforeach; ?>
