@@ -16,10 +16,12 @@ class GroupDCA {
 		switch($_GET['filter']) {
 			case 'incomplete':
 				$ids = LanguageRelations::getIncompleteRelatedPages($roots[0]);
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_cca_lr_group']['noIncompleteRelations'];
 				break;
 
 			case 'ambiguous':
 				$ids = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_cca_lr_group']['noAmbiguousRelations'];
 				break;
 
 			default:
@@ -33,7 +35,7 @@ class GroupDCA {
 		}
 
 		if(!$ids) {
-			ControllerProxy::addConfirmationMessage($GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
+			ControllerProxy::addConfirmationMessage($msg ?: $GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
 			ControllerProxy::redirect(ControllerProxy::getReferer());
 			return;
 		}
