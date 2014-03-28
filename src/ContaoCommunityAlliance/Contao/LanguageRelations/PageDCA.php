@@ -37,6 +37,18 @@ SQL;
 		$copy = $this->getPageInfo($copy);
 
 		if($original->type == 'root') {
+			if(!$original->cca_lr_group) {
+				$sql = 'SELECT dns, title FROM tl_page WHERE id = ?';
+				$result = $db->prepare($sql)->executeUncached($original->id);
+
+				$sql = 'INSERT INTO tl_cca_lr_group(tstamp, title) VALUES(?, ?)';
+				$result = $db->prepare($sql)->executeUncached(time(), $result->dns ?: $result->title);
+				$original->cca_lr_group = $result->insertId;
+
+				$sql = 'UPDATE tl_page SET cca_lr_group = ? WHERE id = ?';
+				$db->prepare($sql)->executeUncached($original->cca_lr_group, $original->id);
+			}
+
 			$sql = 'UPDATE tl_page SET cca_lr_group = ? WHERE id = ?';
 			$db->prepare($sql)->executeUncached($original->cca_lr_group, $copy->id);
 
