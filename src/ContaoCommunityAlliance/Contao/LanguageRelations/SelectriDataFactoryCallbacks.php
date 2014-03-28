@@ -27,10 +27,15 @@ SQL;
 		$field = &$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'];
 		unset($field['input_field_callback']);
 
+		// set the postback param for speeding up ajax requests of the selectri widgets
+		$field['eval']['jsOptions']['qs']['key'] = 'selectriAJAXCallback';
+		$field['eval']['jsOptions']['qs']['cca_lr_id'] = $dc->id;
+
 		$return = $dc->row($dc->strPalette);
 
-		// readd the callback
+		// restore the original dca
 		$field['input_field_callback'] = array(__CLASS__, __FUNCTION__);
+		unset($field['eval']['jsOptions']);
 
 		return $return;
 	}

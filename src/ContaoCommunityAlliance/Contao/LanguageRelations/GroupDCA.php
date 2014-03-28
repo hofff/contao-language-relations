@@ -9,6 +9,23 @@ use ContaoCommunityAlliance\Contao\RootRelations\ControllerProxy;
  */
 class GroupDCA {
 
+	public function keySelectriAJAXCallback($dc) {
+		$key = 'isAjaxRequest';
+
+		// the X-Requested-With gets deleted on ajax requests by selectri widget,
+		// to enable regular contao DC process, but we need this behavior for the
+		// editAll call respecting the passed id
+		$$key = EnvironmentProxy::getCacheValue($key);
+		EnvironmentProxy::setCacheValue($key, true);
+
+		$return = $dc->editAll(\Input::getInstance()->get('cca_lr_id'));
+
+		// this would never be reached, but we clean up the env
+		EnvironmentProxy::setCacheValue($key, $$key);
+
+		return $return;
+	}
+
 	public function keyEditRelations() {
 		$fields = array('cca_lr_pageInfo', 'cca_lr_relations');
 		$roots = array_unique(array_map('intval', array_filter((array) $_GET['roots'], function($root) { return $root >= 1; })));
