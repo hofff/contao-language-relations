@@ -38,7 +38,6 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = array
     'label'     => &$GLOBALS['TL_LANG']['tl_page']['cca_lr_relations'],
     'exclude'   => true,
     'inputType' => 'selectri',
-    'foreignKey'=> 'tl_page.title',
     'eval'  => array
     (
         'doNotSaveEmpty'=> true,
