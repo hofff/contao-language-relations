@@ -1,6 +1,9 @@
 <?php
 
-$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'][] = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'onsubmitPage');
+$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'][]
+	= array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'onsubmitPage');
+$GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][]
+	= array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'oncopyPage');
 
 /*
  * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module

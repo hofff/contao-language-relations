@@ -13,6 +13,68 @@ class PageDCA {
 		return $tpl->parse();
 	}
 
+	public function oncopyPage($insertID, $dc) {
+		$this->copyRelations($dc->id, $insertID, $insertID);
+	}
+
+	protected function getPageInfo($id) {
+		$sql = <<<SQL
+SELECT		page.id, page.type, page.cca_rr_root,
+			COALESCE(rootPage.cca_lr_group, 0) AS cca_lr_group
+
+FROM		tl_page AS page
+LEFT JOIN	tl_page AS rootPage	ON rootPage.id = page.cca_rr_root
+
+WHERE		page.id = ?
+SQL;
+		return \Database::getInstance()->prepare($sql)->executeUncached($id);
+	}
+
+	protected function copyRelations($original, $copy, $copyStart) {
+		$db = \Database::getInstance();
+
+		$original = $this->getPageInfo($original);
+		$copy = $this->getPageInfo($copy);
+
+		if($original->type == 'root') {
+			$sql = 'UPDATE tl_page SET cca_lr_group = ? WHERE id = ?';
+			$db->prepare($sql)->executeUncached($original->cca_lr_group, $copy->id);
+
+		} elseif($original->cca_rr_root != $copy->cca_rr_root && $original->cca_lr_group == $copy->cca_lr_group) {
+			$relations = LanguageRelations::getRelations($original->id);
+
+			$wildcards = rtrim(str_repeat('(?,?),', count($relations) + 1), ',');
+			$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . $wildcards;
+
+			$params[] = $copy->id;
+			$params[] = $original->id;
+			foreach($relations as $id) {
+				$params[] = $copy->id;
+				$params[] = $id;
+			}
+
+			$db->prepare($sql)->executeUncached($params);
+
+			LanguageRelations::createReflectionRelations($copy->id);
+		}
+
+		$sql = 'SELECT id FROM tl_page WHERE pid = ?';
+		$copyChildren = $db->prepare($sql)->execute($copy->id);
+		if(!$copyChildren->numRows) {
+			return;
+		}
+
+		$sql .= ' AND id != ?';
+		$originalChildren = $db->prepare($sql)->execute($original->id, $copyStart);
+		if($originalChildren->numRows != $copyChildren->numRows) {
+			return;
+		}
+
+		while($originalChildren->next() && $copyChildren->next()) {
+			$this->copyRelations($originalChildren->id, $copyChildren->id, $copyStart);
+		}
+	}
+
 	private $relations = array();
 
 	public function onsubmitPage($dc) {
