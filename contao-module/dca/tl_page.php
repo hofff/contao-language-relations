@@ -11,7 +11,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][]
  */
 if($_GET['do'] == 'cca_lr_group')
 {
-    $onsubmit = $GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
+    $onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
     foreach($onsubmit as $i => $callback) if($callback[0] == 'tl_page' && $callback[1] == 'updateSitemap')
     {
         unset($onsubmit[$i]);
