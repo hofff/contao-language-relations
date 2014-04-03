@@ -70,13 +70,13 @@ SQL;
 			LanguageRelations::createReflectionRelations($copy->id);
 		}
 
-		$sql = 'SELECT id FROM tl_page WHERE pid = ?';
+		$sql = 'SELECT id FROM tl_page WHERE pid = ? ORDER BY sorting';
 		$copyChildren = $db->prepare($sql)->execute($copy->id);
 		if(!$copyChildren->numRows) {
 			return;
 		}
 
-		$sql .= ' AND id != ?';
+		$sql = 'SELECT id FROM tl_page WHERE pid = ? AND id != ? ORDER BY sorting';
 		$originalChildren = $db->prepare($sql)->execute($original->id, $copyStart);
 		if($originalChildren->numRows != $copyChildren->numRows) {
 			return;
