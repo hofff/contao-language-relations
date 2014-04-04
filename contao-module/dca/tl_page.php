@@ -47,6 +47,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = array
         'min' => 0,
         'max' => PHP_INT_MAX,
         'sort' => false,
+        'class' => 'cca-lr-relations',
         'data' => array(\ContaoCommunityAlliance\Contao\LanguageRelations\SelectriDataFactoryCallbacks::getInstance(), 'getFactory'),
     ),
     'input_field_callback' => array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\SelectriDataFactoryCallbacks', 'inputFieldCallback'),

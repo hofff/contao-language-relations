@@ -4,11 +4,6 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 
 class SelectriDataFactoryCallbacks extends \DataContainer {
 
-	/** @var \SelectriContaoTableDataFactory */
-	private $factory;
-
-	private $rootLanguages;
-
 	public function inputFieldCallback($dc, $xlabel) {
 		$sql = <<<SQL
 SELECT		grpRoots.id
@@ -44,15 +39,34 @@ SQL;
 		return $this->factory;
 	}
 
-	public function formatPageNodeLabel($node) {
-		$root = $node['cca_rr_root'];
-		if(!isset($this->rootLanguages[$root])) {
-			$sql = 'SELECT language FROM tl_page WHERE id = ?';
-			$result = \Database::getInstance()->prepare($sql)->executeUncached($root);
-			$this->rootLanguages[$root] = $result->language;
-		}
-		return sprintf('<span class="cca-lr-greyed">[%s]</span> %s (ID %s)', $this->rootLanguages[$root], $node['title'], $node['id']);
+	public function generatePageNodeLabel(\SelectriNode $node) {
+		$nodeData = $node->getData();
+
+		$tpl = 'cca_lr_pageNodeLabel';
+		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
+
+		$tpl->language	= $this->getLanguage($nodeData['cca_rr_root']);
+		$tpl->title		= $nodeData['title'];
+		$tpl->id		= $nodeData['id'];
+
+		return $tpl->parse();
 	}
+
+	public function generatePageNodeContent(\SelectriNode $node, \SelectriData $data) {
+		$jsOptions = $data->getWidget()->getJSOptions();
+
+		$tpl = 'cca_lr_pageNodeContent';
+		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
+
+		$tpl->name		= $node->getAdditionalInputName('primary');
+		$tpl->id		= $data->getWidget()->name . '_cca_lr_primary_' . $node->getKey();
+		$tpl->isPrimary	= $this->isRelated($node->getKey(), $jsOptions['qs']['cca_lr_id']);
+
+		return $tpl->parse();
+	}
+
+	/** @var \SelectriContaoTableDataFactory */
+	private $factory;
 
 	protected function __construct() {
 		parent::__construct();
@@ -60,8 +74,32 @@ SQL;
 		$this->factory->setTreeTable('tl_page');
 		$this->factory->getConfig()->addTreeColumns(array('title', 'cca_rr_root'));
 		$this->factory->getConfig()->addTreeSearchColumns('title');
-		$this->factory->getConfig()->setTreeLabelCallback(array($this, 'formatPageNodeLabel'));
+		$this->factory->getConfig()->setTreeLabelCallback(array($this, 'generatePageNodeLabel'));
+		$this->factory->getConfig()->setTreeContentCallback(array($this, 'generatePageNodeContent'));
 		$this->factory->getConfig()->setSelectableExpr('type != \'root\'');
+	}
+
+	private $rootLanguages;
+
+	protected function getLanguage($root) {
+		if(!isset($this->rootLanguages[$root])) {
+			$sql = 'SELECT language FROM tl_page WHERE id = ?';
+			$result = \Database::getInstance()->prepare($sql)->executeUncached($root);
+			$this->rootLanguages[$root] = $result->language;
+		}
+		return $this->rootLanguages[$root];
+	}
+
+	private $pageTo;
+
+	private $relatedToPageTo;
+
+	protected function isRelated($pageFrom, $pageTo) {
+		if($pageTo != $this->pageTo) {
+			$this->pageTo = $pageTo;
+			$this->relatedToPageTo = LanguageRelations::getPagesRelatedTo($pageTo);
+		}
+		return isset($this->relatedToPageTo[$pageFrom]);
 	}
 
 	private function __clone() {

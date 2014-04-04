@@ -6,3 +6,5 @@ $GLOBALS['BE_MOD']['design']['cca_lr_group']['icon']                 = 'system/m
 $GLOBALS['BE_MOD']['design']['cca_lr_group']['selectriAJAXCallback'] = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'keySelectriAJAXCallback');
 $GLOBALS['BE_MOD']['design']['cca_lr_group']['editRelations']        = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\GroupDCA', 'keyEditRelations');
 $GLOBALS['BE_MOD']['design']['cca_lr_group']['stylesheet'][]         = 'system/modules/cca-language-relations/assets/css/style.css';
+
+$GLOBALS['BE_MOD']['design']['page']['stylesheet'][]                 = 'system/modules/cca-language-relations/assets/css/style.css';

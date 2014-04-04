@@ -1,0 +1,1 @@
+<span class="cca-lr-greyed">[<?php echo $this->language; ?>]</span> <?php echo $this->title; ?> (ID <?php echo $this->id; ?>)

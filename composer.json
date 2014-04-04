@@ -15,7 +15,7 @@
 	"require": {
 		"php": ">=5.3",
 		"contao/core": ">=2.11,<4",
-		"backboneit/contao-selectri": ">=1,<2",
+		"backboneit/contao-selectri": ">=2,<3",
 		"contao-community-alliance/root-relations": ">=1,<2"
 	},
 	"autoload": {

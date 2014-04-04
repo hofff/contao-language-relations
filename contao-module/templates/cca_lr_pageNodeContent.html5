@@ -1,0 +1,10 @@
+<?php $label = $GLOBALS['TL_LANG']['tl_page'][$this->isPrimary ? 'cca_lr_isPrimary' : 'cca_lr_makePrimary']; ?>
+<input type="checkbox" value="1" disabled="disabled"
+    id="<?php echo $this->id; ?>" name="<?php echo $this->name; ?>"
+    data-cca-lr-label="<?php echo $label; ?>"
+<?php if($this->isPrimary): ?>
+    data-cca-lr-primary="1"
+    checked="checked"
+<?php endif; ?>
+  />
+<label for="<?php echo $this->id; ?>"><?php echo $label; ?></label>

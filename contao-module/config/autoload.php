@@ -16,6 +16,8 @@
  */
 TemplateLoader::addFiles(array
 (
-	'cca_lr_groupRoots' => 'system/modules/cca-language-relations/templates',
-	'cca_lr_pageInfo'   => 'system/modules/cca-language-relations/templates',
+	'cca_lr_groupRoots'      => 'system/modules/cca-language-relations/templates',
+	'cca_lr_pageInfo'        => 'system/modules/cca-language-relations/templates',
+	'cca_lr_pageNodeContent' => 'system/modules/cca-language-relations/templates',
+	'cca_lr_pageNodeLabel'   => 'system/modules/cca-language-relations/templates',
 ));
