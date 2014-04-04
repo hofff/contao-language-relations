@@ -22,6 +22,7 @@ CREATE TABLE `tl_cca_lr_relation` (
   `pageTo` int(10) unsigned NOT NULL,
 
   PRIMARY KEY  (`pageFrom`, `pageTo`),
+  KEY `pageTo_ix` (`pageTo`),
 
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

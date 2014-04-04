@@ -4,10 +4,13 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 
 /**
  * A relation in tl_cca_lr_relation is valid, if:
- * - pageFrom != pageTo (non reflexive)
+ * - pageFrom != pageTo (non identity)
  * - pageFrom->id.tl_page.cca_rr_root->id.tl_page.cca_lr_group
  * 		= pageTo->id.tl_page.cca_rr_root->id.tl_page.cca_lr_group
  * (the root pages belong to the same translation group)
+ * - pageFrom->id.tl_page.cca_rr_root
+ * 		!= pageTo->id.tl_page.cca_rr_root
+ * (the root pages are not the same)
  *
  * A relation is primary, if:
  * - it is valid
@@ -18,7 +21,7 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 class LanguageRelations {
 
 	/**
-	 * Get the valid relations for each given page ID.
+	 * Get the valid and non-ambiguous relations for each given page ID.
 	 *
 	 * If $primary is true, only primary relations are returned.
 	 *
@@ -76,6 +79,45 @@ SQL;
 		}
 
 		return is_array($pages) ? $relations : $relations[$pages];
+	}
+
+	/**
+	 * Returns all pages that maintain a valid relation to the given page.
+	 *
+	 * The returned array is an identity map.
+	 *
+	 * @param integer $page
+	 * @return array<integer, integer>
+	 */
+	public static function getPagesRelatedTo($page) {
+		if($page < 1) {
+			return array();
+		}
+
+		$sql = <<<SQL
+
+SELECT		rel.pageFrom
+
+FROM 		tl_cca_lr_relation		AS rel
+
+JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
+JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.cca_rr_root
+
+JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
+JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
+														AND rootPageTo.id != rootPageFrom.id
+														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
+
+WHERE		rel.pageTo = ?
+
+SQL;
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+
+		while($result->next()) {
+			$related[$result->pageFrom] = $result->pageFrom;
+		}
+
+		return (array) $related;
 	}
 
 	/**
