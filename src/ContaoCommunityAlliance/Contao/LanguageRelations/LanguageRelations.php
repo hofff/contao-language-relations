@@ -65,8 +65,8 @@ LEFT JOIN	tl_cca_lr_relation		AS refl				ON refl.pageFrom = rel.pageTo
 
 WHERE		rel.pageFrom IN ($wildcards)
 
-GROUP BY	rootPageTo.id
-HAVING		COUNT(rootPageTo.id) = 1
+GROUP BY	rel.pageFrom, rootPageTo.id
+HAVING		COUNT(rel.pageTo) = 1
 
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($ids);
