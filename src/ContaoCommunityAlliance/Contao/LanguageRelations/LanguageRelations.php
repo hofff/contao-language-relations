@@ -303,4 +303,33 @@ SQL;
 		return $result->affectedRows;
 	}
 
+	/**
+	 * Deletes all relations of $pageFrom into the root page tree of $pageTo.
+	 *
+	 * @param integer $pageFrom
+	 * @param integer $pageTo
+	 * @return integer
+	 */
+	public static function deleteRelationsToRoot($pageFrom, $pageTo) {
+		if($page < 1 || $root < 1) {
+			return 0;
+		}
+
+		$sql = <<<SQL
+
+DELETE		rel
+
+FROM		tl_cca_lr_relation	AS rel
+JOIN		tl_page				AS relPageTo		ON relPageTo.id = rel.pageTo
+JOIN		tl_page				AS page				ON page.cca_rr_root = relPageTo.cca_rr_root
+
+WHERE		rel.pageFrom = ?
+AND			page.id = ?
+
+SQL;
+		$result = \Database::getInstance()->prepare($sql)->executeUncached($pageFrom, $pageTo);
+
+		return $result->affectedRows;
+	}
+
 }
