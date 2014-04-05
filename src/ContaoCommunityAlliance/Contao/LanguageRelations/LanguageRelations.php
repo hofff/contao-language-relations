@@ -37,15 +37,11 @@ class LanguageRelations {
 	 * @return array<integer, integer>|array<integer, array<integer, integer>>
 	 */
 	public static function getRelations($pages, $primary = false) {
-		$ids = (array) $pages;
-		$relations = array_fill_keys($ids, array());
-
-		$ids = array_filter($ids, function($id) { return $id >= 1; });
-		if(!$ids) {
+		if(!$ids = self::ids($pages)) {
 			return is_array($pages) ? $relations : array();
 		}
 
-		$wildcards = rtrim(str_repeat('?,', count($ids)), ',');
+		$wildcards = self::wildcards($ids);
 		$sql = <<<SQL
 
 SELECT		rel.pageFrom,
@@ -72,7 +68,9 @@ GROUP BY	rel.pageFrom, rootPageTo.id
 HAVING		COUNT(rel.pageTo) = 1
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($ids);
+		$result = self::query($sql, $ids);
+
+		$relations = array_fill_keys((array) $pages, array());
 
 		while($result->next()) if(!$primary || $result->isPrimary) {
 			$relations[$result->pageFrom][$result->rootPageTo] = $result->pageTo;
@@ -111,7 +109,7 @@ JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
 WHERE		rel.pageTo = ?
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+		$result = self::query($sql, array($page));
 
 		while($result->next()) {
 			$related[$result->pageFrom] = $result->pageFrom;
@@ -160,7 +158,7 @@ AND			rel.pageTo IS NULL
 GROUP BY	pageFrom.id
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+		$result = self::query($sql, array($page));
 
 		while($result->next()) {
 			$incompletenesses[$result->pageFrom] = $result->pageFrom;
@@ -208,7 +206,7 @@ GROUP BY	pageFrom.id, rootPageTo.id
 HAVING		COUNT(pageFrom.id) > 1
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+		$result = self::query($sql, array($page));
 
 		while($result->next()) {
 			$ambiguities[$result->pageFrom] = $result->pageFrom;
@@ -254,7 +252,7 @@ WHERE		rel.pageFrom = ?
 AND			refl.pageTo IS NULL
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+		$result = self::query($sql, array($page));
 
 		return $result->affectedRows;
 	}
@@ -298,23 +296,25 @@ WHERE		rel.pageFrom = ?
 AND			refl.pageFrom IS NULL
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($page);
+		$result = self::query($sql, array($page));
 
 		return $result->affectedRows;
 	}
 
 	/**
-	 * Deletes all relations of $pageFrom into the root page tree of $pageTo.
+	 * Deletes all relations of the given pages into the root page tree of the
+	 * given root.
 	 *
-	 * @param integer $pageFrom
-	 * @param integer $pageTo
+	 * @param integer|array<integer> $pages
+	 * @param integer $root
 	 * @return integer
 	 */
-	public static function deleteRelationsToRoot($pageFrom, $pageTo) {
-		if($page < 1 || $root < 1) {
+	public static function deleteRelationsToRoot($pages, $root) {
+		if($root < 1 || !$pages = self::ids($pages)) {
 			return 0;
 		}
 
+		$wildcards = self::wildcards($pages);
 		$sql = <<<SQL
 
 DELETE		rel
@@ -323,13 +323,41 @@ FROM		tl_cca_lr_relation	AS rel
 JOIN		tl_page				AS relPageTo		ON relPageTo.id = rel.pageTo
 JOIN		tl_page				AS page				ON page.cca_rr_root = relPageTo.cca_rr_root
 
-WHERE		rel.pageFrom = ?
+WHERE		rel.pageFrom IN ($wildcards)
 AND			page.id = ?
 
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($pageFrom, $pageTo);
+		$params = $pages;
+		$params[] = $root;
+		$result = self::query($sql, $params);
 
 		return $result->affectedRows;
+	}
+
+	/**
+	 * @param string $sql
+	 * @param array $params
+	 * @return Result
+	 */
+	private static function query($sql, array $params = null) {
+		return \Database::getInstance()->prepare($sql)->executeUncached($params);
+	}
+
+	/**
+	 * @param mixed $params
+	 * @param string $wildcard
+	 * @return string
+	 */
+	private static function wildcards($params, $wildcard = '?') {
+		return rtrim(str_repeat($wildcard . ',', count((array) $params)), ',');
+	}
+
+	/**
+	 * @param integer|array<integer> $ids
+	 * @return array<integer>
+	 */
+	private static function ids($ids) {
+		return array_filter((array) $ids, function($id) { return $id >= 1; });
 	}
 
 }
