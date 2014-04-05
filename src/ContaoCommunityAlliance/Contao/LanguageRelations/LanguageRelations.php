@@ -216,6 +216,30 @@ SQL;
 	}
 
 	/**
+	 * Creates relations from the given page to the given pages.
+	 *
+	 * CARE: Does not check the validity of the origin relations!
+	 *
+	 * @param integer $pageFrom
+	 * @param integer|array<integer> $pagesTo
+	 * @return integer The number of created relations
+	 */
+	public static function createRelations($pageFrom, $pagesTo) {
+		if($pageFrom < 1 || !$pagesTo = self::ids($pagesTo)) {
+			return 0;
+		}
+
+		$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . self::wildcards($pagesTo, '(?,?)');
+		foreach($pagesTo as $pageTo) {
+			$params[] = $pageFrom;
+			$params[] = $pageTo;
+		}
+		$result = self::query($sql, $params);
+
+		return $result->affectedRows;
+	}
+
+	/**
 	 * Create relations between the pages that the given page is related to and
 	 * the given page itself, if none exists for them in the given page'
 	 * language already.
