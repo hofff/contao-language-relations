@@ -302,6 +302,23 @@ SQL;
 	}
 
 	/**
+	 * Deletes all relations that orignate at one of the given pages.
+	 *
+	 * @param integer|array<integer> $pages
+	 * @return integer
+	 */
+	public static function deleteRelationsFrom($pages) {
+		if(!$pages = self::ids($pages)) {
+			return 0;
+		}
+
+		$sql = 'DELETE FROM tl_cca_lr_relation WHERE pageFrom IN (' . self::wildcards($pages) . ')';
+		$result = self::query($sql, $pages);
+
+		return $result->affectedRows;
+	}
+
+	/**
 	 * Deletes all relations of the given pages into the root page tree of the
 	 * given root.
 	 *
