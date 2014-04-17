@@ -90,26 +90,24 @@ SQL;
 	private $relations = array();
 
 	public function onsubmitPage($dc) {
-		if(isset($this->relations[$dc->id])) {
-			$sql = 'DELETE FROM tl_cca_lr_relation WHERE pageFrom = ?';
-			\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
-
-			$relations = $this->relations[$dc->id];
-			if($relations) {
-				$wildcards = rtrim(str_repeat('(?,?),', count($relations)), ',');
-				$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . $wildcards;
-				foreach($relations as $id) {
-					$params[] = $dc->id;
-					$params[] = $id;
-				}
-				\Database::getInstance()->prepare($sql)->executeUncached($params);
-
-				LanguageRelations::createReflectionRelations($dc->id);
-				LanguageRelations::createIntermediateRelations($dc->id);
-			}
-
-			unset($this->relations[$dc->id]);
+		if(!isset($this->relations[$dc->id])) {
+			return;
 		}
+
+		$relations = $this->relations[$dc->id];
+		unset($this->relations[$dc->id]);
+
+		$makePrimary = array_keys(array_filter($relations, function($relation) {
+			return (bool) $relation['primary'];
+		}));
+
+		LanguageRelations::deleteRelationsFrom($dc->id);
+		LanguageRelations::deleteRelationsToRoot($makePrimary, $dc->id);
+		if(!LanguageRelations::createRelations($dc->id, array_keys($relations))) {
+			return;
+		}
+		LanguageRelations::createReflectionRelations($dc->id);
+		LanguageRelations::createIntermediateRelations($dc->id);
 	}
 
 	public function loadRelations($value, $dc) {
@@ -132,7 +130,7 @@ GROUP BY	cca_rr_root
 HAVING		COUNT(id) > 1
 LIMIT		1
 SQL;
-			$params = $value;
+			$params = array_keys($value);
 			$result = \Database::getInstance()->prepare($sql)->executeUncached($params);
 			if($result->numRows) {
 				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['cca_lr_errMultipleRelationsPerRoot']);
