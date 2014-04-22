@@ -8,3 +8,5 @@ $GLOBALS['BE_MOD']['design']['cca_lr_group']['editRelations']        = array('Co
 $GLOBALS['BE_MOD']['design']['cca_lr_group']['stylesheet'][]         = 'system/modules/cca-language-relations/assets/css/style.css';
 
 $GLOBALS['BE_MOD']['design']['page']['stylesheet'][]                 = 'system/modules/cca-language-relations/assets/css/style.css';
+
+$GLOBALS['TL_HOOKS']['loadDataContainer']['cca_lr']                  = array('ContaoCommunityAlliance\\Contao\\LanguageRelations\\PageDCA', 'hookLoadDataContainer');

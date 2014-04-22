@@ -20,15 +20,6 @@ if($_GET['do'] == 'cca_lr_group')
     unset($onsubmit);
 }
 
-$palettes = &$GLOBALS['TL_DCA']['tl_page']['palettes'];
-foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'root')
-{
-    $palette .= ';{cca_lr_legend}';
-    $_GET['do'] == 'cca_lr_group' && $palette .= ',cca_lr_pageInfo';
-    $palette .= ',cca_lr_relations';
-}
-unset($palettes);
-
 $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_pageInfo'] = array
 (
     'label'     => &$GLOBALS['TL_LANG']['tl_page']['cca_lr_pageInfo'],

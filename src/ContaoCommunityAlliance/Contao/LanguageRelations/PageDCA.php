@@ -7,6 +7,20 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
  */
 class PageDCA {
 
+	public function hookLoadDataContainer($table) {
+		if($table != 'tl_page') {
+			return;
+		}
+
+		$palettes = &$GLOBALS['TL_DCA']['tl_page']['palettes'];
+		foreach($palettes as $key => &$palette) if($key != '__selector__' && $key != 'root') {
+			$palette .= ';{cca_lr_legend}';
+			$_GET['do'] == 'cca_lr_group' && $palette .= ',cca_lr_pageInfo';
+			$palette .= ',cca_lr_relations';
+		}
+		unset($palettes);
+	}
+
 	public function inputFieldPageInfo($dc, $xlabel) {
 		$tpl = new \BackendTemplate('cca_lr_pageInfo');
 		$tpl->setData($dc->activeRecord->row());
