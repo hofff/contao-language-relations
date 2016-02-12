@@ -2,7 +2,7 @@
 
 namespace ContaoCommunityAlliance\Contao\LanguageRelations;
 
-class SelectriDataFactoryCallbacks extends \DataContainer {
+class SelectriDataFactoryCallbacks {
 
 	public function inputFieldCallback($dc, $xlabel) {
 		$sql = <<<SQL
@@ -26,7 +26,9 @@ SQL;
 		$field['eval']['jsOptions']['qs']['key'] = 'selectriAJAXCallback';
 		$field['eval']['jsOptions']['qs']['cca_lr_id'] = $dc->id;
 
-		$return = $dc->row($dc->strPalette);
+		$dcRowMethod = new \ReflectionMethod($dc, 'row');
+		$dcRowMethod->setAccessible(true);
+		$return = $dcRowMethod->invoke($dc, $dc->palette);
 
 		// restore the original dca
 		$field['input_field_callback'] = array(__CLASS__, __FUNCTION__);
@@ -69,7 +71,6 @@ SQL;
 	private $factory;
 
 	protected function __construct() {
-		parent::__construct();
 		$this->factory = new \SelectriContaoTableDataFactory;
 		$this->factory->setTreeTable('tl_page');
 		$this->factory->getConfig()->addTreeColumns(array('title', 'cca_rr_root'));
