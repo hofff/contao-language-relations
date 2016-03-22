@@ -1,6 +1,6 @@
 <?php
 
-namespace ContaoCommunityAlliance\Contao\LanguageRelations;
+namespace Hofff\Contao\LanguageRelations;
 
 /**
  * A relation in tl_cca_lr_relation is valid, if:
@@ -16,7 +16,7 @@ namespace ContaoCommunityAlliance\Contao\LanguageRelations;
  * - it is valid
  * - pageFrom = pageTo->pageFrom.tl_cca_lr_relation.pageTo (there is a link back)
  *
- * @author Oliver Hoff
+ * @author Oliver Hoff <oliver@hofff.com>
  */
 class LanguageRelations {
 
@@ -38,7 +38,7 @@ class LanguageRelations {
 	 */
 	public static function getRelations($pages, $primary = false) {
 		if(!$ids = self::ids($pages)) {
-			return is_array($pages) ? $relations : array();
+			return is_array($pages) ? array_fill_keys($pages, []) : [];
 		}
 
 		$wildcards = self::wildcards($ids);
@@ -70,7 +70,7 @@ HAVING		COUNT(rel.pageTo) = 1
 SQL;
 		$result = self::query($sql, $ids);
 
-		$relations = array_fill_keys((array) $pages, array());
+		$relations = array_fill_keys((array) $pages, []);
 
 		while($result->next()) if(!$primary || $result->isPrimary) {
 			$relations[$result->pageFrom][$result->rootPageTo] = $result->pageTo;
@@ -89,7 +89,7 @@ SQL;
 	 */
 	public static function getPagesRelatedTo($page) {
 		if($page < 1) {
-			return array();
+			return [];
 		}
 
 		$sql = <<<SQL
@@ -109,13 +109,14 @@ JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
 WHERE		rel.pageTo = ?
 
 SQL;
-		$result = self::query($sql, array($page));
+		$result = self::query($sql, [ $page ]);
 
+		$related = [];
 		while($result->next()) {
 			$related[$result->pageFrom] = $result->pageFrom;
 		}
 
-		return (array) $related;
+		return $related;
 	}
 
 	/**
@@ -130,7 +131,7 @@ SQL;
 	 */
 	public static function getIncompleteRelatedPages($page) {
 		if($page < 1) {
-			return array();
+			return [];
 		}
 
 		$sql = <<<SQL
@@ -158,13 +159,14 @@ AND			rel.pageTo IS NULL
 GROUP BY	pageFrom.id
 
 SQL;
-		$result = self::query($sql, array($page));
+		$result = self::query($sql, [ $page ]);
 
+		$incompletenesses = [];
 		while($result->next()) {
 			$incompletenesses[$result->pageFrom] = $result->pageFrom;
 		}
 
-		return (array) $incompletenesses;
+		return $incompletenesses;
 	}
 
 	/**
@@ -180,7 +182,7 @@ SQL;
 	 */
 	public static function getAmbiguousRelatedPages($page) {
 		if($page < 1) {
-			return array();
+			return [];
 		}
 
 		$sql = <<<SQL
@@ -206,13 +208,14 @@ GROUP BY	pageFrom.id, rootPageTo.id
 HAVING		COUNT(pageFrom.id) > 1
 
 SQL;
-		$result = self::query($sql, array($page));
+		$result = self::query($sql, [ $page ]);
 
+		$ambiguities = [];
 		while($result->next()) {
 			$ambiguities[$result->pageFrom] = $result->pageFrom;
 		}
 
-		return (array) $ambiguities;
+		return $ambiguities;
 	}
 
 	/**
@@ -230,6 +233,7 @@ SQL;
 		}
 
 		$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . self::wildcards($pagesTo, '(?,?)');
+		$params = [];
 		foreach($pagesTo as $pageTo) {
 			$params[] = $pageFrom;
 			$params[] = $pageTo;
@@ -276,7 +280,7 @@ WHERE		rel.pageFrom = ?
 AND			refl.pageTo IS NULL
 
 SQL;
-		$result = self::query($sql, array($page));
+		$result = self::query($sql, [ $page ]);
 
 		return $result->affectedRows;
 	}
@@ -320,7 +324,7 @@ WHERE		rel.pageFrom = ?
 AND			refl.pageFrom IS NULL
 
 SQL;
-		$result = self::query($sql, array($page));
+		$result = self::query($sql, [ $page ]);
 
 		return $result->affectedRows;
 	}

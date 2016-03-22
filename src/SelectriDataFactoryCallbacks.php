@@ -1,22 +1,95 @@
 <?php
 
-namespace ContaoCommunityAlliance\Contao\LanguageRelations;
+namespace Hofff\Contao\LanguageRelations;
 
+use Hofff\Contao\Selectri\Model\Data;
+use Hofff\Contao\Selectri\Model\Node;
+use Hofff\Contao\Selectri\Model\Tree\SQLAdjacencyTreeDataFactory;
+
+/**
+ * @author Oliver Hoff <oliver@hofff.com>
+ */
 class SelectriDataFactoryCallbacks {
 
+	/**
+	 * @var SelectriDataFactoryCallbacks
+	 */
+	private static $instance;
+
+	/**
+	 * @return SelectriDataFactoryCallbacks
+	 */
+	public static function getInstance() {
+		isset(self::$instance) || self::$instance = new self;
+		return self::$instance;
+	}
+
+	/**
+	 * @var SQLAdjacencyTreeDataFactory
+	 */
+	private $factory;
+
+	/**
+	 * @var array<integer, string>
+	 */
+	private $rootLanguages;
+
+	/**
+	 * @var integer
+	 */
+	private $pageTo;
+
+	/**
+	 * @var array<integer, integer>
+	 */
+	private $relatedToPageTo;
+
+	/**
+	 */
+	protected function __construct() {
+	}
+
+	/**
+	 */
+	private function __clone() {
+	}
+
+	/**
+	 * @return SQLAdjacencyTreeDataFactory
+	 */
+	public function getFactory() {
+		if(!isset($this->factory)) {
+			$this->factory = new SQLAdjacencyTreeDataFactory;
+			$this->factory->getConfig()->setTable('tl_page');
+			$this->factory->getConfig()->addColumns([ 'title', 'cca_rr_root' ]);
+			$this->factory->getConfig()->addSearchColumns('title');
+			$this->factory->getConfig()->setLabelCallback([ $this, 'generatePageNodeLabel' ]);
+			$this->factory->getConfig()->setContentCallback([ $this, 'generatePageNodeContent' ]);
+			$this->factory->getConfig()->setSelectableExpr('type != \'root\'');
+		}
+
+		return $this->factory;
+	}
+
+	/**
+	 * @param \DataContainer $dc
+	 * @param string $xlabel
+	 * @return string
+	 */
 	public function inputFieldCallback($dc, $xlabel) {
 		$sql = <<<SQL
 SELECT		grpRoots.id
 FROM		tl_page			AS page
 JOIN		tl_page			AS root		ON root.id = page.cca_rr_root
 JOIN		tl_cca_lr_group	AS grp		ON grp.id = root.cca_lr_group
-JOIN		tl_page			AS grpRoots	ON grpRoots.cca_lr_group = root.cca_lr_group AND grpRoots.id != root.id
+JOIN		tl_page			AS grpRoots	ON grpRoots.cca_lr_group = root.cca_lr_group
+										AND grpRoots.id != root.id
 WHERE		page.id = ?
 ORDER BY	grpRoots.sorting
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id);
 
-		$this->factory->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : array(-1));
+		$this->factory->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : [ -1 ]);
 
 		// remove the input field callback, to avoid endless recursion
 		$field = &$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'];
@@ -31,17 +104,17 @@ SQL;
 		$return = $dcRowMethod->invoke($dc, $dc->palette);
 
 		// restore the original dca
-		$field['input_field_callback'] = array(__CLASS__, __FUNCTION__);
+		$field['input_field_callback'] = [ __CLASS__, __FUNCTION__ ];
 		unset($field['eval']['jsOptions']);
 
 		return $return;
 	}
 
-	public function getFactory() {
-		return $this->factory;
-	}
-
-	public function generatePageNodeLabel(\SelectriNode $node) {
+	/**
+	 * @param Node $node
+	 * @return string
+	 */
+	public function generatePageNodeLabel(Node $node) {
 		$nodeData = $node->getData();
 
 		$tpl = 'cca_lr_pageNodeLabel';
@@ -54,7 +127,12 @@ SQL;
 		return $tpl->parse();
 	}
 
-	public function generatePageNodeContent(\SelectriNode $node, \SelectriData $data) {
+	/**
+	 * @param Node $node
+	 * @param Data $data
+	 * @return string
+	 */
+	public function generatePageNodeContent(Node $node, Data $data) {
 		$jsOptions = $data->getWidget()->getJSOptions();
 
 		$tpl = 'cca_lr_pageNodeContent';
@@ -67,21 +145,10 @@ SQL;
 		return $tpl->parse();
 	}
 
-	/** @var \SelectriContaoTableDataFactory */
-	private $factory;
-
-	protected function __construct() {
-		$this->factory = new \SelectriContaoTableDataFactory;
-		$this->factory->setTreeTable('tl_page');
-		$this->factory->getConfig()->addTreeColumns(array('title', 'cca_rr_root'));
-		$this->factory->getConfig()->addTreeSearchColumns('title');
-		$this->factory->getConfig()->setTreeLabelCallback(array($this, 'generatePageNodeLabel'));
-		$this->factory->getConfig()->setTreeContentCallback(array($this, 'generatePageNodeContent'));
-		$this->factory->getConfig()->setSelectableExpr('type != \'root\'');
-	}
-
-	private $rootLanguages;
-
+	/**
+	 * @param integer $root
+	 * @return string
+	 */
 	protected function getLanguage($root) {
 		if(!isset($this->rootLanguages[$root])) {
 			$sql = 'SELECT language FROM tl_page WHERE id = ?';
@@ -91,26 +158,17 @@ SQL;
 		return $this->rootLanguages[$root];
 	}
 
-	private $pageTo;
-
-	private $relatedToPageTo;
-
+	/**
+	 * @param integer $pageFrom
+	 * @param integer $pageTo
+	 * @return boolean
+	 */
 	protected function isRelated($pageFrom, $pageTo) {
 		if($pageTo != $this->pageTo) {
 			$this->pageTo = $pageTo;
 			$this->relatedToPageTo = LanguageRelations::getPagesRelatedTo($pageTo);
 		}
 		return isset($this->relatedToPageTo[$pageFrom]);
-	}
-
-	private function __clone() {
-	}
-
-	private static $instance;
-
-	public static function getInstance() {
-		isset(self::$instance) || self::$instance = new self;
-		return self::$instance;
 	}
 
 }

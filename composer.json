@@ -1,5 +1,5 @@
 {
-	"name": "contao-community-alliance/language-relations",
+	"name": "hofff/contao-language-relations",
 	"description": "Maintaining relations between translated pages.",
 	"keywords": [ "utility", "translation", "page", "tree", "contao" ],
 	"type": "contao-module",
@@ -13,21 +13,24 @@
 		}
 	],
 	"require": {
-		"php": ">=5.3",
-		"contao/core": ">=2.11,<4-dev",
-		"contao-community-alliance/composer-plugin": "~2.0",
-		"backboneit/contao-selectri": ">=2-dev,<3-dev",
-		"contao-community-alliance/root-relations": ">=1-dev,<2-dev"
+		"php": "^5.5 || ^7.0",
+		"contao/core": "^3.2",
+		"contao-community-alliance/composer-plugin": "^2.0",
+		"hofff/contao-selectri": "^3.0",
+		"hofff/root-relations": "^2.0"
+	},
+	"replace": {
+		"contao-community-alliance/language-relations": "self.version"
 	},
 	"autoload": {
-		"psr-0": {
-			"ContaoCommunityAlliance": "src/"
+		"psr-4": {
+			"Hofff\\Contao\\LanguageRelations\\": "src/"
 		}
 	},
 	"extra": {
 		"contao": {
 			"sources": {
-				"contao-module": "system/modules/cca-language-relations"
+				"contao-module": "system/modules/hofff_language_relations"
 			},
 			"runonce": [
 			]

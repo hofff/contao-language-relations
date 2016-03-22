@@ -1,7 +1,9 @@
 <?php
 
-/**
-* Back end modules
-*/
-$GLOBALS['TL_LANG']['MOD']['cca-language-relations']        = 'Language relations for translations';
-$GLOBALS['TL_LANG']['MOD']['cca_lr_group']                  = array('Translation groups', 'Create and configure translation groups');
+$GLOBALS['TL_LANG']['MOD']['hofff_language_relations'][0]
+	= 'hofff.com – Language relations for translations';
+
+$GLOBALS['TL_LANG']['MOD']['cca_lr_group'][0]
+	= 'Translation groups';
+$GLOBALS['TL_LANG']['MOD']['cca_lr_group'][1]
+	= 'Create and configure translation groups';

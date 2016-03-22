@@ -1,14 +1,27 @@
 <?php
 
-namespace ContaoCommunityAlliance\Contao\LanguageRelations;
-
-use ContaoCommunityAlliance\Contao\RootRelations\ControllerProxy;
+namespace Hofff\Contao\LanguageRelations;
 
 /**
- * @author Oliver Hoff
+ * @author Oliver Hoff <oliver@hofff.com>
  */
 class GroupDCA {
 
+	/**
+	 * @var array
+	 */
+	private $roots;
+
+	/**
+	 */
+	public function __construct() {
+		$this->roots = [];
+	}
+
+	/**
+	 * @param \DataContainer $dc
+	 * @return string
+	 */
 	public function keySelectriAJAXCallback($dc) {
 		$key = 'isAjaxRequest';
 
@@ -18,7 +31,7 @@ class GroupDCA {
 		$$key = EnvironmentProxy::getCacheValue($key);
 		EnvironmentProxy::setCacheValue($key, true);
 
-		$return = $dc->editAll(\Input::getInstance()->get('cca_lr_id'));
+		$return = $dc->editAll(\Input::get('cca_lr_id'));
 
 		// this would never be reached, but we clean up the env
 		EnvironmentProxy::setCacheValue($key, $$key);
@@ -26,9 +39,15 @@ class GroupDCA {
 		return $return;
 	}
 
+	/**
+	 * @return void
+	 */
 	public function keyEditRelations() {
-		$fields = array('cca_lr_pageInfo', 'cca_lr_relations');
-		$roots = array_unique(array_map('intval', array_filter((array) $_GET['roots'], function($root) { return $root >= 1; })));
+		$fields = [ 'cca_lr_pageInfo', 'cca_lr_relations' ];
+		$roots = (array) $_GET['roots'];
+		$roots = array_map('intval', $roots);
+		$roots = array_filter($roots, function($root) { return $root >= 1; });
+		$roots = array_unique($roots);
 
 		switch($_GET['filter']) {
 			case 'incomplete':
@@ -43,8 +62,8 @@ class GroupDCA {
 
 			default:
 				if($roots) {
-					$wildcards = rtrim(str_repeat('?,', count('roots')), ',');
-					$sql = "SELECT id FROM tl_page WHERE cca_rr_root IN ($wildcards) AND type != 'root'";
+					$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
+					$sql = 'SELECT id FROM tl_page WHERE cca_rr_root IN (' . $wildcards . ') AND type != \'root\'';
 					$result = \Database::getInstance()->prepare($sql)->executeUncached($roots);
 					$ids = $result->fetchEach('id');
 				}
@@ -52,8 +71,8 @@ class GroupDCA {
 		}
 
 		if(!$ids) {
-			ControllerProxy::addConfirmationMessage($msg ?: $GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
-			ControllerProxy::redirect(ControllerProxy::getReferer());
+			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
+			\Controller::redirect(\System::getReferer());
 			return;
 		}
 
@@ -62,20 +81,36 @@ class GroupDCA {
 		$session['CURRENT']['tl_page'] = $fields;
 		\Session::getInstance()->setData($session);
 
-		ControllerProxy::redirect('contao/main.php?do=cca_lr_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
+		\Controller::redirect('contao/main.php?do=cca_lr_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
 	}
 
+	/**
+	 * @param string $group
+	 * @param string $mode
+	 * @param string $field
+	 * @param array $row
+	 * @param \DataContainer $dc
+	 * @return string
+	 */
 	public function groupGroup($group, $mode, $field, $row, $dc) {
 		return $row['title'];
 	}
 
+	/**
+	 * @param array $row
+	 * @param string $label
+	 * @return string
+	 */
 	public function labelGroup($row, $label) {
 		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($row['id']);
 
-		$groupRoots = array();
+		$groupRoots = [];
 		while($result->next()) {
-			$groupRoots[] = $result->row();
+			$row = $result->row();
+			$row['cca_lr_incomplete'] = LanguageRelations::getIncompleteRelatedPages($row['id']);
+			$row['cca_lr_ambiguous'] = LanguageRelations::getAmbiguousRelatedPages($row['id']);
+			$groupRoots[] = $row;
 		}
 
 		$tpl = new \BackendTemplate('cca_lr_groupRoots');
@@ -84,6 +119,9 @@ class GroupDCA {
 		return $tpl->parse();
 	}
 
+	/**
+	 * @return array<string, array<integer, string>>
+	 */
 	public function getRootsOptions() {
 		$sql = <<<SQL
 SELECT		page.id,
@@ -103,7 +141,7 @@ ORDER BY	grp.title IS NOT NULL,
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached('root');
 
-		$options = array();
+		$options = [];
 		while($result->next()) {
 			$groupTitle = $result->grpID
 				? $result->grpTitle . ' (ID ' . $result->grpID . ')'
@@ -114,8 +152,10 @@ SQL;
 		return $options;
 	}
 
-	private $roots = array();
-
+	/**
+	 * @param \DataContainer $dc
+	 * @return void
+	 */
 	public function onsubmitGroup($dc) {
 		if(isset($this->roots[$dc->id])) {
 			$sql = 'UPDATE tl_page SET cca_lr_group = NULL WHERE cca_lr_group = ?';
@@ -131,12 +171,22 @@ SQL;
 		}
 	}
 
+	/**
+	 * @param mixed $value
+	 * @param \DataContainer $dc
+	 * @return array<integer>
+	 */
 	public function loadRoots($value, $dc) {
 		$sql = 'SELECT id FROM tl_page WHERE cca_lr_group = ? AND type = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id, 'root');
 		return $result->fetchEach('id');
 	}
 
+	/**
+	 * @param integer $value
+	 * @param \DataContainer $dc
+	 * @return null
+	 */
 	public function saveRoots($value, $dc) {
 		$this->roots[$dc->id] = $value;
 		return null;
