@@ -12,7 +12,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][]
  * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module
  * https://github.com/hofff/contao-language-relations/issues/2
  */
-if($_GET['do'] == 'cca_lr_group') {
+if($_GET['do'] == 'hofff_translation_group') {
 	$onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
 	foreach($onsubmit as $i => list($class, $method)) {
 		if($class == 'tl_page' && $method == 'updateSitemap') {

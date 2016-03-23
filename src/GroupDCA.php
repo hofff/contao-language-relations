@@ -81,7 +81,7 @@ class GroupDCA {
 		$session['CURRENT']['tl_page'] = $fields;
 		\Session::getInstance()->setData($session);
 
-		\Controller::redirect('contao/main.php?do=cca_lr_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
+		\Controller::redirect('contao/main.php?do=hofff_translation_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
 	}
 
 	/**

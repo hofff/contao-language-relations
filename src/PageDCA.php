@@ -31,7 +31,7 @@ class PageDCA {
 		foreach($palettes as $key => &$palette) {
 			if($key != '__selector__' && $key != 'root') {
 				$palette .= ';{cca_lr_legend}';
-				$_GET['do'] == 'cca_lr_group' && $palette .= ',cca_lr_pageInfo';
+				$_GET['do'] == 'hofff_translation_group' && $palette .= ',cca_lr_pageInfo';
 				$palette .= ',cca_lr_relations';
 			}
 		}
