@@ -89,7 +89,7 @@ ORDER BY	grpRoots.sorting
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id);
 
-		$this->factory->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : [ -1 ]);
+		$this->getFactory()->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : [ -1 ]);
 
 		// remove the input field callback, to avoid endless recursion
 		$field = &$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_page_translations'];
