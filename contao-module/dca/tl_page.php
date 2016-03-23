@@ -28,14 +28,14 @@ $GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['hofff_translation_group_
 $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_translation_group_id']['sql']
 	= 'int(10) unsigned NOT NULL default \'0\'';
 
-$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_pageInfo'] = [
-	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_pageInfo'],
+$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_info'] = [
+	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_info'],
 	'exclude'				=> true,
 	'input_field_callback'	=> [ PageDCA::class, 'inputFieldPageInfo' ],
 ];
 
-$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = [
-	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_relations'],
+$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_page_translations'] = [
+	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_page_translations'],
 	'exclude'				=> true,
 	'inputType'				=> 'selectri',
 	'eval'					=> [

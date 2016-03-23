@@ -31,7 +31,7 @@ class GroupDCA {
 		$$key = EnvironmentProxy::getCacheValue($key);
 		EnvironmentProxy::setCacheValue($key, true);
 
-		$return = $dc->editAll(\Input::get('cca_lr_id'));
+		$return = $dc->editAll(\Input::get('hofff_page_id'));
 
 		// this would never be reached, but we clean up the env
 		EnvironmentProxy::setCacheValue($key, $$key);
@@ -43,7 +43,7 @@ class GroupDCA {
 	 * @return void
 	 */
 	public function keyEditRelations() {
-		$fields = [ 'cca_lr_pageInfo', 'cca_lr_relations' ];
+		$fields = [ 'hofff_language_relations_info', 'hofff_page_translations' ];
 		$roots = (array) $_GET['roots'];
 		$roots = array_map('intval', $roots);
 		$roots = array_filter($roots, function($root) { return $root >= 1; });
@@ -108,8 +108,8 @@ class GroupDCA {
 		$groupRoots = [];
 		while($result->next()) {
 			$row = $result->row();
-			$row['cca_lr_incomplete'] = LanguageRelations::getIncompleteRelatedPages($row['id']);
-			$row['cca_lr_ambiguous'] = LanguageRelations::getAmbiguousRelatedPages($row['id']);
+			$row['incomplete'] = LanguageRelations::getIncompleteRelatedPages($row['id']);
+			$row['ambiguous'] = LanguageRelations::getAmbiguousRelatedPages($row['id']);
 			$groupRoots[] = $row;
 		}
 

@@ -3,11 +3,11 @@
 $GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_legend']
 	= 'Übersetzungen';
 
-$GLOBALS['TL_LANG']['tl_page']['hofff_pageInfo'][0]
+$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_info'][0]
 	= 'Seiteninformationen';
-$GLOBALS['TL_LANG']['tl_page']['hofff_relations'][0]
+$GLOBALS['TL_LANG']['tl_page']['hofff_page_translations'][0]
 	= 'Übersetzungen';
-$GLOBALS['TL_LANG']['tl_page']['hofff_relations'][1]
+$GLOBALS['TL_LANG']['tl_page']['hofff_page_translations'][1]
 	= 'Legt fest, welche Seiten anderer Startpunkte Übersetzungen dieser Seite sind.';
 
 $GLOBALS['TL_LANG']['tl_page']['hofff_makePrimary']

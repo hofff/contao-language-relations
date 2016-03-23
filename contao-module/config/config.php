@@ -16,5 +16,5 @@ $GLOBALS['BE_MOD']['design']['hofff_translation_group']['stylesheet'][]
 $GLOBALS['BE_MOD']['design']['page']['stylesheet'][]
 	= 'system/modules/hofff_language_relations/assets/css/style.css';
 
-$GLOBALS['TL_HOOKS']['loadDataContainer']['cca_lr']
+$GLOBALS['TL_HOOKS']['loadDataContainer']['hofff_language_relations']
 	= [ 'Hofff\\Contao\\LanguageRelations\\PageDCA', 'hookLoadDataContainer' ];

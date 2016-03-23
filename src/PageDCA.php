@@ -31,8 +31,8 @@ class PageDCA {
 		foreach($palettes as $key => &$palette) {
 			if($key != '__selector__' && $key != 'root') {
 				$palette .= ';{hofff_language_relations_legend}';
-				$_GET['do'] == 'hofff_translation_group' && $palette .= ',cca_lr_pageInfo';
-				$palette .= ',cca_lr_relations';
+				$_GET['do'] == 'hofff_translation_group' && $palette .= ',hofff_language_relations_info';
+				$palette .= ',hofff_page_translations';
 			}
 		}
 		unset($palette, $palettes);
@@ -44,7 +44,7 @@ class PageDCA {
 	 * @return string
 	 */
 	public function inputFieldPageInfo($dc, $xlabel) {
-		$tpl = new \BackendTemplate('hofff_pageInfo');
+		$tpl = new \BackendTemplate('hofff_language_relations_info');
 		$tpl->setData($dc->activeRecord->row());
 		return $tpl->parse();
 	}

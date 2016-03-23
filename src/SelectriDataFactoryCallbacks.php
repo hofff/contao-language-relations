@@ -92,12 +92,12 @@ SQL;
 		$this->factory->getConfig()->setRoots($result->numRows ? $result->fetchEach('id') : [ -1 ]);
 
 		// remove the input field callback, to avoid endless recursion
-		$field = &$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'];
+		$field = &$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_page_translations'];
 		unset($field['input_field_callback']);
 
 		// set the postback param for speeding up ajax requests of the selectri widgets
 		$field['eval']['jsOptions']['qs']['key'] = 'selectriAJAXCallback';
-		$field['eval']['jsOptions']['qs']['cca_lr_id'] = $dc->id;
+		$field['eval']['jsOptions']['qs']['hofff_page_id'] = $dc->id;
 
 		$dcRowMethod = new \ReflectionMethod($dc, 'row');
 		$dcRowMethod->setAccessible(true);
@@ -139,8 +139,8 @@ SQL;
 		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
 
 		$tpl->name		= $node->getAdditionalInputName('primary');
-		$tpl->id		= $data->getWidget()->name . '_cca_lr_primary_' . $node->getKey();
-		$tpl->isPrimary	= $this->isRelated($node->getKey(), $jsOptions['qs']['cca_lr_id']);
+		$tpl->id		= $data->getWidget()->name . '_hofff_language_relations_primary_' . $node->getKey();
+		$tpl->isPrimary	= $this->isRelated($node->getKey(), $jsOptions['qs']['hofff_page_id']);
 
 		return $tpl->parse();
 	}
