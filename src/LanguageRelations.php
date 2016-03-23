@@ -5,8 +5,8 @@ namespace Hofff\Contao\LanguageRelations;
 /**
  * A relation in tl_hofff_page_translation is valid, if:
  * - pageFrom != pageTo (non identity)
- * - pageFrom->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
- * 		= pageTo->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
+ * - pageFrom->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
+ * 		= pageTo->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
  * (the root pages belong to the same translation group)
  * - pageFrom->id.tl_page.hofff_root_page_id
  * 		!= pageTo->id.tl_page.hofff_root_page_id
@@ -57,7 +57,7 @@ JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page
 JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
 JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 														AND rootPageTo.id != rootPageFrom.id
-														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
+														AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
 
 LEFT JOIN	tl_hofff_page_translation		AS refl				ON refl.pageFrom = rel.pageTo
 														AND refl.pageTo = rel.pageFrom
@@ -104,7 +104,7 @@ JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page
 JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
 JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 														AND rootPageTo.id != rootPageFrom.id
-														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
+														AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
 
 WHERE		rel.pageTo = ?
 
@@ -144,7 +144,7 @@ JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
 JOIN		tl_page					AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
 														AND pageFrom.id != rootPageFrom.id
 
-LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.cca_lr_group = rootPageFrom.cca_lr_group
+LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
 														AND groupRoots.id != rootPageFrom.id
 LEFT JOIN	(
 			tl_hofff_page_translation		AS rel
@@ -200,7 +200,7 @@ JOIN		tl_hofff_page_translation	AS rel				ON rel.pageFrom = pageFrom.id
 JOIN		tl_page				AS pageTo			ON pageTo.id = rel.pageTo
 JOIN		tl_page				AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 													AND rootPageTo.id != rootPageFrom.id
-													AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
+													AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
 
 WHERE		page.id = ?
 

@@ -102,7 +102,7 @@ class GroupDCA {
 	 * @return string
 	 */
 	public function labelGroup($row, $label) {
-		$sql = 'SELECT * FROM tl_page WHERE cca_lr_group = ? ORDER BY title';
+		$sql = 'SELECT * FROM tl_page WHERE hofff_translation_group_id = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($row['id']);
 
 		$groupRoots = [];
@@ -131,7 +131,7 @@ SELECT		page.id,
 			grp.title			AS grpTitle
 
 FROM		tl_page				AS page
-LEFT JOIN	tl_hofff_translation_group		AS grp			ON grp.id = page.cca_lr_group
+LEFT JOIN	tl_hofff_translation_group		AS grp			ON grp.id = page.hofff_translation_group_id
 
 WHERE		page.type = ?
 
@@ -158,13 +158,13 @@ SQL;
 	 */
 	public function onsubmitGroup($dc) {
 		if(isset($this->roots[$dc->id])) {
-			$sql = 'UPDATE tl_page SET cca_lr_group = NULL WHERE cca_lr_group = ?';
+			$sql = 'UPDATE tl_page SET hofff_translation_group_id = NULL WHERE hofff_translation_group_id = ?';
 			\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
 
 			$roots = deserialize($this->roots[$dc->id], true);
 			if($roots) {
 				$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
-				$sql = 'UPDATE tl_page SET cca_lr_group = ? WHERE id IN (' . $wildcards . ')';
+				$sql = 'UPDATE tl_page SET hofff_translation_group_id = ? WHERE id IN (' . $wildcards . ')';
 				array_unshift($roots, $dc->id);
 				\Database::getInstance()->prepare($sql)->executeUncached($roots);
 			}
@@ -177,7 +177,7 @@ SQL;
 	 * @return array<integer>
 	 */
 	public function loadRoots($value, $dc) {
-		$sql = 'SELECT id FROM tl_page WHERE cca_lr_group = ? AND type = ? ORDER BY title';
+		$sql = 'SELECT id FROM tl_page WHERE hofff_translation_group_id = ? AND type = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id, 'root');
 		return $result->fetchEach('id');
 	}

@@ -23,9 +23,9 @@ if($_GET['do'] == 'hofff_translation_group') {
 	unset($onsubmit);
 }
 
-$GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['cca_lr_group']
+$GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['hofff_translation_group_id']
 	= 'index';
-$GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_group']['sql']
+$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_translation_group_id']['sql']
 	= 'int(10) unsigned NOT NULL default \'0\'';
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_pageInfo'] = [
