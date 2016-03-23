@@ -16,8 +16,8 @@
  */
 TemplateLoader::addFiles(array
 (
-	'cca_lr_groupRoots'      => 'system/modules/hofff_language_relations/templates',
-	'cca_lr_pageInfo'        => 'system/modules/hofff_language_relations/templates',
-	'cca_lr_pageNodeContent' => 'system/modules/hofff_language_relations/templates',
-	'cca_lr_pageNodeLabel'   => 'system/modules/hofff_language_relations/templates',
+	'hofff_groupRoots'      => 'system/modules/hofff_language_relations/templates',
+	'hofff_pageInfo'        => 'system/modules/hofff_language_relations/templates',
+	'hofff_pageNodeContent' => 'system/modules/hofff_language_relations/templates',
+	'hofff_pageNodeLabel'   => 'system/modules/hofff_language_relations/templates',
 ));

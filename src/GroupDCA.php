@@ -113,7 +113,7 @@ class GroupDCA {
 			$groupRoots[] = $row;
 		}
 
-		$tpl = new \BackendTemplate('cca_lr_groupRoots');
+		$tpl = new \BackendTemplate('hofff_groupRoots');
 		$tpl->groupRoots = $groupRoots;
 
 		return $tpl->parse();

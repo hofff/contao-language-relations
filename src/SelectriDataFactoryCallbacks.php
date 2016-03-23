@@ -117,7 +117,7 @@ SQL;
 	public function generatePageNodeLabel(Node $node) {
 		$nodeData = $node->getData();
 
-		$tpl = 'cca_lr_pageNodeLabel';
+		$tpl = 'hofff_pageNodeLabel';
 		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
 
 		$tpl->language	= $this->getLanguage($nodeData['hofff_root_page_id']);
@@ -135,7 +135,7 @@ SQL;
 	public function generatePageNodeContent(Node $node, Data $data) {
 		$jsOptions = $data->getWidget()->getJSOptions();
 
-		$tpl = 'cca_lr_pageNodeContent';
+		$tpl = 'hofff_pageNodeContent';
 		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
 
 		$tpl->name		= $node->getAdditionalInputName('primary');

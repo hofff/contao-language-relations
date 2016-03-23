@@ -44,7 +44,7 @@ class PageDCA {
 	 * @return string
 	 */
 	public function inputFieldPageInfo($dc, $xlabel) {
-		$tpl = new \BackendTemplate('cca_lr_pageInfo');
+		$tpl = new \BackendTemplate('hofff_pageInfo');
 		$tpl->setData($dc->activeRecord->row());
 		return $tpl->parse();
 	}
