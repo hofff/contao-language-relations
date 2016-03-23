@@ -61,7 +61,7 @@ class SelectriDataFactoryCallbacks {
 		if(!isset($this->factory)) {
 			$this->factory = new SQLAdjacencyTreeDataFactory;
 			$this->factory->getConfig()->setTable('tl_page');
-			$this->factory->getConfig()->addColumns([ 'title', 'cca_rr_root' ]);
+			$this->factory->getConfig()->addColumns([ 'title', 'hofff_root_page_id' ]);
 			$this->factory->getConfig()->addSearchColumns('title');
 			$this->factory->getConfig()->setLabelCallback([ $this, 'generatePageNodeLabel' ]);
 			$this->factory->getConfig()->setContentCallback([ $this, 'generatePageNodeContent' ]);
@@ -80,7 +80,7 @@ class SelectriDataFactoryCallbacks {
 		$sql = <<<SQL
 SELECT		grpRoots.id
 FROM		tl_page			AS page
-JOIN		tl_page			AS root		ON root.id = page.cca_rr_root
+JOIN		tl_page			AS root		ON root.id = page.hofff_root_page_id
 JOIN		tl_cca_lr_group	AS grp		ON grp.id = root.cca_lr_group
 JOIN		tl_page			AS grpRoots	ON grpRoots.cca_lr_group = root.cca_lr_group
 										AND grpRoots.id != root.id
@@ -120,7 +120,7 @@ SQL;
 		$tpl = 'cca_lr_pageNodeLabel';
 		$tpl = TL_MODE == 'FE' ? new \FrontendTemplate($tpl) : new \BackendTemplate($tpl);
 
-		$tpl->language	= $this->getLanguage($nodeData['cca_rr_root']);
+		$tpl->language	= $this->getLanguage($nodeData['hofff_root_page_id']);
 		$tpl->title		= $nodeData['title'];
 		$tpl->id		= $nodeData['id'];
 

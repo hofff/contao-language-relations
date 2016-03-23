@@ -5,11 +5,11 @@ namespace Hofff\Contao\LanguageRelations;
 /**
  * A relation in tl_cca_lr_relation is valid, if:
  * - pageFrom != pageTo (non identity)
- * - pageFrom->id.tl_page.cca_rr_root->id.tl_page.cca_lr_group
- * 		= pageTo->id.tl_page.cca_rr_root->id.tl_page.cca_lr_group
+ * - pageFrom->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
+ * 		= pageTo->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
  * (the root pages belong to the same translation group)
- * - pageFrom->id.tl_page.cca_rr_root
- * 		!= pageTo->id.tl_page.cca_rr_root
+ * - pageFrom->id.tl_page.hofff_root_page_id
+ * 		!= pageTo->id.tl_page.hofff_root_page_id
  * (the root pages are not the same)
  *
  * A relation is primary, if:
@@ -52,10 +52,10 @@ SELECT		rel.pageFrom,
 FROM 		tl_cca_lr_relation		AS rel
 
 JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.cca_rr_root
+JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
 
 JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
+JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 														AND rootPageTo.id != rootPageFrom.id
 														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
 
@@ -99,10 +99,10 @@ SELECT		rel.pageFrom
 FROM 		tl_cca_lr_relation		AS rel
 
 JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.cca_rr_root
+JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
 
 JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
+JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 														AND rootPageTo.id != rootPageFrom.id
 														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
 
@@ -140,8 +140,8 @@ SELECT		pageFrom.id				AS pageFrom
 
 FROM 		tl_page					AS page
 
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = page.cca_rr_root
-JOIN		tl_page					AS pageFrom			ON pageFrom.cca_rr_root = rootPageFrom.id
+JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
+JOIN		tl_page					AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
 														AND pageFrom.id != rootPageFrom.id
 
 LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.cca_lr_group = rootPageFrom.cca_lr_group
@@ -149,7 +149,7 @@ LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.cca_lr_group = rootPageFrom.c
 LEFT JOIN	(
 			tl_cca_lr_relation		AS rel
 	JOIN	tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-	JOIN	tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
+	JOIN	tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 )														ON rel.pageFrom = pageFrom.id
 														AND rootPageTo.id = groupRoots.id
 
@@ -191,14 +191,14 @@ SELECT		DISTINCT pageFrom.id AS pageFrom
 
 FROM 		tl_page				AS page
 
-JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = page.cca_rr_root
-JOIN		tl_page				AS pageFrom			ON pageFrom.cca_rr_root = rootPageFrom.id
+JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
+JOIN		tl_page				AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
 													AND pageFrom.id != rootPageFrom.id
 
 JOIN		tl_cca_lr_relation	AS rel				ON rel.pageFrom = pageFrom.id
 
 JOIN		tl_page				AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page				AS rootPageTo		ON rootPageTo.id = pageTo.cca_rr_root
+JOIN		tl_page				AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 													AND rootPageTo.id != rootPageFrom.id
 													AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
 
@@ -267,12 +267,12 @@ SELECT		rel.pageTo, rel.pageFrom
 
 FROM		tl_cca_lr_relation	AS rel
 JOIN		tl_page				AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = pageFrom.cca_rr_root
+JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
 
 LEFT JOIN	(
 			tl_cca_lr_relation	AS refl
 	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
-	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.cca_rr_root
+	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
 )													ON refl.pageFrom = rel.pageTo
 													AND reflRootPageTo.id = rootPageFrom.id
 
@@ -311,12 +311,12 @@ JOIN		tl_cca_lr_relation	AS inter			ON inter.pageFrom = rel.pageFrom
 													AND inter.pageTo != rel.pageTo
 
 JOIN		tl_page				AS interPageTo		ON interPageTo.id = inter.pageTo
-JOIN		tl_page				AS interRootPageTo	ON interRootPageTo.id = interPageTo.cca_rr_root
+JOIN		tl_page				AS interRootPageTo	ON interRootPageTo.id = interPageTo.hofff_root_page_id
 
 LEFT JOIN	(
 			tl_cca_lr_relation	AS refl
 	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
-	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.cca_rr_root
+	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
 )													ON refl.pageFrom = rel.pageTo
 													AND reflRootPageTo.id = interRootPageTo.id
 
@@ -366,7 +366,7 @@ DELETE		rel
 
 FROM		tl_cca_lr_relation	AS rel
 JOIN		tl_page				AS relPageTo		ON relPageTo.id = rel.pageTo
-JOIN		tl_page				AS page				ON page.cca_rr_root = relPageTo.cca_rr_root
+JOIN		tl_page				AS page				ON page.hofff_root_page_id = relPageTo.hofff_root_page_id
 
 WHERE		rel.pageFrom IN ($wildcards)
 AND			page.id = ?

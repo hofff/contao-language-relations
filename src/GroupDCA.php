@@ -63,7 +63,7 @@ class GroupDCA {
 			default:
 				if($roots) {
 					$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
-					$sql = 'SELECT id FROM tl_page WHERE cca_rr_root IN (' . $wildcards . ') AND type != \'root\'';
+					$sql = 'SELECT id FROM tl_page WHERE hofff_root_page_id IN (' . $wildcards . ') AND type != \'root\'';
 					$result = \Database::getInstance()->prepare($sql)->executeUncached($roots);
 					$ids = $result->fetchEach('id');
 				}

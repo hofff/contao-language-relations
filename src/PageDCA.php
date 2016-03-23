@@ -107,10 +107,10 @@ class PageDCA {
 			$wildcards = rtrim(str_repeat('?,', count($value)), ',');
 
 			$sql = <<<SQL
-SELECT		cca_rr_root
+SELECT		hofff_root_page_id
 FROM		tl_page
 WHERE		id IN ($wildcards)
-GROUP BY	cca_rr_root
+GROUP BY	hofff_root_page_id
 HAVING		COUNT(id) > 1
 LIMIT		1
 SQL;
@@ -125,11 +125,11 @@ SELECT		SUM(rootPage.cca_lr_group != curRootPage.cca_lr_group) AS ungroupedRelat
 			SUM(rootPage.id = curRootPage.id) AS ownRootRelations
 
 FROM		tl_page		AS page
-JOIN		tl_page		AS rootPage			ON rootPage.id = page.cca_rr_root
+JOIN		tl_page		AS rootPage			ON rootPage.id = page.hofff_root_page_id
 JOIN		(
 	SELECT	curRootPage1.cca_lr_group, curRootPage1.id
 	FROM	tl_page		AS curPage1
-	JOIN	tl_page		AS curRootPage1		ON curRootPage1.id = curPage1.cca_rr_root
+	JOIN	tl_page		AS curRootPage1		ON curRootPage1.id = curPage1.hofff_root_page_id
 	WHERE	curPage1.id = ?
 )						AS curRootPage
 
@@ -177,7 +177,7 @@ SQL;
 			$sql = 'UPDATE tl_page SET cca_lr_group = ? WHERE id = ?';
 			$db->prepare($sql)->executeUncached($original->cca_lr_group, $copy->id);
 
-		} elseif($original->cca_rr_root != $copy->cca_rr_root && $original->cca_lr_group == $copy->cca_lr_group) {
+		} elseif($original->hofff_root_page_id != $copy->hofff_root_page_id && $original->cca_lr_group == $copy->cca_lr_group) {
 			$relations = LanguageRelations::getRelations($original->id);
 
 			$wildcards = rtrim(str_repeat('(?,?),', count($relations) + 1), ',');
@@ -219,11 +219,11 @@ SQL;
 	 */
 	protected function getPageInfo($id) {
 		$sql = <<<SQL
-SELECT		page.id, page.type, page.cca_rr_root,
+SELECT		page.id, page.type, page.hofff_root_page_id,
 			COALESCE(rootPage.cca_lr_group, 0) AS cca_lr_group
 
 FROM		tl_page AS page
-LEFT JOIN	tl_page AS rootPage	ON rootPage.id = page.cca_rr_root
+LEFT JOIN	tl_page AS rootPage	ON rootPage.id = page.hofff_root_page_id
 
 WHERE		page.id = ?
 SQL;
