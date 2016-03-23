@@ -30,7 +30,7 @@ class PageDCA {
 		$palettes = &$GLOBALS['TL_DCA']['tl_page']['palettes'];
 		foreach($palettes as $key => &$palette) {
 			if($key != '__selector__' && $key != 'root') {
-				$palette .= ';{cca_lr_legend}';
+				$palette .= ';{hofff_language_relations_legend}';
 				$_GET['do'] == 'hofff_translation_group' && $palette .= ',cca_lr_pageInfo';
 				$palette .= ',cca_lr_relations';
 			}
@@ -117,7 +117,7 @@ SQL;
 			$params = array_keys($value);
 			$result = \Database::getInstance()->prepare($sql)->executeUncached($params);
 			if($result->numRows) {
-				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['cca_lr_errMultipleRelationsPerRoot']);
+				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['hofff_errMultipleRelationsPerRoot']);
 			}
 
 			$sql = <<<SQL
@@ -138,10 +138,10 @@ SQL;
 			array_unshift($params, $dc->id);
 			$result = \Database::getInstance()->prepare($sql)->executeUncached($params);
 			if($result->ungroupedRelations) {
-				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['cca_lr_errUngroupedRelations']);
+				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['hofff_errUngroupedRelations']);
 			}
 			if($result->ownRootRelations) {
-				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['cca_lr_errOwnRootRelations']);
+				throw new \Exception($GLOBALS['TL_LANG']['tl_page']['hofff_errOwnRootRelations']);
 			}
 		}
 

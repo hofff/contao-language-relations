@@ -29,13 +29,13 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_translation_group_id']['sql']
 	= 'int(10) unsigned NOT NULL default \'0\'';
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_pageInfo'] = [
-	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['cca_lr_pageInfo'],
+	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_pageInfo'],
 	'exclude'				=> true,
 	'input_field_callback'	=> [ PageDCA::class, 'inputFieldPageInfo' ],
 ];
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = [
-	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['cca_lr_relations'],
+	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_relations'],
 	'exclude'				=> true,
 	'inputType'				=> 'selectri',
 	'eval'					=> [

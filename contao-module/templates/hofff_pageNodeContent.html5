@@ -1,4 +1,4 @@
-<?php $label = $GLOBALS['TL_LANG']['tl_page'][$this->isPrimary ? 'cca_lr_isPrimary' : 'cca_lr_makePrimary']; ?>
+<?php $label = $GLOBALS['TL_LANG']['tl_page'][$this->isPrimary ? 'hofff_isPrimary' : 'hofff_makePrimary']; ?>
 <input type="checkbox" value="1" disabled="disabled"
     id="<?= $this->id; ?>"
     name="<?= $this->name; ?>"
