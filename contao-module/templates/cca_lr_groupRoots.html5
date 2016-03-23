@@ -1,5 +1,5 @@
 <?php if(!$this->groupRoots): ?>
-  <?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['noRootsAssigned']; ?>
+  <?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noRootsAssigned']; ?>
 
 <?php else: ?>
   <ul class="cca-lr-groupRoots">
@@ -7,16 +7,16 @@
       <li>
 
         <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?= $groupRoot['id']; ?>"
-            title="<?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['editRelations']; ?>"
+            title="<?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['editRelations']; ?>"
         >
           <?= \Image::getHtml('system/modules/hofff_language_relations/assets/images/relation.png'); ?>
         </a>
 
         <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?= $groupRoot['id']; ?>&filter=incomplete"
 <?php if($groupRoot['cca_lr_incomplete']): ?>
-            title="<?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['editIncompleteRelations']; ?>"
+            title="<?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['editIncompleteRelations']; ?>"
 <?php else: ?>
-            title="<?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['noIncompleteRelations']; ?>"
+            title="<?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noIncompleteRelations']; ?>"
             class="disabled"
 <?php endif; ?>
         >
@@ -25,9 +25,9 @@
 
         <a href="contao/main.php?do=cca_lr_group&key=editRelations&roots=<?= $groupRoot['id']; ?>&filter=ambiguous"
 <?php if($groupRoot['cca_lr_ambiguous']): ?>
-            title="<?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['editAmbiguousRelations']; ?>"
+            title="<?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['editAmbiguousRelations']; ?>"
 <?php else: ?>
-            title="<?= $GLOBALS['TL_LANG']['tl_cca_lr_group']['noAmbiguousRelations']; ?>"
+            title="<?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noAmbiguousRelations']; ?>"
             class="disabled"
 <?php endif; ?>
         >

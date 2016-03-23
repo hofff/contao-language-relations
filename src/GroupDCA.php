@@ -52,12 +52,12 @@ class GroupDCA {
 		switch($_GET['filter']) {
 			case 'incomplete':
 				$ids = LanguageRelations::getIncompleteRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_cca_lr_group']['noIncompleteRelations'];
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noIncompleteRelations'];
 				break;
 
 			case 'ambiguous':
 				$ids = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_cca_lr_group']['noAmbiguousRelations'];
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noAmbiguousRelations'];
 				break;
 
 			default:
@@ -71,7 +71,7 @@ class GroupDCA {
 		}
 
 		if(!$ids) {
-			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_cca_lr_group']['noPagesToEdit']);
+			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noPagesToEdit']);
 			\Controller::redirect(\System::getReferer());
 			return;
 		}
@@ -131,7 +131,7 @@ SELECT		page.id,
 			grp.title			AS grpTitle
 
 FROM		tl_page				AS page
-LEFT JOIN	tl_cca_lr_group		AS grp			ON grp.id = page.cca_lr_group
+LEFT JOIN	tl_hofff_translation_group		AS grp			ON grp.id = page.cca_lr_group
 
 WHERE		page.type = ?
 
@@ -145,7 +145,7 @@ SQL;
 		while($result->next()) {
 			$groupTitle = $result->grpID
 				? $result->grpTitle . ' (ID ' . $result->grpID . ')'
-				: $GLOBALS['TL_LANG']['tl_cca_lr_group']['notGrouped'];
+				: $GLOBALS['TL_LANG']['tl_hofff_translation_group']['notGrouped'];
 			$options[$groupTitle][$result->id] = $result->title . ' [' . $result->language . ']';
 		}
 

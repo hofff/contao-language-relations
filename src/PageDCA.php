@@ -166,7 +166,7 @@ SQL;
 				$sql = 'SELECT dns, title FROM tl_page WHERE id = ?';
 				$result = $db->prepare($sql)->executeUncached($original->id);
 
-				$sql = 'INSERT INTO tl_cca_lr_group(tstamp, title) VALUES(?, ?)';
+				$sql = 'INSERT INTO tl_hofff_translation_group(tstamp, title) VALUES(?, ?)';
 				$result = $db->prepare($sql)->executeUncached(time(), $result->dns ?: $result->title);
 				$original->cca_lr_group = $result->insertId;
 

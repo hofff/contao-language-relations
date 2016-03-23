@@ -3,6 +3,7 @@
 !/dev/
 !/ext/
 !/contao-module/
+!/runonce/
 !/src/
 !/publish/
 !/build.xml

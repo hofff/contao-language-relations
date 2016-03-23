@@ -81,7 +81,7 @@ class SelectriDataFactoryCallbacks {
 SELECT		grpRoots.id
 FROM		tl_page			AS page
 JOIN		tl_page			AS root		ON root.id = page.hofff_root_page_id
-JOIN		tl_cca_lr_group	AS grp		ON grp.id = root.cca_lr_group
+JOIN		tl_hofff_translation_group	AS grp		ON grp.id = root.cca_lr_group
 JOIN		tl_page			AS grpRoots	ON grpRoots.cca_lr_group = root.cca_lr_group
 										AND grpRoots.id != root.id
 WHERE		page.id = ?
