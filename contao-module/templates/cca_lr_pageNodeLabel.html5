@@ -1,1 +1,1 @@
-<span class="cca-lr-greyed">[<?= $this->language; ?>]</span> <?= $this->title; ?> (ID <?= $this->id; ?>)
+<span class="hofff-greyed">[<?= $this->language; ?>]</span> <?= $this->title; ?> (ID <?= $this->id; ?>)

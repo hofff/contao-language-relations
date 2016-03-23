@@ -2,7 +2,7 @@
   <?= $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noRootsAssigned']; ?>
 
 <?php else: ?>
-  <ul class="cca-lr-groupRoots">
+  <ul class="hofff-groupRoots">
     <?php foreach($this->groupRoots as $groupRoot): ?>
       <li>
 

@@ -1,54 +1,54 @@
-  .tl_listing .cca-lr-groupRoots {
+  .tl_listing .hofff-groupRoots {
     padding:4px 0;
   }
 
-  .cca-lr-groupRoots li {
+  .hofff-groupRoots li {
     padding:3px 0;
   }
 
-  .cca-lr-groupRoots a.disabled {
+  .hofff-groupRoots a.disabled {
     opacity:0.5;
   }
 
-  .cca-lr-pageInfo {
+  .hofff-pageInfo {
     margin:10px 0 4px;
     font-size:12px;
     font-weight:bold;
   }
 
-  .tl_tbox .cca-lr-pageInfo {
+  .tl_tbox .hofff-pageInfo {
     margin-top:25px;
   }
 
-  .cca-lr-pageInfo span,
-  .cca-lr-greyed {
+  .hofff-pageInfo span,
+  .hofff-greyed {
     color:#999999;
   }
 
-  .cca-lr-pageInfo + div h3 {
+  .hofff-pageInfo + div h3 {
     display:none;
   }
   
-  .cca-lr-relations .striContent {
+  .hofff-relations .striContent {
     display:none;
     float:right;
     margin-right:22px;
     padding-top:2px;
   }
   
-  .cca-lr-relations .striSelection .striContent {
+  .hofff-relations .striSelection .striContent {
     display:block;
   }
   
-  .cca-lr-relations .striContent input {
+  .hofff-relations .striContent input {
     position:relative;
   }
   
-  .cca-lr-relations .striContent:hover input::after {
+  .hofff-relations .striContent:hover input::after {
     position:absolute;
     bottom:2px;
     right:18px;
-    content:attr(data-cca-lr-label);
+    content:attr(data-hofff-label);
     white-space:nowrap;
 	color:#fff;
 	z-index:99;
@@ -63,7 +63,7 @@
 	background-image:linear-gradient(to top,#333 0,#666 80%);
   }
   
-  .cca-lr-relations .striContent label {
+  .hofff-relations .striContent label {
     display:none;
   }
   

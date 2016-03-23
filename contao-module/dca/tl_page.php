@@ -44,7 +44,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['cca_lr_relations'] = [
 		'max'					=> PHP_INT_MAX,
 		'sort'					=> false,
 		'canonical'				=> true,
-		'class'					=> 'cca-lr-relations',
+		'class'					=> 'hofff-relations',
 		'data'					=> [ SelectriDataFactoryCallbacks::getInstance(), 'getFactory' ],
 	],
 	'input_field_callback'	=> [ SelectriDataFactoryCallbacks::class, 'inputFieldCallback' ],
