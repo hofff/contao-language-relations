@@ -17,7 +17,7 @@
 		"contao/core": "^3.2",
 		"contao-community-alliance/composer-plugin": "^2.0",
 		"hofff/contao-selectri": "^3.0",
-		"hofff/root-relations": "^2.0"
+		"hofff/contao-root-relations": "^2.0"
 	},
 	"replace": {
 		"contao-community-alliance/language-relations": "self.version"
