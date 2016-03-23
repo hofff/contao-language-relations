@@ -3,7 +3,7 @@
 namespace Hofff\Contao\LanguageRelations;
 
 /**
- * A relation in tl_cca_lr_relation is valid, if:
+ * A relation in tl_hofff_page_translation is valid, if:
  * - pageFrom != pageTo (non identity)
  * - pageFrom->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
  * 		= pageTo->id.tl_page.hofff_root_page_id->id.tl_page.cca_lr_group
@@ -14,7 +14,7 @@ namespace Hofff\Contao\LanguageRelations;
  *
  * A relation is primary, if:
  * - it is valid
- * - pageFrom = pageTo->pageFrom.tl_cca_lr_relation.pageTo (there is a link back)
+ * - pageFrom = pageTo->pageFrom.tl_hofff_page_translation.pageTo (there is a link back)
  *
  * @author Oliver Hoff <oliver@hofff.com>
  */
@@ -49,7 +49,7 @@ SELECT		rel.pageFrom,
 			rootPageTo.id			AS rootPageTo,
 			refl.pageTo IS NOT NULL	AS isPrimary
 
-FROM 		tl_cca_lr_relation		AS rel
+FROM 		tl_hofff_page_translation		AS rel
 
 JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
 JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
@@ -59,7 +59,7 @@ JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 														AND rootPageTo.id != rootPageFrom.id
 														AND rootPageTo.cca_lr_group = rootPageFrom.cca_lr_group
 
-LEFT JOIN	tl_cca_lr_relation		AS refl				ON refl.pageFrom = rel.pageTo
+LEFT JOIN	tl_hofff_page_translation		AS refl				ON refl.pageFrom = rel.pageTo
 														AND refl.pageTo = rel.pageFrom
 
 WHERE		rel.pageFrom IN ($wildcards)
@@ -96,7 +96,7 @@ SQL;
 
 SELECT		rel.pageFrom
 
-FROM 		tl_cca_lr_relation		AS rel
+FROM 		tl_hofff_page_translation		AS rel
 
 JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
 JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
@@ -147,7 +147,7 @@ JOIN		tl_page					AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
 LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.cca_lr_group = rootPageFrom.cca_lr_group
 														AND groupRoots.id != rootPageFrom.id
 LEFT JOIN	(
-			tl_cca_lr_relation		AS rel
+			tl_hofff_page_translation		AS rel
 	JOIN	tl_page					AS pageTo			ON pageTo.id = rel.pageTo
 	JOIN	tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
 )														ON rel.pageFrom = pageFrom.id
@@ -195,7 +195,7 @@ JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
 JOIN		tl_page				AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
 													AND pageFrom.id != rootPageFrom.id
 
-JOIN		tl_cca_lr_relation	AS rel				ON rel.pageFrom = pageFrom.id
+JOIN		tl_hofff_page_translation	AS rel				ON rel.pageFrom = pageFrom.id
 
 JOIN		tl_page				AS pageTo			ON pageTo.id = rel.pageTo
 JOIN		tl_page				AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
@@ -232,7 +232,7 @@ SQL;
 			return 0;
 		}
 
-		$sql = 'INSERT INTO tl_cca_lr_relation (pageFrom, pageTo) VALUES ' . self::wildcards($pagesTo, '(?,?)');
+		$sql = 'INSERT INTO tl_hofff_page_translation (pageFrom, pageTo) VALUES ' . self::wildcards($pagesTo, '(?,?)');
 		$params = [];
 		foreach($pagesTo as $pageTo) {
 			$params[] = $pageFrom;
@@ -260,17 +260,17 @@ SQL;
 
 		$sql = <<<SQL
 
-INSERT INTO	tl_cca_lr_relation
+INSERT INTO	tl_hofff_page_translation
 			(pageFrom, pageTo)
 
 SELECT		rel.pageTo, rel.pageFrom
 
-FROM		tl_cca_lr_relation	AS rel
+FROM		tl_hofff_page_translation	AS rel
 JOIN		tl_page				AS pageFrom			ON pageFrom.id = rel.pageFrom
 JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
 
 LEFT JOIN	(
-			tl_cca_lr_relation	AS refl
+			tl_hofff_page_translation	AS refl
 	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
 	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
 )													ON refl.pageFrom = rel.pageTo
@@ -301,20 +301,20 @@ SQL;
 
 		$sql = <<<SQL
 
-INSERT INTO	tl_cca_lr_relation
+INSERT INTO	tl_hofff_page_translation
 			(pageFrom, pageTo)
 
 SELECT		rel.pageTo, inter.pageTo
 
-FROM		tl_cca_lr_relation	AS rel
-JOIN		tl_cca_lr_relation	AS inter			ON inter.pageFrom = rel.pageFrom
+FROM		tl_hofff_page_translation	AS rel
+JOIN		tl_hofff_page_translation	AS inter			ON inter.pageFrom = rel.pageFrom
 													AND inter.pageTo != rel.pageTo
 
 JOIN		tl_page				AS interPageTo		ON interPageTo.id = inter.pageTo
 JOIN		tl_page				AS interRootPageTo	ON interRootPageTo.id = interPageTo.hofff_root_page_id
 
 LEFT JOIN	(
-			tl_cca_lr_relation	AS refl
+			tl_hofff_page_translation	AS refl
 	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
 	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
 )													ON refl.pageFrom = rel.pageTo
@@ -340,7 +340,7 @@ SQL;
 			return 0;
 		}
 
-		$sql = 'DELETE FROM tl_cca_lr_relation WHERE pageFrom IN (' . self::wildcards($pages) . ')';
+		$sql = 'DELETE FROM tl_hofff_page_translation WHERE pageFrom IN (' . self::wildcards($pages) . ')';
 		$result = self::query($sql, $pages);
 
 		return $result->affectedRows;
@@ -364,7 +364,7 @@ SQL;
 
 DELETE		rel
 
-FROM		tl_cca_lr_relation	AS rel
+FROM		tl_hofff_page_translation	AS rel
 JOIN		tl_page				AS relPageTo		ON relPageTo.id = rel.pageTo
 JOIN		tl_page				AS page				ON page.hofff_root_page_id = relPageTo.hofff_root_page_id
 

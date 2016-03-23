@@ -7,7 +7,7 @@
 -- *                                                        *
 -- **********************************************************
 
-CREATE TABLE `tl_cca_lr_relation` (
+CREATE TABLE `tl_hofff_page_translation` (
 
   `pageFrom` int(10) unsigned NOT NULL,
   `pageTo` int(10) unsigned NOT NULL,
