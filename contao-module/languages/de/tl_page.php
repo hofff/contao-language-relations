@@ -15,6 +15,17 @@ $GLOBALS['TL_LANG']['tl_page']['hofff_makePrimary']
 $GLOBALS['TL_LANG']['tl_page']['hofff_isPrimary']
 	= 'Dies ist die primäre Beziehung';
 
+$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_no_translation_group'] = <<<EOT
+Diese Seite wird nicht übersetzt, da der Seitenbaum dieser Seite keiner
+Übersetzungsgruppe zugeordnet ist.
+EOT;
+$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_no_translated_root_pages'] = <<<EOT
+Diese Seite wird nicht übersetzt, da es keine Seitenbäume anderer Sprachen in
+der Übersetzungsgruppe dieses Seitenbaums gibt.
+EOT;
+$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_manage_translation_groups']
+	= 'Übersetzungsgruppen verwalten';
+
 $GLOBALS['TL_LANG']['tl_page']['hofff_errMultipleRelationsPerRoot']
 	= 'Es darf je Startpunkt nur eine Referenz ausgewählt werden.';
 $GLOBALS['TL_LANG']['tl_page']['hofff_errUngroupedRelations']
