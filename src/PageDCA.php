@@ -89,9 +89,9 @@ class PageDCA {
 	 * @return array<integer>
 	 */
 	public function loadRelations($value, $dc) {
-		$sql = 'SELECT pageTo FROM tl_hofff_page_translation WHERE pageFrom = ?';
+		$sql = 'SELECT translated_page_id FROM tl_hofff_page_translation WHERE page_id = ?';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id);
-		return $result->fetchEach('pageTo');
+		return $result->fetchEach('translated_page_id');
 	}
 
 	/**
@@ -181,7 +181,7 @@ SQL;
 			$relations = LanguageRelations::getRelations($original->id);
 
 			$wildcards = rtrim(str_repeat('(?,?),', count($relations) + 1), ',');
-			$sql = 'INSERT INTO tl_hofff_page_translation (pageFrom, pageTo) VALUES ' . $wildcards;
+			$sql = 'INSERT INTO tl_hofff_page_translation (page_id, translated_page_id) VALUES ' . $wildcards;
 
 			$params = [];
 			$params[] = $copy->id;

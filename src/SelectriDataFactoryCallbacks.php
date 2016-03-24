@@ -37,12 +37,12 @@ class SelectriDataFactoryCallbacks {
 	/**
 	 * @var integer
 	 */
-	private $pageTo;
+	private $translatedPage;
 
 	/**
 	 * @var array<integer, integer>
 	 */
-	private $relatedToPageTo;
+	private $translatedPageOf;
 
 	/**
 	 */
@@ -159,16 +159,16 @@ SQL;
 	}
 
 	/**
-	 * @param integer $pageFrom
-	 * @param integer $pageTo
+	 * @param integer $page
+	 * @param integer $translatedPage
 	 * @return boolean
 	 */
-	protected function isRelated($pageFrom, $pageTo) {
-		if($pageTo != $this->pageTo) {
-			$this->pageTo = $pageTo;
-			$this->relatedToPageTo = LanguageRelations::getPagesRelatedTo($pageTo);
+	protected function isRelated($page, $translatedPage) {
+		if($translatedPage != $this->translatedPage) {
+			$this->translatedPage = $translatedPage;
+			$this->translatedPageOf = LanguageRelations::getPagesRelatedTo($translatedPage);
 		}
-		return isset($this->relatedToPageTo[$pageFrom]);
+		return isset($this->translatedPageOf[$page]);
 	}
 
 }

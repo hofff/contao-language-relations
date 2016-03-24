@@ -4,17 +4,17 @@ namespace Hofff\Contao\LanguageRelations;
 
 /**
  * A relation in tl_hofff_page_translation is valid, if:
- * - pageFrom != pageTo (non identity)
- * - pageFrom->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
- * 		= pageTo->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
+ * - page_id != translated_page_id (non identity)
+ * - page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
+ * 		= translated_page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
  * (the root pages belong to the same translation group)
- * - pageFrom->id.tl_page.hofff_root_page_id
- * 		!= pageTo->id.tl_page.hofff_root_page_id
+ * - page_id->id.tl_page.hofff_root_page_id
+ * 		!= translated_page_id->id.tl_page.hofff_root_page_id
  * (the root pages are not the same)
  *
  * A relation is primary, if:
  * - it is valid
- * - pageFrom = pageTo->pageFrom.tl_hofff_page_translation.pageTo (there is a link back)
+ * - page_id = translated_page_id->page_id.tl_hofff_page_translation.translated_page_id (there is a link back)
  *
  * @author Oliver Hoff <oliver@hofff.com>
  */
@@ -43,37 +43,27 @@ class LanguageRelations {
 
 		$wildcards = self::wildcards($ids);
 		$sql = <<<SQL
-
-SELECT		rel.pageFrom,
-			rel.pageTo,
-			rootPageTo.id			AS rootPageTo,
-			refl.pageTo IS NOT NULL	AS isPrimary
-
-FROM 		tl_hofff_page_translation		AS rel
-
-JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
-
-JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
-														AND rootPageTo.id != rootPageFrom.id
-														AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
-
-LEFT JOIN	tl_hofff_page_translation		AS refl				ON refl.pageFrom = rel.pageTo
-														AND refl.pageTo = rel.pageFrom
-
-WHERE		rel.pageFrom IN ($wildcards)
-
-GROUP BY	rel.pageFrom, rootPageTo.id
-HAVING		COUNT(rel.pageTo) = 1
-
+SELECT
+	page_id						AS page_id,
+	MAX(translated_page_id)		AS translated_page_id,
+	translated_root_page_id		AS translated_root_page_id,
+	MAX(is_primary)				AS is_primary
+FROM
+	hofff_page_translation_valid
+WHERE
+	page_id IN ($wildcards)
+GROUP BY
+	page_id,
+	translated_root_page_id
+HAVING
+	COUNT(translated_page_id) = 1
 SQL;
 		$result = self::query($sql, $ids);
 
 		$relations = array_fill_keys((array) $pages, []);
 
-		while($result->next()) if(!$primary || $result->isPrimary) {
-			$relations[$result->pageFrom][$result->rootPageTo] = $result->pageTo;
+		while($result->next()) if(!$primary || $result->is_primary) {
+			$relations[$result->page_id][$result->translated_root_page_id] = $result->translated_page_id;
 		}
 
 		return is_array($pages) ? $relations : $relations[$pages];
@@ -93,27 +83,18 @@ SQL;
 		}
 
 		$sql = <<<SQL
-
-SELECT		rel.pageFrom
-
-FROM 		tl_hofff_page_translation		AS rel
-
-JOIN		tl_page					AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
-
-JOIN		tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
-														AND rootPageTo.id != rootPageFrom.id
-														AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
-
-WHERE		rel.pageTo = ?
-
+SELECT
+	page_id
+FROM
+	hofff_page_translation_valid
+WHERE
+	translated_page_id = ?
 SQL;
 		$result = self::query($sql, [ $page ]);
 
 		$related = [];
 		while($result->next()) {
-			$related[$result->pageFrom] = $result->pageFrom;
+			$related[$result->page_id] = $result->page_id;
 		}
 
 		return $related;
@@ -135,35 +116,46 @@ SQL;
 		}
 
 		$sql = <<<SQL
-
-SELECT		pageFrom.id				AS pageFrom
-
-FROM 		tl_page					AS page
-
-JOIN		tl_page					AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
-JOIN		tl_page					AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
-														AND pageFrom.id != rootPageFrom.id
-
-LEFT JOIN	tl_page					AS groupRoots		ON groupRoots.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
-														AND groupRoots.id != rootPageFrom.id
-LEFT JOIN	(
-			tl_hofff_page_translation		AS rel
-	JOIN	tl_page					AS pageTo			ON pageTo.id = rel.pageTo
-	JOIN	tl_page					AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
-)														ON rel.pageFrom = pageFrom.id
-														AND rootPageTo.id = groupRoots.id
-
-WHERE		page.id = ?
-AND			rel.pageTo IS NULL
-
-GROUP BY	pageFrom.id
-
+SELECT
+	page.id						AS page_id,
+	group_root_page.id			AS missing_root_page_id,
+	group_root_page.language	AS missing_root_page_language
+FROM
+	tl_page
+	AS root_page
+JOIN
+	tl_page
+	AS page
+	ON page.hofff_root_page_id = root_page.id
+	AND page.id != root_page.id
+LEFT JOIN
+	tl_page
+	AS group_root_page
+	ON group_root_page.hofff_translation_group_id = root_page.hofff_translation_group_id
+	AND group_root_page.id != root_page.id
+	AND group_root_page.type = 'root'
+LEFT JOIN
+	hofff_page_translation_valid
+	AS translation
+	ON translation.page_id = page.id
+	AND translation.translated_root_page_id = group_root_page.id
+WHERE
+	root_page.id IN (
+		SELECT
+			page_1.hofff_root_page_id
+		FROM
+			tl_page
+			AS page_1
+		WHERE
+			page_1.id = ?
+	)
+	AND translation.page_id IS NULL
 SQL;
 		$result = self::query($sql, [ $page ]);
 
 		$incompletenesses = [];
 		while($result->next()) {
-			$incompletenesses[$result->pageFrom] = $result->pageFrom;
+			$incompletenesses[$result->page_id] = $result->page_id;
 		}
 
 		return $incompletenesses;
@@ -186,33 +178,33 @@ SQL;
 		}
 
 		$sql = <<<SQL
-
-SELECT		DISTINCT pageFrom.id AS pageFrom
-
-FROM 		tl_page				AS page
-
-JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = page.hofff_root_page_id
-JOIN		tl_page				AS pageFrom			ON pageFrom.hofff_root_page_id = rootPageFrom.id
-													AND pageFrom.id != rootPageFrom.id
-
-JOIN		tl_hofff_page_translation	AS rel				ON rel.pageFrom = pageFrom.id
-
-JOIN		tl_page				AS pageTo			ON pageTo.id = rel.pageTo
-JOIN		tl_page				AS rootPageTo		ON rootPageTo.id = pageTo.hofff_root_page_id
-													AND rootPageTo.id != rootPageFrom.id
-													AND rootPageTo.hofff_translation_group_id = rootPageFrom.hofff_translation_group_id
-
-WHERE		page.id = ?
-
-GROUP BY	pageFrom.id, rootPageTo.id
-HAVING		COUNT(pageFrom.id) > 1
-
+SELECT DISTINCT
+	translation.page_id		AS page_id
+FROM
+	hofff_page_translation_valid
+	AS translation
+WHERE
+	translation.root_page_id IN (
+		SELECT
+			page_1.hofff_root_page_id
+		FROM
+			tl_page
+			AS page_1
+		WHERE
+			page_1.id = ?
+	)
+	AND translation.page_id != translation.root_page_id
+GROUP BY
+	translation.page_id,
+	translation.translated_root_page_id
+HAVING
+	COUNT(translation.page_id) > 1
 SQL;
 		$result = self::query($sql, [ $page ]);
 
 		$ambiguities = [];
 		while($result->next()) {
-			$ambiguities[$result->pageFrom] = $result->pageFrom;
+			$ambiguities[$result->page_id] = $result->page_id;
 		}
 
 		return $ambiguities;
@@ -221,22 +213,22 @@ SQL;
 	/**
 	 * Creates relations from the given page to the given pages.
 	 *
-	 * CARE: Does not check the validity of the origin relations!
+	 * CARE: Does not check the validity of the given relations!
 	 *
-	 * @param integer $pageFrom
-	 * @param integer|array<integer> $pagesTo
+	 * @param integer $page
+	 * @param integer|array<integer> $translatedPages
 	 * @return integer The number of created relations
 	 */
-	public static function createRelations($pageFrom, $pagesTo) {
-		if($pageFrom < 1 || !$pagesTo = self::ids($pagesTo)) {
+	public static function createRelations($page, $translatedPages) {
+		if($page < 1 || !$translatedPages = self::ids($translatedPages)) {
 			return 0;
 		}
 
-		$sql = 'INSERT INTO tl_hofff_page_translation (pageFrom, pageTo) VALUES ' . self::wildcards($pagesTo, '(?,?)');
+		$sql = 'INSERT INTO tl_hofff_page_translation (page_id, translated_page_id) VALUES ' . self::wildcards($translatedPages, '(?,?)');
 		$params = [];
-		foreach($pagesTo as $pageTo) {
-			$params[] = $pageFrom;
-			$params[] = $pageTo;
+		foreach($translatedPages as $translatedPage) {
+			$params[] = $page;
+			$params[] = $translatedPage;
 		}
 		$result = self::query($sql, $params);
 
@@ -245,10 +237,8 @@ SQL;
 
 	/**
 	 * Create relations between the pages that the given page is related to and
-	 * the given page itself, if none exists for them in the given page'
-	 * language already.
-	 *
-	 * CARE: Does not check the validity of the origin relations!
+	 * the given page itself, if none exists for them in the given page's root
+	 * page tree already.
 	 *
 	 * @param integer $page
 	 * @return integer
@@ -259,26 +249,23 @@ SQL;
 		}
 
 		$sql = <<<SQL
-
-INSERT INTO	tl_hofff_page_translation
-			(pageFrom, pageTo)
-
-SELECT		rel.pageTo, rel.pageFrom
-
-FROM		tl_hofff_page_translation	AS rel
-JOIN		tl_page				AS pageFrom			ON pageFrom.id = rel.pageFrom
-JOIN		tl_page				AS rootPageFrom		ON rootPageFrom.id = pageFrom.hofff_root_page_id
-
-LEFT JOIN	(
-			tl_hofff_page_translation	AS refl
-	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
-	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
-)													ON refl.pageFrom = rel.pageTo
-													AND reflRootPageTo.id = rootPageFrom.id
-
-WHERE		rel.pageFrom = ?
-AND			refl.pageTo IS NULL
-
+INSERT INTO
+	tl_hofff_page_translation
+	(page_id, translated_page_id)
+SELECT
+	translation.translated_page_id,
+	translation.page_id
+FROM
+	hofff_page_translation_valid
+	AS translation
+LEFT JOIN
+	hofff_page_translation_valid
+	AS reflected_translation
+	ON reflected_translation.page_id = translation.translated_page_id
+	AND reflected_translation.translated_root_page_id = translation.root_page_id
+WHERE
+	translation.page_id = ?
+	AND reflected_translation.page_id IS NULL
 SQL;
 		$result = self::query($sql, [ $page ]);
 
@@ -289,8 +276,6 @@ SQL;
 	 * Create relations between the pages that the given page is related to and
 	 * themselfs, if none exists for them in their respective languages already.
 	 *
-	 * CARE: Does not check the validity of the origin relations!
-	 *
 	 * @param integer $page
 	 * @return integer
 	 */
@@ -300,29 +285,28 @@ SQL;
 		}
 
 		$sql = <<<SQL
-
-INSERT INTO	tl_hofff_page_translation
-			(pageFrom, pageTo)
-
-SELECT		rel.pageTo, inter.pageTo
-
-FROM		tl_hofff_page_translation	AS rel
-JOIN		tl_hofff_page_translation	AS inter			ON inter.pageFrom = rel.pageFrom
-													AND inter.pageTo != rel.pageTo
-
-JOIN		tl_page				AS interPageTo		ON interPageTo.id = inter.pageTo
-JOIN		tl_page				AS interRootPageTo	ON interRootPageTo.id = interPageTo.hofff_root_page_id
-
-LEFT JOIN	(
-			tl_hofff_page_translation	AS refl
-	JOIN	tl_page				AS reflPageTo		ON reflPageTo.id = refl.pageTo
-	JOIN	tl_page				AS reflRootPageTo	ON reflRootPageTo.id = reflPageTo.hofff_root_page_id
-)													ON refl.pageFrom = rel.pageTo
-													AND reflRootPageTo.id = interRootPageTo.id
-
-WHERE		rel.pageFrom = ?
-AND			refl.pageFrom IS NULL
-
+INSERT INTO
+	tl_hofff_page_translation
+	(page_id, translated_page_id)
+SELECT
+	left_translation.translated_page_id,
+	right_translation.translated_page_id
+FROM
+	hofff_page_translation_valid
+	AS left_translation
+JOIN
+	hofff_page_translation_valid
+	AS right_translation
+	ON right_translation.page_id = left_translation.page_id
+	AND right_translation.translated_page_id != left_translation.translated_page_id
+LEFT JOIN
+	hofff_page_translation_valid
+	AS reflected_translation
+	ON reflected_translation.page_id = left_translation.translated_page_id
+	AND reflected_translation.translated_root_page_id = right_translation.translated_root_page_id
+WHERE
+	reflected_translation.page_id IS NULL
+	AND left_translation.page_id = ?
 SQL;
 		$result = self::query($sql, [ $page ]);
 
@@ -340,7 +324,7 @@ SQL;
 			return 0;
 		}
 
-		$sql = 'DELETE FROM tl_hofff_page_translation WHERE pageFrom IN (' . self::wildcards($pages) . ')';
+		$sql = 'DELETE FROM tl_hofff_page_translation WHERE page_id IN (' . self::wildcards($pages) . ')';
 		$result = self::query($sql, $pages);
 
 		return $result->affectedRows;
@@ -361,16 +345,26 @@ SQL;
 
 		$wildcards = self::wildcards($pages);
 		$sql = <<<SQL
-
-DELETE		rel
-
-FROM		tl_hofff_page_translation	AS rel
-JOIN		tl_page				AS relPageTo		ON relPageTo.id = rel.pageTo
-JOIN		tl_page				AS page				ON page.hofff_root_page_id = relPageTo.hofff_root_page_id
-
-WHERE		rel.pageFrom IN ($wildcards)
-AND			page.id = ?
-
+DELETE
+	translation
+FROM
+	tl_hofff_page_translation
+	AS translation
+JOIN
+	tl_page
+	AS translated_page
+	ON translated_page.id = translation.translated_page_id
+WHERE
+	translation.page_id IN ($wildcards)
+	AND translated_page.hofff_root_page_id IN (
+		SELECT
+			page_1.hofff_root_page_id
+		FROM
+			tl_page
+			AS page_1
+		WHERE
+			page_1.id = ?
+	)
 SQL;
 		$params = $pages;
 		$params[] = $root;

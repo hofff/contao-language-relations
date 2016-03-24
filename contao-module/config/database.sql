@@ -9,10 +9,10 @@
 
 CREATE TABLE `tl_hofff_page_translation` (
 
-  `pageFrom` int(10) unsigned NOT NULL,
-  `pageTo` int(10) unsigned NOT NULL,
+  `page_id` int(10) unsigned NOT NULL,
+  `translated_page_id` int(10) unsigned NOT NULL,
 
-  PRIMARY KEY  (`pageFrom`, `pageTo`),
-  KEY `pageTo_ix` (`pageTo`),
+  PRIMARY KEY  (`page_id`, `translated_page_id`),
+  KEY `translated_page_id` (`translated_page_id`),
 
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

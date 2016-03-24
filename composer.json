@@ -33,7 +33,8 @@
 				"contao-module": "system/modules/hofff_language_relations"
 			},
 			"runonce": [
-				"runonce/01_renameDatabaseResources.php"
+				"runonce/01_renameDatabaseResources.php",
+				"runonce/createViews.php"
 			]
 		}
 	}
