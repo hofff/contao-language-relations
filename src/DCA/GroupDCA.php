@@ -1,6 +1,9 @@
 <?php
 
-namespace Hofff\Contao\LanguageRelations;
+namespace Hofff\Contao\LanguageRelations\DCA;
+
+use Hofff\Contao\LanguageRelations\LanguageRelations;
+use Hofff\Contao\LanguageRelations\Util\EnvironmentProxy;
 
 /**
  * @author Oliver Hoff <oliver@hofff.com>
@@ -31,7 +34,7 @@ class GroupDCA {
 		$$key = EnvironmentProxy::getCacheValue($key);
 		EnvironmentProxy::setCacheValue($key, true);
 
-		$return = $dc->editAll(\Input::get('hofff_page_id'));
+		$return = $dc->editAll(\Input::get('hofff_language_relations_id'));
 
 		// this would never be reached, but we clean up the env
 		EnvironmentProxy::setCacheValue($key, $$key);
@@ -43,7 +46,7 @@ class GroupDCA {
 	 * @return void
 	 */
 	public function keyEditRelations() {
-		$fields = [ 'hofff_language_relations_info', 'hofff_page_translations' ];
+		$fields = [ 'hofff_language_relations_info', 'hofff_language_relations' ];
 		$roots = (array) $_GET['roots'];
 		$roots = array_map('intval', $roots);
 		$roots = array_filter($roots, function($root) { return $root >= 1; });
@@ -52,12 +55,12 @@ class GroupDCA {
 		switch($_GET['filter']) {
 			case 'incomplete':
 				$ids = LanguageRelations::getIncompleteRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noIncompleteRelations'];
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noIncompleteRelations'];
 				break;
 
 			case 'ambiguous':
 				$ids = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noAmbiguousRelations'];
+				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noAmbiguousRelations'];
 				break;
 
 			default:
@@ -71,7 +74,7 @@ class GroupDCA {
 		}
 
 		if(!$ids) {
-			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_translation_group']['noPagesToEdit']);
+			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
 			\Controller::redirect(\System::getReferer());
 			return;
 		}
@@ -81,7 +84,7 @@ class GroupDCA {
 		$session['CURRENT']['tl_page'] = $fields;
 		\Session::getInstance()->setData($session);
 
-		\Controller::redirect('contao/main.php?do=hofff_translation_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
+		\Controller::redirect('contao/main.php?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
 	}
 
 	/**
@@ -102,7 +105,7 @@ class GroupDCA {
 	 * @return string
 	 */
 	public function labelGroup($row, $label) {
-		$sql = 'SELECT * FROM tl_page WHERE hofff_translation_group_id = ? ORDER BY title';
+		$sql = 'SELECT * FROM tl_page WHERE hofff_language_relations_group_id = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($row['id']);
 
 		$groupRoots = [];
@@ -113,7 +116,7 @@ class GroupDCA {
 			$groupRoots[] = $row;
 		}
 
-		$tpl = new \BackendTemplate('hofff_groupRoots');
+		$tpl = new \BackendTemplate('hofff_language_relations_group_roots');
 		$tpl->groupRoots = $groupRoots;
 
 		return $tpl->parse();
@@ -124,29 +127,39 @@ class GroupDCA {
 	 */
 	public function getRootsOptions() {
 		$sql = <<<SQL
-SELECT		page.id,
-			page.title,
-			page.language,
-			grp.id				AS grpID,
-			grp.title			AS grpTitle
-
-FROM		tl_page				AS page
-LEFT JOIN	tl_hofff_translation_group		AS grp			ON grp.id = page.hofff_translation_group_id
-
-WHERE		page.type = ?
-
-ORDER BY	grp.title IS NOT NULL,
-			grp.title,
-			page.title
+SELECT
+	page.id			AS page_id,
+	page.title		AS page_title,
+	page.language	AS page_language,
+	grp.id			AS group_id,
+	grp.title		AS group_title
+FROM
+	tl_page
+	AS page
+LEFT JOIN
+	tl_hofff_language_relations_group
+	AS grp
+	ON grp.id = page.hofff_language_relations_group_id
+WHERE
+	page.type = ?
+ORDER BY
+	grp.title IS NOT NULL,
+	grp.title,
+	page.title
 SQL;
 		$result = \Database::getInstance()->prepare($sql)->executeUncached('root');
 
 		$options = [];
 		while($result->next()) {
-			$groupTitle = $result->grpID
-				? $result->grpTitle . ' (ID ' . $result->grpID . ')'
-				: $GLOBALS['TL_LANG']['tl_hofff_translation_group']['notGrouped'];
-			$options[$groupTitle][$result->id] = $result->title . ' [' . $result->language . ']';
+			$groupTitle = $result->group_id
+				? sprintf('%s (ID %s)', $result->group_title, $result->group_id)
+				: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['notGrouped'];
+			$options[$groupTitle][$result->page_id] = sprintf(
+				'%s [%s] (ID %s)',
+				$result->page_title,
+				$result->page_language,
+				$result->page_id
+			);
 		}
 
 		return $options;
@@ -158,13 +171,13 @@ SQL;
 	 */
 	public function onsubmitGroup($dc) {
 		if(isset($this->roots[$dc->id])) {
-			$sql = 'UPDATE tl_page SET hofff_translation_group_id = NULL WHERE hofff_translation_group_id = ?';
+			$sql = 'UPDATE tl_page SET hofff_language_relations_group_id = NULL WHERE hofff_language_relations_group_id = ?';
 			\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
 
 			$roots = deserialize($this->roots[$dc->id], true);
 			if($roots) {
 				$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
-				$sql = 'UPDATE tl_page SET hofff_translation_group_id = ? WHERE id IN (' . $wildcards . ')';
+				$sql = 'UPDATE tl_page SET hofff_language_relations_group_id = ? WHERE id IN (' . $wildcards . ')';
 				array_unshift($roots, $dc->id);
 				\Database::getInstance()->prepare($sql)->executeUncached($roots);
 			}
@@ -177,7 +190,7 @@ SQL;
 	 * @return array<integer>
 	 */
 	public function loadRoots($value, $dc) {
-		$sql = 'SELECT id FROM tl_page WHERE hofff_translation_group_id = ? AND type = ? ORDER BY title';
+		$sql = 'SELECT id FROM tl_page WHERE hofff_language_relations_group_id = ? AND type = ? ORDER BY title';
 		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id, 'root');
 		return $result->fetchEach('id');
 	}

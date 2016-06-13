@@ -34,7 +34,7 @@
 			},
 			"runonce": [
 				"runonce/01_renameDatabaseResources.php",
-				"runonce/createViews.php"
+				"runonce/dropViews.php"
 			]
 		}
 	}

@@ -1,18 +1,39 @@
 <?php
 
-use Hofff\Contao\LanguageRelations\PageDCA;
-use Hofff\Contao\LanguageRelations\SelectriDataFactoryCallbacks;
+use Hofff\Contao\LanguageRelations\DCA\PageDCA;
+use Hofff\Contao\LanguageRelations\DCA\RelationsDCABuilder;
+use Hofff\Contao\LanguageRelations\DCA\RelationsDCABuilderConfig;
+use Hofff\Contao\LanguageRelations\Relations;
+use Hofff\Contao\Selectri\Util\Icons;
 
-$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'][]
-	= [ PageDCA::class, 'onsubmitPage' ];
+call_user_func(function() {
+	list($callback, $columns) = Icons::getTableIconCallback('tl_page');
+	Icons::setTableIconCallback('hofff_language_relations_page_tree', $callback, $columns);
+
+	$relations = new Relations(
+		'tl_hofff_language_relations_page',
+		'hofff_language_relations_page_item',
+		'hofff_language_relations_page_relation'
+	);
+
+	$config = new RelationsDCABuilderConfig;
+	$config->setRelations($relations);
+	$config->setAggregateFieldName('hofff_root_page_id');
+	$config->setAggregateView('hofff_language_relations_page_aggregate');
+	$config->setTreeView('hofff_language_relations_page_tree');
+
+	$builder = new RelationsDCABuilder($config);
+	$builder->build($GLOBALS['TL_DCA']['tl_page']);
+});
+
 $GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][]
-	= [ PageDCA::class, 'oncopyPage' ];
+	= [ PageDCA::class, 'oncopyCallback' ];
 
 /*
  * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module
  * https://github.com/hofff/contao-language-relations/issues/2
  */
-if($_GET['do'] == 'hofff_translation_group') {
+if($_GET['do'] == 'hofff_language_relations_group') {
 	$onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
 	foreach($onsubmit as $i => list($class, $method)) {
 		if($class == 'tl_page' && $method == 'updateSitemap') {
@@ -23,35 +44,13 @@ if($_GET['do'] == 'hofff_translation_group') {
 	unset($onsubmit);
 }
 
-$GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['hofff_translation_group_id']
+$GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['hofff_language_relations_group_id']
 	= 'index';
-$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_translation_group_id']['sql']
+$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_group_id']['sql']
 	= 'int(10) unsigned NOT NULL default \'0\'';
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_info'] = [
 	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_info'],
 	'exclude'				=> true,
-	'input_field_callback'	=> [ PageDCA::class, 'inputFieldPageInfo' ],
-];
-
-$GLOBALS['TL_DCA']['tl_page']['fields']['hofff_page_translations'] = [
-	'label'					=> &$GLOBALS['TL_LANG']['tl_page']['hofff_page_translations'],
-	'exclude'				=> true,
-	'inputType'				=> 'selectri',
-	'eval'					=> [
-		'doNotSaveEmpty'		=> true,
-		'min'					=> 0,
-		'max'					=> PHP_INT_MAX,
-		'sort'					=> false,
-		'canonical'				=> true,
-		'class'					=> 'hofff-relations',
-		'data'					=> [ SelectriDataFactoryCallbacks::getInstance(), 'getFactory' ],
-	],
-	'input_field_callback'	=> [ SelectriDataFactoryCallbacks::class, 'inputFieldCallback' ],
-	'load_callback'			=> [
-		[ PageDCA::class, 'loadRelations' ],
-	],
-	'save_callback'			=> [
-		[ PageDCA::class, 'saveRelations' ],
-	],
+	'input_field_callback'	=> [ PageDCA::class, 'inputFieldCallbackPageInfo' ],
 ];

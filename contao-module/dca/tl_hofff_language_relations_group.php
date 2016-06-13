@@ -1,8 +1,8 @@
 <?php
 
-use Hofff\Contao\LanguageRelations\GroupDCA;
+use Hofff\Contao\LanguageRelations\DCA\GroupDCA;
 
-$GLOBALS['TL_DCA']['tl_hofff_translation_group'] = [
+$GLOBALS['TL_DCA']['tl_hofff_language_relations_group'] = [
 
 	'config' => [
 		'dataContainer'		=> 'Table',
@@ -34,12 +34,12 @@ $GLOBALS['TL_DCA']['tl_hofff_translation_group'] = [
 		],
 		'operations' => [
 			'edit' => [
-				'label'			=> &$GLOBALS['TL_LANG']['tl_hofff_translation_group']['edit'],
+				'label'			=> &$GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['edit'],
 				'href'			=> 'act=edit',
 				'icon'			=> 'edit.gif',
 			],
 			'delete' => [
-				'label'			=> &$GLOBALS['TL_LANG']['tl_hofff_translation_group']['delete'],
+				'label'			=> &$GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['delete'],
 				'href'			=> 'act=delete',
 				'icon'			=> 'delete.gif',
 				'attributes'	=> 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\')) return false; Backend.getScrollOffset();"',
@@ -64,7 +64,7 @@ $GLOBALS['TL_DCA']['tl_hofff_translation_group'] = [
 			'sql'				=> 'int(10) unsigned NOT NULL default \'0\'',
 		],
 		'title' => [
-			'label'				=> &$GLOBALS['TL_LANG']['tl_hofff_translation_group']['title'],
+			'label'				=> &$GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['title'],
 			'exclude'			=> true,
 			'search'			=> true,
 			'inputType'			=> 'text',
@@ -76,7 +76,7 @@ $GLOBALS['TL_DCA']['tl_hofff_translation_group'] = [
 			'sql'				=> 'varchar(255) NOT NULL default \'\'',
 		],
 		'roots' => [
-			'label'				=> &$GLOBALS['TL_LANG']['tl_hofff_translation_group']['roots'],
+			'label'				=> &$GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['roots'],
 			'exclude'			=> true,
 			'inputType'			=> 'select',
 			'options_callback'	=> [ GroupDCA::class, 'getRootsOptions' ],

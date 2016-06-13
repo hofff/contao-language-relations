@@ -3,10 +3,10 @@
 namespace Hofff\Contao\LanguageRelations;
 
 /**
- * A relation in tl_hofff_page_translation is valid, if:
+ * A relation in tl_hofff_language_relations_page is valid, if:
  * - page_id != translated_page_id (non identity)
- * - page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
- * 		= translated_page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_translation_group_id
+ * - page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_language_relations_group_id
+ * 		= translated_page_id->id.tl_page.hofff_root_page_id->id.tl_page.hofff_language_relations_group_id
  * (the root pages belong to the same translation group)
  * - page_id->id.tl_page.hofff_root_page_id
  * 		!= translated_page_id->id.tl_page.hofff_root_page_id
@@ -14,11 +14,29 @@ namespace Hofff\Contao\LanguageRelations;
  *
  * A relation is primary, if:
  * - it is valid
- * - page_id = translated_page_id->page_id.tl_hofff_page_translation.translated_page_id (there is a link back)
+ * - page_id = translated_page_id->page_id.tl_hofff_language_relations_page.translated_page_id (there is a link back)
  *
  * @author Oliver Hoff <oliver@hofff.com>
+ * @deprecated
  */
 class LanguageRelations {
+
+	/**
+	 * @var Relations
+	 */
+	private static $relations;
+
+	/**
+	 * @return Relations
+	 */
+	private static function getRelationsInstance() {
+		isset(self::$relations) || self::$relations = new Relations(
+			'tl_hofff_language_relations_page',
+			'hofff_language_relations_page_item',
+			'hofff_language_relations_page_relation'
+		);
+		return self::$relations;
+	}
 
 	/**
 	 * Get the valid and non-ambiguous relations for each given page ID.
@@ -37,36 +55,7 @@ class LanguageRelations {
 	 * @return array<integer, integer>|array<integer, array<integer, integer>>
 	 */
 	public static function getRelations($pages, $primary = false) {
-		if(!$ids = self::ids($pages)) {
-			return is_array($pages) ? array_fill_keys($pages, []) : [];
-		}
-
-		$wildcards = self::wildcards($ids);
-		$sql = <<<SQL
-SELECT
-	page_id						AS page_id,
-	MAX(translated_page_id)		AS translated_page_id,
-	translated_root_page_id		AS translated_root_page_id,
-	MAX(is_primary)				AS is_primary
-FROM
-	hofff_page_translation_valid
-WHERE
-	page_id IN ($wildcards)
-GROUP BY
-	page_id,
-	translated_root_page_id
-HAVING
-	COUNT(translated_page_id) = 1
-SQL;
-		$result = self::query($sql, $ids);
-
-		$relations = array_fill_keys((array) $pages, []);
-
-		while($result->next()) if(!$primary || $result->is_primary) {
-			$relations[$result->page_id][$result->translated_root_page_id] = $result->translated_page_id;
-		}
-
-		return is_array($pages) ? $relations : $relations[$pages];
+		return self::getRelationsInstance()->getRelations($pages, $primary);
 	}
 
 	/**
@@ -78,26 +67,7 @@ SQL;
 	 * @return array<integer, integer>
 	 */
 	public static function getPagesRelatedTo($page) {
-		if($page < 1) {
-			return [];
-		}
-
-		$sql = <<<SQL
-SELECT
-	page_id
-FROM
-	hofff_page_translation_valid
-WHERE
-	translated_page_id = ?
-SQL;
-		$result = self::query($sql, [ $page ]);
-
-		$related = [];
-		while($result->next()) {
-			$related[$result->page_id] = $result->page_id;
-		}
-
-		return $related;
+		return self::getRelationsInstance()->getItemsRelatedTo($page);
 	}
 
 	/**
@@ -111,53 +81,9 @@ SQL;
 	 * @return array<integer, integer>
 	 */
 	public static function getIncompleteRelatedPages($page) {
-		if($page < 1) {
-			return [];
-		}
-
-		$sql = <<<SQL
-SELECT
-	page.id						AS page_id,
-	group_root_page.id			AS missing_root_page_id,
-	group_root_page.language	AS missing_root_page_language
-FROM
-	tl_page
-	AS root_page
-JOIN
-	tl_page
-	AS page
-	ON page.hofff_root_page_id = root_page.id
-	AND page.id != root_page.id
-LEFT JOIN
-	tl_page
-	AS group_root_page
-	ON group_root_page.hofff_translation_group_id = root_page.hofff_translation_group_id
-	AND group_root_page.id != root_page.id
-	AND group_root_page.type = 'root'
-LEFT JOIN
-	hofff_page_translation_valid
-	AS translation
-	ON translation.page_id = page.id
-	AND translation.translated_root_page_id = group_root_page.id
-WHERE
-	root_page.id IN (
-		SELECT
-			page_1.hofff_root_page_id
-		FROM
-			tl_page
-			AS page_1
-		WHERE
-			page_1.id = ?
-	)
-	AND translation.page_id IS NULL
-SQL;
-		$result = self::query($sql, [ $page ]);
-
-		$incompletenesses = [];
-		while($result->next()) {
-			$incompletenesses[$result->page_id] = $result->page_id;
-		}
-
+		$incompletenesses = self::getRelationsInstance()->getIncompleteRelatedItems($page);
+		$incompletenesses = array_keys($incompletenesses);
+		$incompletenesses = array_combine($incompletenesses, $incompletenesses);
 		return $incompletenesses;
 	}
 
@@ -173,41 +99,7 @@ SQL;
 	 * @return array<integer, integer>
 	 */
 	public static function getAmbiguousRelatedPages($page) {
-		if($page < 1) {
-			return [];
-		}
-
-		$sql = <<<SQL
-SELECT DISTINCT
-	translation.page_id		AS page_id
-FROM
-	hofff_page_translation_valid
-	AS translation
-WHERE
-	translation.root_page_id IN (
-		SELECT
-			page_1.hofff_root_page_id
-		FROM
-			tl_page
-			AS page_1
-		WHERE
-			page_1.id = ?
-	)
-	AND translation.page_id != translation.root_page_id
-GROUP BY
-	translation.page_id,
-	translation.translated_root_page_id
-HAVING
-	COUNT(translation.page_id) > 1
-SQL;
-		$result = self::query($sql, [ $page ]);
-
-		$ambiguities = [];
-		while($result->next()) {
-			$ambiguities[$result->page_id] = $result->page_id;
-		}
-
-		return $ambiguities;
+		return self::getRelationsInstance()->getAmbiguousRelatedItems($page);
 	}
 
 	/**
@@ -220,19 +112,7 @@ SQL;
 	 * @return integer The number of created relations
 	 */
 	public static function createRelations($page, $translatedPages) {
-		if($page < 1 || !$translatedPages = self::ids($translatedPages)) {
-			return 0;
-		}
-
-		$sql = 'INSERT INTO tl_hofff_page_translation (page_id, translated_page_id) VALUES ' . self::wildcards($translatedPages, '(?,?)');
-		$params = [];
-		foreach($translatedPages as $translatedPage) {
-			$params[] = $page;
-			$params[] = $translatedPage;
-		}
-		$result = self::query($sql, $params);
-
-		return $result->affectedRows;
+		return self::getRelationsInstance()->createRelations($page, $translatedPages);
 	}
 
 	/**
@@ -244,32 +124,7 @@ SQL;
 	 * @return integer
 	 */
 	public static function createReflectionRelations($page) {
-		if($page < 1) {
-			return 0;
-		}
-
-		$sql = <<<SQL
-INSERT INTO
-	tl_hofff_page_translation
-	(page_id, translated_page_id)
-SELECT
-	translation.translated_page_id,
-	translation.page_id
-FROM
-	hofff_page_translation_valid
-	AS translation
-LEFT JOIN
-	hofff_page_translation_valid
-	AS reflected_translation
-	ON reflected_translation.page_id = translation.translated_page_id
-	AND reflected_translation.translated_root_page_id = translation.root_page_id
-WHERE
-	translation.page_id = ?
-	AND reflected_translation.page_id IS NULL
-SQL;
-		$result = self::query($sql, [ $page ]);
-
-		return $result->affectedRows;
+		return self::getRelationsInstance()->createReflectionRelations($page);
 	}
 
 	/**
@@ -280,37 +135,7 @@ SQL;
 	 * @return integer
 	 */
 	public static function createIntermediateRelations($page) {
-		if($page < 1) {
-			return 0;
-		}
-
-		$sql = <<<SQL
-INSERT INTO
-	tl_hofff_page_translation
-	(page_id, translated_page_id)
-SELECT
-	left_translation.translated_page_id,
-	right_translation.translated_page_id
-FROM
-	hofff_page_translation_valid
-	AS left_translation
-JOIN
-	hofff_page_translation_valid
-	AS right_translation
-	ON right_translation.page_id = left_translation.page_id
-	AND right_translation.translated_page_id != left_translation.translated_page_id
-LEFT JOIN
-	hofff_page_translation_valid
-	AS reflected_translation
-	ON reflected_translation.page_id = left_translation.translated_page_id
-	AND reflected_translation.translated_root_page_id = right_translation.translated_root_page_id
-WHERE
-	reflected_translation.page_id IS NULL
-	AND left_translation.page_id = ?
-SQL;
-		$result = self::query($sql, [ $page ]);
-
-		return $result->affectedRows;
+		return self::getRelationsInstance()->createIntermediateRelations($page);
 	}
 
 	/**
@@ -320,14 +145,7 @@ SQL;
 	 * @return integer
 	 */
 	public static function deleteRelationsFrom($pages) {
-		if(!$pages = self::ids($pages)) {
-			return 0;
-		}
-
-		$sql = 'DELETE FROM tl_hofff_page_translation WHERE page_id IN (' . self::wildcards($pages) . ')';
-		$result = self::query($sql, $pages);
-
-		return $result->affectedRows;
+		return self::getRelationsInstance()->deleteRelationsFrom($pages);
 	}
 
 	/**
@@ -339,64 +157,7 @@ SQL;
 	 * @return integer
 	 */
 	public static function deleteRelationsToRoot($pages, $root) {
-		if($root < 1 || !$pages = self::ids($pages)) {
-			return 0;
-		}
-
-		$wildcards = self::wildcards($pages);
-		$sql = <<<SQL
-DELETE
-	translation
-FROM
-	tl_hofff_page_translation
-	AS translation
-JOIN
-	tl_page
-	AS translated_page
-	ON translated_page.id = translation.translated_page_id
-WHERE
-	translation.page_id IN ($wildcards)
-	AND translated_page.hofff_root_page_id IN (
-		SELECT
-			page_1.hofff_root_page_id
-		FROM
-			tl_page
-			AS page_1
-		WHERE
-			page_1.id = ?
-	)
-SQL;
-		$params = $pages;
-		$params[] = $root;
-		$result = self::query($sql, $params);
-
-		return $result->affectedRows;
-	}
-
-	/**
-	 * @param string $sql
-	 * @param array $params
-	 * @return Result
-	 */
-	private static function query($sql, array $params = null) {
-		return \Database::getInstance()->prepare($sql)->executeUncached($params);
-	}
-
-	/**
-	 * @param mixed $params
-	 * @param string $wildcard
-	 * @return string
-	 */
-	private static function wildcards($params, $wildcard = '?') {
-		return rtrim(str_repeat($wildcard . ',', count((array) $params)), ',');
-	}
-
-	/**
-	 * @param integer|array<integer> $ids
-	 * @return array<integer>
-	 */
-	private static function ids($ids) {
-		return array_filter((array) $ids, function($id) { return $id >= 1; });
+		return self::getRelationsInstance()->deleteRelationsToRoot($pages, $root);
 	}
 
 }

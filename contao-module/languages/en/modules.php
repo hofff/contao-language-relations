@@ -1,9 +1,9 @@
 <?php
 
 $GLOBALS['TL_LANG']['MOD']['hofff_language_relations'][0]
-	= 'hofff.com – Language relations for translations';
+	= 'hofff.com – Language relations';
 
-$GLOBALS['TL_LANG']['MOD']['hofff_translation_group'][0]
+$GLOBALS['TL_LANG']['MOD']['hofff_language_relations_group'][0]
 	= 'Translation groups';
-$GLOBALS['TL_LANG']['MOD']['hofff_translation_group'][1]
+$GLOBALS['TL_LANG']['MOD']['hofff_language_relations_group'][1]
 	= 'Create and configure translation groups';

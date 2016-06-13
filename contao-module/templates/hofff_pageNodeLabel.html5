@@ -1,1 +1,0 @@
-<span class="hofff-greyed">[<?= $this->language; ?>]</span> <?= $this->title; ?> (ID <?= $this->id; ?>)

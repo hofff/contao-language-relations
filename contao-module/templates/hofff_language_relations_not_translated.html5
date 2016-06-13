@@ -2,7 +2,7 @@
   <p>
     <?= $this->reason ?>
   </p>
-  <a href="contao/main.php?do=hofff_translation_group">
-    <?= $GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_manage_translation_groups'] ?>
+  <a href="contao/main.php?do=hofff_language_relations_group">
+    <?= $GLOBALS['TL_LANG']['hofff_language_relations']['manageTranslationGroups'] ?>
   </a>
 </div>

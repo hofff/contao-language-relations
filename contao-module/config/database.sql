@@ -7,12 +7,12 @@
 -- *                                                        *
 -- **********************************************************
 
-CREATE TABLE `tl_hofff_page_translation` (
+CREATE TABLE `tl_hofff_language_relations_page` (
 
-  `page_id` int(10) unsigned NOT NULL,
-  `translated_page_id` int(10) unsigned NOT NULL,
+  `item_id` int(10) unsigned NOT NULL,
+  `related_item_id` int(10) unsigned NOT NULL,
 
-  PRIMARY KEY  (`page_id`, `translated_page_id`),
-  KEY `translated_page_id` (`translated_page_id`),
+  PRIMARY KEY  (`item_id`, `related_item_id`),
+  KEY `related_item_id` (`related_item_id`),
 
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hofff\Contao\LanguageRelations;
+namespace Hofff\Contao\LanguageRelations\Util;
 
 /**
  * @author Oliver Hoff <oliver@hofff.com>
