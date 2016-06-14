@@ -299,12 +299,16 @@ SQL;
 		}
 
 		$result = QueryUtil::query(
-			'SELECT group_title FROM %s WHERE aggregate_id = ?',
+			'SELECT group_title, language FROM %s WHERE aggregate_id = ?',
 			[ $this->config->getAggregateView() ],
 			[ $aggregate ]
 		);
 
-		return $this->groupTitleCache[$aggregate] = $result->group_title;
+		$tpl = new \BackendTemplate('hofff_language_relations_node_label');
+		$tpl->language = $result->language;
+		$tpl->title = $result->group_title;
+
+		return $this->groupTitleCache[$aggregate] = $tpl->parse();
 	}
 
 	/**
