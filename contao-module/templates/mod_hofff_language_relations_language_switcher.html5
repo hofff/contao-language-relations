@@ -1,0 +1,16 @@
+<?php if(strlen($this->items)): ?>
+  <!-- indexer::stop -->
+    <nav <?= $this->cssID ?>
+        class="<?= $this->class ?> block"
+        <?php if ($this->style): ?> style="<?= $this->style ?>"<?php endif; ?>
+    >
+
+      <?php if ($this->headline): ?>
+        <<?= $this->hl ?>><?= $this->headline ?></<?= $this->hl ?>>
+      <?php endif; ?>
+
+      <?= $this->items ?>
+
+    </nav>
+  <!-- indexer::continue -->
+<?php endif; ?>

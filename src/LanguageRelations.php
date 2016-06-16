@@ -29,7 +29,7 @@ class LanguageRelations {
 	/**
 	 * @return Relations
 	 */
-	private static function getRelationsInstance() {
+	public static function getRelationsInstance() {
 		isset(self::$relations) || self::$relations = new Relations(
 			'tl_hofff_language_relations_page',
 			'hofff_language_relations_page_item',

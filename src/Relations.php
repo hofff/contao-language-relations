@@ -72,27 +72,39 @@ class Relations {
 	 * @param boolean $primary
 	 * @return array<integer, integer>|array<integer, array<integer, integer>>
 	 */
-	public function getRelations($items, $primary = false) {
+	public function getRelations($items, $primary = false, $complete = false) {
 		if(!$ids = $this->ids($items)) {
 			return is_array($items) ? array_fill_keys($items, []) : [];
 		}
 
 		$sql = <<<SQL
 SELECT
-	item_id					AS item_id,
-	MAX(related_item_id)	AS related_item_id,
-	related_root_page_id	AS related_root_page_id,
-	MAX(is_primary)			AS is_primary
+	item.item_id					AS item_id,
+	MAX(relation.related_item_id)	AS related_item_id,
+	root_page.id					AS related_root_page_id,
+	MAX(relation.is_primary)		AS is_primary
 FROM
 	%s
+	AS item
+JOIN
+	tl_page
+	AS root_page
+	ON root_page.hofff_language_relations_group_id = item.group_id
+	AND root_page.id != item.root_page_id
+	AND root_page.type = 'root'
+LEFT JOIN
+	%s
+	AS relation
+	ON relation.item_id = item.item_id
+	AND relation.root_page_id = root_page.id
+	AND relation.is_valid
 WHERE
-	item_id IN (%s)
-	AND is_valid
+	item.item_id IN (%s)
 GROUP BY
-	item_id,
-	related_root_page_id
+	item.item_id,
+	root_page.id
 HAVING
-	COUNT(related_item_id) = 1
+	COUNT(relation.related_item_id) = 1
 SQL;
 		$result = $this->query(
 			$sql,
@@ -107,6 +119,13 @@ SQL;
 
 		while($result->next()) if(!$primary || $result->is_primary) {
 			$relations[$result->item_id][$result->related_root_page_id] = $result->related_item_id;
+		}
+
+		if(!$complete) {
+			foreach($relations as &$map) {
+				$map = array_filter($map, 'is_null');
+			}
+			unset($map);
 		}
 
 		return is_array($items) ? $relations : $relations[$items];
