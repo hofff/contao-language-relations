@@ -51,6 +51,8 @@ JOIN
 	tl_page
 	AS root_page
 	ON root_page.id = page.hofff_root_page_id
+	AND root_page.id != page.id
+	AND root_page.type = 'root'
 SQL;
 	}
 
