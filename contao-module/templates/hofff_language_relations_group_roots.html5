@@ -34,7 +34,7 @@
           <?= \Image::getHtml('system/modules/hofff_language_relations/assets/images/relation-ambiguous.png'); ?>
         </a>
 
-        <span>[<?= $groupRoot['language']; ?>] <?= $groupRoot['title']; ?></span>
+        <span class="hofff-language">[<?= $groupRoot['language']; ?>]</span> <?= $groupRoot['title']; ?>
 
       </li>
     <?php endforeach; ?>

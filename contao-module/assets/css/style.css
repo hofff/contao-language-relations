@@ -10,6 +10,17 @@
     opacity:0.5;
   }
 
+  .hofff-groupRoots a.disabled {
+    opacity:0.5;
+  }
+
+  .hofff-groupRoots .hofff-language {
+    color:#999999;
+    font-family:monospace;
+    font-size:11px;
+    font-size:0.85rem;
+  }
+
   .hofff-pageInfo {
     margin:10px 0 4px;
     font-size:12px;
@@ -20,8 +31,7 @@
     margin-top:25px;
   }
 
-  .hofff-pageInfo span,
-  .hofff-greyed {
+  .hofff-pageInfo span {
     color:#999999;
   }
 
@@ -62,8 +72,13 @@
 	background-image:-ms-linear-gradient(bottom,#333 0,#666 80%);
 	background-image:linear-gradient(to top,#333 0,#666 80%);
   }
-  
+
   .hofff-relations .striContent label {
     display:none;
   }
-  
+
+  .hofff-relations .hofff-language {
+    color:#999999;
+    font-family: monospace;
+    vertical-align: 1px;
+  }
