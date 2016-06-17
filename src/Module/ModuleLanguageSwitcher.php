@@ -3,6 +3,7 @@
 namespace Hofff\Contao\LanguageRelations\Module;
 
 use Hofff\Contao\LanguageRelations\LanguageRelations;
+use Hofff\Contao\LanguageRelations\Util\ContaoUtil;
 
 class ModuleLanguageSwitcher extends \Module {
 
@@ -63,7 +64,7 @@ class ModuleLanguageSwitcher extends \Module {
 				return $page->rootIsPublic;
 			});
 			$relatedPages = array_map(function($page) {
-				return $this->isPagePublished($page)
+				return ContaoUtil::isPublished($page)
 					? $page
 					: \PageModel::findWithDetails($page->hofff_root_page_id);
 			}, $relatedPages);
@@ -121,17 +122,6 @@ class ModuleLanguageSwitcher extends \Module {
 		$this->Template->items = $tpl->parse();
 
 		$this->injectAlternateLinks($items);
-	}
-
-	/**
-	 * @param \PageModel $page
-	 * @return boolean
-	 */
-	protected function isPagePublished(\PageModel $page) {
-		$time = time();
-		return $page->published
-			&& (!$page->start || $page->start <= $time)
-			&& (!$page->stop || $page->stop >= $time);
 	}
 
 	/**
