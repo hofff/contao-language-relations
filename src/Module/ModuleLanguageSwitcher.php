@@ -94,7 +94,10 @@ class ModuleLanguageSwitcher extends \Module {
 			$item['tabindex']	= '';
 			$item['nofollow']	= false;
 
-			$item['isActive'] && $item['class'] .= ' active';
+			if($item['isActive']) {
+				$item['href']	= \Environment::get('request');
+				$item['class']	.= ' active';
+			}
 
 			$items[$rootPageID] = $item;
 		}
