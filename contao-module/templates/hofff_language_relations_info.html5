@@ -1,3 +1,0 @@
-<div class="hofff-pageInfo">
-  <?= $this->title; ?> <span>(<?= $this->alias; ?>)</span>
-</div>

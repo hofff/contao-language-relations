@@ -51,7 +51,7 @@ class PageDCA {
 	 * @return string
 	 */
 	public function inputFieldCallbackPageInfo($dc, $xlabel) {
-		$tpl = new \BackendTemplate('hofff_language_relations_info');
+		$tpl = new \BackendTemplate('hofff_language_relations_page_info');
 		$tpl->setData($dc->activeRecord->row());
 		return $tpl->parse();
 	}
