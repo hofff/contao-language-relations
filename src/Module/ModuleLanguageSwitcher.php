@@ -191,21 +191,18 @@ class ModuleLanguageSwitcher extends \Module {
 	 * @return array
 	 */
 	protected function sortItems(array $items) {
+		uasort($items, function($a, $b) {
+			return strnatcasecmp($a['language'], $b['language']);
+		});
+
 		if($labels = $this->getLabels()) {
 			$labels = array_flip(array_keys($labels));
-			$comparator = function($a, $b) use($labels) {
+			uasort($items, function($a, $b) use($labels) {
 				$a = isset($labels[$a['language']]) ? $labels[$a['language']] : PHP_INT_MAX;
 				$b = isset($labels[$b['language']]) ? $labels[$b['language']] : PHP_INT_MAX;
 				return $a - $b;
-			};
-
-		} else {
-			$comparator = function($a, $b) {
-				return strcmp($a['language'], $b['language']);
-			};
+			});
 		}
-
-		uasort($items, $comparator);
 
 		return $items;
 	}
@@ -221,7 +218,7 @@ class ModuleLanguageSwitcher extends \Module {
 			}
 
 			$GLOBALS['TL_HEAD'][] = sprintf(
-				'<link rel="alternate" hreflang="%s" lang="%s" href="%s" title="%s"%s />',
+				'<link rel="alternate" hreflang="%s" lang="%s" href="%s" title="%s" />',
 				$item['language'],
 				$item['language'],
 				$item['href'],
@@ -238,6 +235,10 @@ class ModuleLanguageSwitcher extends \Module {
 		$labels = [];
 
 		foreach(deserialize($this->hofff_language_relations_labels, true) as $row) {
+			if(!strlen($row['language'])) {
+				continue;
+			}
+
 			$labels[$row['language']] = $row['label'];
 		}
 
