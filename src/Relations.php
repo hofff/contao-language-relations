@@ -70,6 +70,7 @@ class Relations {
 	 *
 	 * @param integer|array<integer> $items
 	 * @param boolean $primary
+	 * @param boolean $complete
 	 * @return array<integer, integer>|array<integer, array<integer, integer>>
 	 */
 	public function getRelations($items, $primary = false, $complete = false) {
@@ -96,7 +97,7 @@ LEFT JOIN
 	%s
 	AS relation
 	ON relation.item_id = item.item_id
-	AND relation.root_page_id = root_page.id
+	AND relation.related_root_page_id = root_page.id
 	AND relation.is_valid
 WHERE
 	item.item_id IN (%s)
@@ -109,6 +110,7 @@ SQL;
 		$result = $this->query(
 			$sql,
 			[
+				$this->itemView,
 				$this->relationView,
 				$this->wildcards($ids)
 			],
@@ -123,7 +125,9 @@ SQL;
 
 		if(!$complete) {
 			foreach($relations as &$map) {
-				$map = array_filter($map, 'is_null');
+				$map = array_filter($map, function($id) {
+					return $id !== null;
+				});
 			}
 			unset($map);
 		}
