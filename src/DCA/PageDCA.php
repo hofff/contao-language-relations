@@ -104,7 +104,7 @@ class PageDCA {
 			);
 
 		} elseif($original->root_page_id != $copy->root_page_id && $original->group_id == $copy->group_id) {
-			$relatedItems = $this->getRelations()->getRelations($original->id);
+			$relatedItems = $this->relations->getRelations($original->id);
 			$relatedItems[] = $original->id;
 			$this->relations->createRelations($copy->id, $relatedItems);
 			$this->relations->createReflectionRelations($copy->id);
