@@ -33,7 +33,11 @@ $GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][]
  */
 if($_GET['do'] == 'hofff_language_relations_group') {
 	$onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
-	foreach($onsubmit as $i => list($class, $method)) {
+	foreach($onsubmit as $i => $callback) {
+		if(!is_array($callback)) {
+			continue;
+		}
+		list($class, $method) = $callback;
 		if($class == 'tl_page' && $method == 'updateSitemap') {
 			unset($onsubmit[$i]);
 			break;
