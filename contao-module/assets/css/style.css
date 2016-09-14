@@ -39,22 +39,26 @@
     display:none;
   }
   
-  .hofff-relations .striContent {
+  .hofff-relations .striContent,
+  .hofff-relations .hofff-selectri-content {
     display:none;
     float:right;
     margin-right:22px;
     padding-top:2px;
   }
   
-  .hofff-relations .striSelection .striContent {
+  .hofff-relations .striSelection .striContent,
+  .hofff-relations .hofff-selectri-selection .hofff-selectri-content {
     display:block;
   }
   
-  .hofff-relations .striContent input {
+  .hofff-relations .striContent input,
+  .hofff-relations .hofff-selectri-content input {
     position:relative;
   }
   
-  .hofff-relations .striContent:hover input::after {
+  .hofff-relations .striContent:hover input::after,
+  .hofff-relations .hofff-selectri-content:hover input::after {
     position:absolute;
     bottom:2px;
     right:18px;
@@ -73,7 +77,8 @@
 	background-image:linear-gradient(to top,#333 0,#666 80%);
   }
 
-  .hofff-relations .striContent label {
+  .hofff-relations .striContent label,
+  .hofff-relations .hofff-selectri-content label {
     display:none;
   }
 
