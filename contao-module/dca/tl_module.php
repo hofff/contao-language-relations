@@ -47,6 +47,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['hofff_language_relations_labels'] = [
 				'label'			=> &$GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_language'],
 				'inputType'		=> 'text',
 				'eval'			=> [
+					'style'			=> 'width:100px;',
 				],
 			],
 			'label'			=> [
@@ -56,7 +57,7 @@ $GLOBALS['TL_DCA']['tl_module']['fields']['hofff_language_relations_labels'] = [
 				],
 			],
 		],
-		'tl_class'		=> '',
+		'tl_class'		=> 'clr',
 	],
 	'sql'			=> 'blob NULL',
 ];
