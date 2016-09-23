@@ -70,9 +70,7 @@ class ModuleLanguageSwitcher extends \Module {
 			}, $relatedPages);
 		}
 
-		if(!$this->hofff_language_relations_hide_current) {
-			$relatedPages[$currentPage->hofff_root_page_id] = $currentPage;
-		}
+		$relatedPages[$currentPage->hofff_root_page_id] = $currentPage;
 
 		$params = $this->getRequestParams($currentPage);
 
@@ -115,13 +113,17 @@ class ModuleLanguageSwitcher extends \Module {
 
 		$items = $this->sortItems($items);
 
+		$this->injectAlternateLinks($items);
+
+		if($this->hofff_language_relations_hide_current) {
+			unset($items[$currentPage->hofff_root_page_id]);
+		}
+
 		$tpl = new \FrontendTemplate($this->navigationTpl);
 		$tpl->setData($this->arrData);
 		$tpl->level = 'level_1';
 		$tpl->items = $items;
 		$this->Template->items = $tpl->parse();
-
-		$this->injectAlternateLinks($items);
 	}
 
 	/**
@@ -206,16 +208,10 @@ class ModuleLanguageSwitcher extends \Module {
 	 */
 	protected function injectAlternateLinks(array $items) {
 		foreach($items as $item) {
-			if($item['isActive']) {
-				continue;
-			}
-
 			$GLOBALS['TL_HEAD'][] = sprintf(
-				'<link rel="alternate" hreflang="%s" lang="%s" href="%s" title="%s" />',
+				'<link rel="alternate" hreflang="%s" href="%s" />',
 				$item['language'],
-				$item['language'],
-				$item['href'],
-				specialchars($item['pageTitle'])
+				$item['href']
 			);
 		}
 	}
