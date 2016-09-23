@@ -126,15 +126,15 @@ class ModuleLanguageSwitcher extends \Module {
 
 	/**
 	 * @param \PageModel $currentPage
-	 * @return string|null
+	 * @return string
 	 */
 	protected function getRequestParams($currentPage) {
 		if(!$this->hofff_language_relations_keep_request_params) {
-			return null;
+			return '';
 		}
 
 		list($params) = explode('?', \Environment::get('request'), 2);
-		$params = strval(substr($params, strlen($currentPage->alias) + 1));
+		$params = (string) substr($params, strlen($currentPage->alias) + 1);
 
 		return $params;
 	}
