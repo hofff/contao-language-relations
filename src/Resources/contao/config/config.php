@@ -11,17 +11,15 @@ $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['tables'][]
              = 'tl_hofff_language_relations_group';
 $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['tables'][]
              = 'tl_page';
-$GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['icon']
-                 = 'system/modules/hofff_language_relations/assets/images/language-relations.png';
 $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['selectriAJAXCallback']
     = [ GroupDCA::class, 'keySelectriAJAXCallback' ];
 $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['editRelations']
         = [ GroupDCA::class, 'keyEditRelations' ];
 $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['stylesheet'][]
-         = 'system/modules/hofff_language_relations/assets/css/style.css';
+         = 'bundles/hofffcontaolanguagerelations/css/style.css';
 
 $GLOBALS['BE_MOD']['design']['page']['stylesheet'][]
-    = 'system/modules/hofff_language_relations/assets/css/style.css';
+    = 'bundles/hofffcontaolanguagerelations/css/style.css';
 
 $GLOBALS['FE_MOD']['navigationMenu']['hofff_language_relations_language_switcher']
     = ModuleLanguageSwitcher::class;
