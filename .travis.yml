@@ -11,6 +11,9 @@ matrix:
   allow_failures:
     - php: nightly
 
+before_install:
+  - export COMPOSER_GLOBAL_HOME_DIR=`composer config -g home`
+
 install:
   - composer update $COMPOSER_FLAGS --no-interaction --no-progress -vvv
   - composer global require maglnet/composer-require-checker:@dev
