@@ -1,132 +1,141 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\DCA;
 
+use Contao\BackendTemplate;
+use Contao\Controller;
+use Contao\Database;
+use Contao\DataContainer;
+use Contao\Input;
+use Contao\Message;
+use Contao\Session;
+use Contao\StringUtil;
+use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;
 use Hofff\Contao\LanguageRelations\Util\EnvironmentProxy;
+use function array_filter;
+use function array_map;
+use function array_unique;
+use function array_unshift;
+use function count;
+use function rtrim;
+use function sprintf;
+use function str_repeat;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class GroupDCA {
+class GroupDCA
+{
+    /** @var string[]|int[] */
+    private $roots;
 
-	/**
-	 * @var array
-	 */
-	private $roots;
+    public function __construct()
+    {
+        $this->roots = [];
+    }
 
-	/**
-	 */
-	public function __construct() {
-		$this->roots = [];
-	}
+    public function keySelectriAJAXCallback(DataContainer $dc) : string
+    {
+        $key = 'isAjaxRequest';
 
-	/**
-	 * @param \DataContainer $dc
-	 * @return string
-	 */
-	public function keySelectriAJAXCallback($dc) {
-		$key = 'isAjaxRequest';
+        // the X-Requested-With gets deleted on ajax requests by selectri widget,
+        // to enable regular contao DC process, but we need this behavior for the
+        // editAll call respecting the passed id
+        $$key = EnvironmentProxy::getCacheValue($key);
+        EnvironmentProxy::setCacheValue($key, true);
 
-		// the X-Requested-With gets deleted on ajax requests by selectri widget,
-		// to enable regular contao DC process, but we need this behavior for the
-		// editAll call respecting the passed id
-		$$key = EnvironmentProxy::getCacheValue($key);
-		EnvironmentProxy::setCacheValue($key, true);
+        $return = $dc->editAll(Input::get('hofff_language_relations_id'));
 
-		$return = $dc->editAll(\Input::get('hofff_language_relations_id'));
+        // this would never be reached, but we clean up the env
+        EnvironmentProxy::setCacheValue($key, $$key);
 
-		// this would never be reached, but we clean up the env
-		EnvironmentProxy::setCacheValue($key, $$key);
+        return $return;
+    }
 
-		return $return;
-	}
+    public function keyEditRelations() : void
+    {
+        $fields = [ 'hofff_language_relations_info', 'hofff_language_relations' ];
+        $roots  = (array) $_GET['roots'];
+        $roots  = array_map('intval', $roots);
+        $roots  = array_filter($roots, static function ($root) {
+            return $root >= 1;
+        });
+        $roots  = array_unique($roots);
 
-	/**
-	 * @return void
-	 */
-	public function keyEditRelations() {
-		$fields = [ 'hofff_language_relations_info', 'hofff_language_relations' ];
-		$roots = (array) $_GET['roots'];
-		$roots = array_map('intval', $roots);
-		$roots = array_filter($roots, function($root) { return $root >= 1; });
-		$roots = array_unique($roots);
+        switch ($_GET['filter']) {
+            case 'incomplete':
+                $ids         = LanguageRelations::getIncompleteRelatedPages($roots[0]);
+                $ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noIncompleteRelations'];
+                break;
 
-		switch($_GET['filter']) {
-			case 'incomplete':
-				$ids = LanguageRelations::getIncompleteRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noIncompleteRelations'];
-				break;
+            case 'ambiguous':
+                $ids         = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
+                $ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noAmbiguousRelations'];
+                break;
 
-			case 'ambiguous':
-				$ids = LanguageRelations::getAmbiguousRelatedPages($roots[0]);
-				$ids || $msg = $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noAmbiguousRelations'];
-				break;
+            default:
+                if ($roots) {
+                    $wildcards = rtrim(str_repeat('?,', count($roots)), ',');
+                    $result    = Database::getInstance()->prepare(
+                        'SELECT id FROM tl_page WHERE hofff_root_page_id IN (' . $wildcards . ') AND type != \'root\''
+                    )->execute($roots);
+                    $ids       = $result->fetchEach('id');
+                }
+                break;
+        }
 
-			default:
-				if($roots) {
-					$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
-					$sql = 'SELECT id FROM tl_page WHERE hofff_root_page_id IN (' . $wildcards . ') AND type != \'root\'';
-					$result = \Database::getInstance()->prepare($sql)->executeUncached($roots);
-					$ids = $result->fetchEach('id');
-				}
-				break;
-		}
+        if (! $ids) {
+            Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
+            Controller::redirect(System::getReferer());
+            return;
+        }
 
-		if(!$ids) {
-			\Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
-			\Controller::redirect(\System::getReferer());
-			return;
-		}
+        $session                       = Session::getInstance()->getData();
+        $session['CURRENT']['IDS']     = $ids;
+        $session['CURRENT']['tl_page'] = $fields;
+        Session::getInstance()->setData($session);
 
-		$session = \Session::getInstance()->getData();
-		$session['CURRENT']['IDS'] = $ids;
-		$session['CURRENT']['tl_page'] = $fields;
-		\Session::getInstance()->setData($session);
+        Controller::redirect(
+            'contao/main.php?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN
+        );
+    }
 
-		\Controller::redirect('contao/main.php?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN);
-	}
+    /**
+     * @param mixed[] $row
+     */
+    public function groupGroup(string $group, ?string $mode, string $field, array $row, DataContainer $dc) : string
+    {
+        return $row['title'];
+    }
 
-	/**
-	 * @param string $group
-	 * @param string $mode
-	 * @param string $field
-	 * @param array $row
-	 * @param \DataContainer $dc
-	 * @return string
-	 */
-	public function groupGroup($group, $mode, $field, $row, $dc) {
-		return $row['title'];
-	}
+    /**
+     * @param mixed[] $row
+     */
+    public function labelGroup(array $row, string $label) : string
+    {
+        $sql    = 'SELECT * FROM tl_page WHERE hofff_language_relations_group_id = ? ORDER BY title';
+        $result = Database::getInstance()->prepare($sql)->execute($row['id']);
 
-	/**
-	 * @param array $row
-	 * @param string $label
-	 * @return string
-	 */
-	public function labelGroup($row, $label) {
-		$sql = 'SELECT * FROM tl_page WHERE hofff_language_relations_group_id = ? ORDER BY title';
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($row['id']);
+        $groupRoots = [];
+        while ($result->next()) {
+            $row               = $result->row();
+            $row['incomplete'] = LanguageRelations::getIncompleteRelatedPages((int) $row['id']);
+            $row['ambiguous']  = LanguageRelations::getAmbiguousRelatedPages((int) $row['id']);
+            $groupRoots[]      = $row;
+        }
 
-		$groupRoots = [];
-		while($result->next()) {
-			$row = $result->row();
-			$row['incomplete'] = LanguageRelations::getIncompleteRelatedPages($row['id']);
-			$row['ambiguous'] = LanguageRelations::getAmbiguousRelatedPages($row['id']);
-			$groupRoots[] = $row;
-		}
+        $tpl             = new BackendTemplate('hofff_language_relations_group_roots');
+        $tpl->groupRoots = $groupRoots;
 
-		$tpl = new \BackendTemplate('hofff_language_relations_group_roots');
-		$tpl->groupRoots = $groupRoots;
+        return $tpl->parse();
+    }
 
-		return $tpl->parse();
-	}
-
-	/**
-	 * @return array<string, array<integer, string>>
-	 */
-	public function getRootsOptions() {
-		$sql = <<<SQL
+    /**
+     * @return string[][]
+     */
+    public function getRootsOptions() : array
+    {
+        $sql    = <<<SQL
 SELECT
 	page.id			AS page_id,
 	page.title		AS page_title,
@@ -147,62 +156,66 @@ ORDER BY
 	grp.title,
 	page.title
 SQL;
-		$result = \Database::getInstance()->prepare($sql)->executeUncached('root');
+        $result = Database::getInstance()->prepare($sql)->execute('root');
 
-		$options = [];
-		while($result->next()) {
-			$groupTitle = $result->group_id
-				? sprintf('%s (ID %s)', $result->group_title, $result->group_id)
-				: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['notGrouped'];
-			$options[$groupTitle][$result->page_id] = sprintf(
-				'%s [%s] (ID %s)',
-				$result->page_title,
-				$result->page_language,
-				$result->page_id
-			);
-		}
+        $options = [];
+        while ($result->next()) {
+            $groupTitle                             = $result->group_id
+            ? sprintf('%s (ID %s)', $result->group_title, $result->group_id)
+            : $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['notGrouped'];
+            $options[$groupTitle][$result->page_id] = sprintf(
+                '%s [%s] (ID %s)',
+                $result->page_title,
+                $result->page_language,
+                $result->page_id
+            );
+        }
 
-		return $options;
-	}
+        return $options;
+    }
 
-	/**
-	 * @param \DataContainer $dc
-	 * @return void
-	 */
-	public function onsubmitGroup($dc) {
-		if(isset($this->roots[$dc->id])) {
-			$sql = 'UPDATE tl_page SET hofff_language_relations_group_id = NULL WHERE hofff_language_relations_group_id = ?';
-			\Database::getInstance()->prepare($sql)->executeUncached($dc->id);
+    public function onsubmitGroup(DataContainer $dc) : void
+    {
+        if (! isset($this->roots[$dc->id])) {
+            return;
+        }
 
-			$roots = deserialize($this->roots[$dc->id], true);
-			if($roots) {
-				$wildcards = rtrim(str_repeat('?,', count($roots)), ',');
-				$sql = 'UPDATE tl_page SET hofff_language_relations_group_id = ? WHERE id IN (' . $wildcards . ')';
-				array_unshift($roots, $dc->id);
-				\Database::getInstance()->prepare($sql)->executeUncached($roots);
-			}
-		}
-	}
+        Database::getInstance()
+            ->prepare(
+                'UPDATE tl_page SET hofff_language_relations_group_id=NULL WHERE hofff_language_relations_group_id=?'
+            )
+            ->execute($dc->id);
 
-	/**
-	 * @param mixed $value
-	 * @param \DataContainer $dc
-	 * @return array<integer>
-	 */
-	public function loadRoots($value, $dc) {
-		$sql = 'SELECT id FROM tl_page WHERE hofff_language_relations_group_id = ? AND type = ? ORDER BY title';
-		$result = \Database::getInstance()->prepare($sql)->executeUncached($dc->id, 'root');
-		return $result->fetchEach('id');
-	}
+        $roots = StringUtil::deserialize($this->roots[$dc->id], true);
+        if (! $roots) {
+            return;
+        }
 
-	/**
-	 * @param integer $value
-	 * @param \DataContainer $dc
-	 * @return null
-	 */
-	public function saveRoots($value, $dc) {
-		$this->roots[$dc->id] = $value;
-		return null;
-	}
+        $wildcards = rtrim(str_repeat('?,', count($roots)), ',');
+        $sql       = 'UPDATE tl_page SET hofff_language_relations_group_id=? WHERE id IN (' . $wildcards . ')';
+        array_unshift($roots, $dc->id);
+        Database::getInstance()->prepare($sql)->execute($roots);
+    }
 
+    /**
+     * @param mixed         $value
+     * @param DataContainer $dc
+     *
+     * @return mixed[]
+     */
+    public function loadRoots($value, $dc) : array
+    {
+        $sql    = 'SELECT id FROM tl_page WHERE hofff_language_relations_group_id=? AND type=? ORDER BY title';
+        $result = Database::getInstance()->prepare($sql)->execute($dc->id, 'root');
+        return $result->fetchEach('id');
+    }
+
+    /**
+     * @return null
+     */
+    public function saveRoots(int $value, DataContainer $dc)
+    {
+        $this->roots[$dc->id] = $value;
+        return null;
+    }
 }

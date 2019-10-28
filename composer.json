@@ -1,42 +1,44 @@
 {
-	"name": "hofff/contao-language-relations",
-	"description": "Maintaining relations between translated pages.",
-	"keywords": [ "utility", "translation", "page", "tree", "contao" ],
-	"type": "contao-module",
-	"license": "LGPL-3.0+",
-	"authors": [
-		{
-			"name": "Oliver Hoff",
-			"email": "oliver@hofff.com",
-			"homepage": "http://hofff.com/",
-			"role": "Developer"
-		}
-	],
-	"require": {
-		"php": "^5.5 || ^7.0",
-		"contao/core": "^3.5",
-		"contao-community-alliance/composer-plugin": "^2.0",
-		"hofff/contao-selectri": "^3.0 || ^4.0",
-		"hofff/contao-root-relations": "^2.0",
-		"menatwork/contao-multicolumnwizard" : "^3.2"
-	},
-	"replace": {
-		"contao-community-alliance/language-relations": "self.version"
-	},
-	"autoload": {
-		"psr-4": {
-			"Hofff\\Contao\\LanguageRelations\\": "src/"
-		}
-	},
-	"extra": {
-		"contao": {
-			"sources": {
-				"contao-module": "system/modules/hofff_language_relations"
-			},
-			"runonce": [
-				"runonce/01_renameDatabaseResources.php",
-				"runonce/dropViews.php"
-			]
-		}
-	}
+  "name": "hofff/contao-language-relations",
+  "description": "Maintaining relations between translated pages.",
+  "keywords": [ "utility", "translation", "page", "tree", "contao" ],
+  "type": "contao-bundle",
+  "license": "LGPL-3.0+",
+  "authors": [
+    {
+      "name": "Nicky Hoff",
+      "email": "nick@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Manager"
+    }
+  ],
+  "require": {
+    "php": "^7.2",
+    "ext-intl": "*",
+    "contao/core-bundle": "^4.4",
+    "hofff/contao-selectri": "^4.0.2",
+    "hofff/contao-root-relations": "^3.0@dev",
+    "menatwork/contao-multicolumnwizard" : "^3.2",
+    "symfony/dependency-injection": "^3.3 || ^4.0",
+    "symfony/http-kernel": "^3.3 || ^4.0"
+  },
+  "require-dev": {
+    "contao/manager-plugin": "^2.1",
+    "doctrine/coding-standard": "^5.0"
+  },
+  "conflict": {
+    "contao/manager-plugin": "<2.1 || >= 3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Hofff\\Contao\\LanguageRelations\\": "src/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-release/3.0": "3.0.x-dev",
+      "dev-support/2.x": "2.1.x-dev"
+    },
+    "contao-manager-plugin": "Hofff\\Contao\\LanguageRelations\\ContaoManager\\Plugin"
+  }
 }

@@ -1,38 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\Util;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class QueryUtil {
+use Contao\Database;
+use Contao\Database\Result;
+use function array_filter;
+use function count;
+use function rtrim;
+use function str_repeat;
+use function vsprintf;
 
-	/**
-	 * @param string $sql
-	 * @param array|null $placeholders
-	 * @param array|null $params
-	 * @return Result
-	 */
-	public static function query($sql, array $placeholders = null, array $params = null) {
-		$placeholders === null || $sql = vsprintf($sql, $placeholders);
-		return \Database::getInstance()->prepare($sql)->executeUncached($params);
-	}
+class QueryUtil
+{
+    /**
+     * @param mixed[]|null $placeholders
+     * @param mixed[]|null $params
+     */
+    public static function query(string $sql, ?array $placeholders = null, ?array $params = null) : Result
+    {
+        $placeholders === null || $sql = vsprintf($sql, $placeholders);
+        return Database::getInstance()->prepare($sql)->execute($params);
+    }
 
-	/**
-	 * @param mixed $params
-	 * @param string $wildcard
-	 * @return string
-	 */
-	public static function wildcards($params, $wildcard = '?') {
-		return rtrim(str_repeat($wildcard . ',', count((array) $params)), ',');
-	}
+    /**
+     * @param mixed  $params
+     * @param string $wildcard
+     */
+    public static function wildcards($params, $wildcard = '?') : string
+    {
+        return rtrim(str_repeat($wildcard . ',', count((array) $params)), ',');
+    }
 
-	/**
-	 * @param integer|array<integer> $ids
-	 * @return array<integer>
-	 */
-	public static function ids($ids) {
-		return array_filter((array) $ids, function($id) { return $id >= 1; });
-	}
-
+    /**
+     * @param int|int[] $ids
+     *
+     * @return int[]
+     */
+    public static function ids($ids) : array
+    {
+        return array_filter((array) $ids, static function ($id) {
+            return $id >= 1;
+        });
+    }
 }

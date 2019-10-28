@@ -1,42 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\Database;
 
+use Contao\Database;
 use Hofff\Contao\LanguageRelations\Util\StringUtil;
+use function array_flip;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class Installer {
+class Installer
+{
+    /**
+     * @param mixed[] $queries
+     *
+     * @return string[][]
+     */
+    public function hookSQLCompileCommands(array $queries) : array
+    {
+        $tables = array_flip(Database::getInstance()->listTables(null, true));
 
-	/**
-	 * @param array $queries
-	 * @return void
-	 */
-	public function hookSQLCompileCommands($queries) {
-		$tables = array_flip(\Database::getInstance()->listTables(null, true));
+        if (! isset($tables['hofff_language_relations_page_item'])) {
+            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getItemView());
+        }
+        if (! isset($tables['hofff_language_relations_page_relation'])) {
+            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getRelationView());
+        }
+        if (! isset($tables['hofff_language_relations_page_aggregate'])) {
+            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getAggregateView());
+        }
+        if (! isset($tables['hofff_language_relations_page_tree'])) {
+            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getTreeView());
+        }
 
-		if(!isset($tables['hofff_language_relations_page_item'])) {
-			$queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getItemView());
-		}
-		if(!isset($tables['hofff_language_relations_page_relation'])) {
-			$queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getRelationView());
-		}
-		if(!isset($tables['hofff_language_relations_page_aggregate'])) {
-			$queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getAggregateView());
-		}
-		if(!isset($tables['hofff_language_relations_page_tree'])) {
-			$queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getTreeView());
-		}
+        return $queries;
+    }
 
-		return $queries;
-	}
-
-	/**
-	 * @return string
-	 */
-	protected function getItemView() {
-		return <<<SQL
+    protected function getItemView() : string
+    {
+        return <<<SQL
 CREATE OR REPLACE VIEW hofff_language_relations_page_item AS
 
 SELECT
@@ -54,13 +55,11 @@ JOIN
 	AND root_page.id != page.id
 	AND root_page.type = 'root'
 SQL;
-	}
+    }
 
-	/**
-	 * @return string
-	 */
-	protected function getRelationView() {
-		return <<<SQL
+    protected function getRelationView() : string
+    {
+        return <<<SQL
 CREATE OR REPLACE VIEW hofff_language_relations_page_relation AS
 
 SELECT
@@ -94,13 +93,11 @@ LEFT JOIN
 	ON reflected_relation.item_id = relation.related_item_id
 	AND reflected_relation.related_item_id = relation.item_id
 SQL;
-	}
+    }
 
-	/**
-	 * @return string
-	 */
-	protected function getAggregateView() {
-		return <<<SQL
+    protected function getAggregateView() : string
+    {
+        return <<<SQL
 CREATE OR REPLACE VIEW hofff_language_relations_page_aggregate AS
 
 SELECT
@@ -120,12 +117,10 @@ JOIN
 WHERE
 	root_page.type = 'root'
 SQL;
-	}
-	/**
-	 * @return string
-	 */
-	protected function getTreeView() {
-		return <<<SQL
+    }
+    protected function getTreeView() : string
+    {
+        return <<<SQL
 CREATE OR REPLACE VIEW hofff_language_relations_page_tree AS
 
 SELECT
@@ -150,6 +145,5 @@ JOIN
 	AS root_page
 	ON root_page.id = page.hofff_root_page_id
 SQL;
-	}
-
+    }
 }

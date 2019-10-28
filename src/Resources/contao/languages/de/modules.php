@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 $GLOBALS['TL_LANG']['MOD']['hofff_language_relations'][0]
-	= 'hofff.com – Sprachbeziehungen';
+    = 'hofff.com – Sprachbeziehungen';
 
 $GLOBALS['TL_LANG']['MOD']['hofff_language_relations_group'][0]
-	= 'Übersetzungsgruppen';
+    = 'Übersetzungsgruppen';
 $GLOBALS['TL_LANG']['MOD']['hofff_language_relations_group'][1]
-	= 'Übersetzungsgruppen anlegen und konfigurieren';
+    = 'Übersetzungsgruppen anlegen und konfigurieren';
 
 $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][0]
-	= 'Sprachenwechsler';
+    = 'Sprachenwechsler';
 $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][1]
-	= 'Eine Navigation um zu anderen Sprachen dieser Seite zu wechseln.';
+    = 'Eine Navigation um zu anderen Sprachen dieser Seite zu wechseln.';

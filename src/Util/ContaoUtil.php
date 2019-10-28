@@ -1,25 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\Util;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class ContaoUtil {
+use Contao\Model;
+use function time;
 
-	/**
-	 * @param \Model $model
-	 * @return boolean
-	 */
-	public static function isPublished(\Model $model) {
-		if(BE_USER_LOGGED_IN) {
-			return true;
-		}
+class ContaoUtil
+{
+    public static function isPublished(Model $model) : bool
+    {
+        if (BE_USER_LOGGED_IN) {
+            return true;
+        }
 
-		$time = time();
-		return $model->published
-			&& (!$model->start || $model->start <= $time)
-			&& (!$model->stop || $model->stop >= $time);
-	}
-
+        $time = time();
+        return $model->published
+            && (! $model->start || $model->start <= $time)
+            && (! $model->stop || $model->stop >= $time);
+    }
 }

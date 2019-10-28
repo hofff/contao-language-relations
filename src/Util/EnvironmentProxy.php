@@ -1,42 +1,42 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\Util;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class EnvironmentProxy extends \Environment {
+use Contao\Environment;
 
-	/**
-	 * @return array
-	 */
-	public static function getCache() {
-		return self::$arrCache;
-	}
+class EnvironmentProxy extends Environment
+{
+    /**
+     * @return mixed[]
+     */
+    public static function getCache() : array
+    {
+        return self::$arrCache;
+    }
 
-	/**
-	 * @param array $cache
-	 * @return void
-	 */
-	public static function setCache(array $cache) {
-		self::$arrCache = $cache;
-	}
+    /**
+     * @param mixed[] $cache
+     */
+    public static function setCache(array $cache) : void
+    {
+        self::$arrCache = $cache;
+    }
 
-	/**
-	 * @param string $key
-	 * @return mixed
-	 */
-	public static function getCacheValue($key) {
-		return self::$arrCache[$key];
-	}
+    /**
+     * @return mixed
+     */
+    public static function getCacheValue(string $key)
+    {
+        return self::$arrCache[$key];
+    }
 
-	/**
-	 * @param string $key
-	 * @param mixed $value
-	 * @return void
-	 */
-	public static function setCacheValue($key, $value) {
-		self::$arrCache[$key] = $value;
-	}
-
+    /**
+     * @param mixed $value
+     */
+    public static function setCacheValue(string $key, $value) : void
+    {
+        self::$arrCache[$key] = $value;
+    }
 }

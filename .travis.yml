@@ -1,0 +1,22 @@
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+      env:
+        - COMPOSER_FLAGS="--prefer-stable --prefer-lowest"
+    - php: 7.3
+    - php: nightly
+  allow_failures:
+    - php: nightly
+
+install:
+  - composer update $COMPOSER_FLAGS --no-interaction --no-progress -vvv
+  - composer global require maglnet/composer-require-checker:@dev
+  - export PATH=$PATH:${COMPOSER_GLOBAL_HOME_DIR}/vendor/bin
+  - composer info -D | sort
+
+script:
+  - composer-require-checker --config-file=.composer-require-checker.json
+  - vendor/bin/phpcs

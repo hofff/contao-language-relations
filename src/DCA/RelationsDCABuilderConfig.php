@@ -1,159 +1,107 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations\DCA;
 
 use Hofff\Contao\LanguageRelations\Relations;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class RelationsDCABuilderConfig {
+class RelationsDCABuilderConfig
+{
+    /** @var Relations */
+    protected $relations;
 
-	/**
-	 * @var Relations
-	 */
-	protected $relations;
+    /** @var string */
+    protected $aggregateFieldName;
 
-	/**
-	 * @var string
-	 */
-	protected $aggregateFieldName;
+    /** @var string */
+    protected $aggregateView;
 
-	/**
-	 * @var string
-	 */
-	protected $aggregateView;
+    /** @var string */
+    protected $treeView;
 
-	/**
-	 * @var string
-	 */
-	protected $treeView;
+    /** @var callable|null */
+    protected $selectriDataFactoryConfiguratorCallback;
 
-	/**
-	 * @var callable
-	 */
-	protected $selectriDataFactoryConfiguratorCallback;
+    /** @var string */
+    protected $selectriNodeLabelTemplate;
 
-	/**
-	 * @var string
-	 */
-	protected $selectriNodeLabelTemplate;
+    /** @var string */
+    protected $selectriNodeContentTemplate;
 
-	/**
-	 * @var string
-	 */
-	protected $selectriNodeContentTemplate;
+    public function __construct()
+    {
+        $this->selectriNodeLabelTemplate   = 'hofff_language_relations_node_label';
+        $this->selectriNodeContentTemplate = 'hofff_language_relations_node_content';
+    }
 
-	/**
-	 */
-	public function __construct() {
-		$this->selectriNodeLabelTemplate = 'hofff_language_relations_node_label';
-		$this->selectriNodeContentTemplate = 'hofff_language_relations_node_content';
-	}
+    public function getRelations() : Relations
+    {
+        return $this->relations;
+    }
 
-	/**
-	 * @return Relations
-	 */
-	public function getRelations() {
-		return $this->relations;
-	}
+    public function setRelations(Relations $relations) : void
+    {
+        $this->relations = $relations;
+    }
 
-	/**
-	 * @param Relations $relations
-	 * @return void
-	 */
-	public function setRelations(Relations $relations) {
-		$this->relations = $relations;
-	}
+    public function getAggregateFieldName() : string
+    {
+        return $this->aggregateFieldName;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getAggregateFieldName() {
-		return $this->aggregateFieldName;
-	}
+    public function setAggregateFieldName(string $aggregateFieldName) : void
+    {
+        $this->aggregateFieldName = $aggregateFieldName;
+    }
 
-	/**
-	 * @param string $aggregateFieldName
-	 * @return void
-	 */
-	public function setAggregateFieldName($aggregateFieldName) {
-		$this->aggregateFieldName = $aggregateFieldName;
-	}
+    public function getAggregateView() : string
+    {
+        return $this->aggregateView;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getAggregateView() {
-		return $this->aggregateView;
-	}
+    public function setAggregateView(string $aggregateView) : void
+    {
+        $this->aggregateView = $aggregateView;
+    }
 
-	/**
-	 * @param string $aggregateView
-	 * @return void
-	 */
-	public function setAggregateView($aggregateView) {
-		$this->aggregateView = $aggregateView;
-	}
+    public function getTreeView() : string
+    {
+        return $this->treeView;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getTreeView() {
-		return $this->treeView;
-	}
+    public function setTreeView(string $treeView) : void
+    {
+        $this->treeView = $treeView;
+    }
 
-	/**
-	 * @param string $treeView
-	 * @return void
-	 */
-	public function setTreeView($treeView) {
-		$this->treeView = $treeView;
-	}
+    public function getSelectriDataFactoryConfiguratorCallback() : ?callable
+    {
+        return $this->selectriDataFactoryConfiguratorCallback;
+    }
 
-	/**
-	 * @return callable
-	 */
-	public function getSelectriDataFactoryConfiguratorCallback() {
-		return $this->selectriDataFactoryConfiguratorCallback;
-	}
+    public function setSelectriDataFactoryConfiguratorCallback(?callable $callback) : void
+    {
+        $this->selectriDataFactoryConfiguratorCallback = $callback;
+    }
 
-	/**
-	 * @param callable $callback
-	 * @return void
-	 */
-	public function setSelectriDataFactoryConfiguratorCallback($callback) {
-		$this->selectriDataFactoryConfiguratorCallback = $callback;
-	}
+    public function getSelectriNodeLabelTemplate() : string
+    {
+        return $this->selectriNodeLabelTemplate;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getSelectriNodeLabelTemplate() {
-		return $this->selectriNodeLabelTemplate;
-	}
+    public function setSelectriNodeLabelTemplate(string $template) : void
+    {
+        $this->selectriNodeLabelTemplate = $template;
+    }
 
-	/**
-	 * @param string $template
-	 * @return void
-	 */
-	public function setSelectriNodeLabelTemplate($template) {
-		$this->selectriNodeLabelTemplate = $template;
-	}
+    public function getSelectriNodeContentTemplate() : string
+    {
+        return $this->selectriNodeContentTemplate;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getSelectriNodeContentTemplate() {
-		return $this->selectriNodeContentTemplate;
-	}
-
-	/**
-	 * @param string $template
-	 * @return void
-	 */
-	public function setSelectriNodeContentTemplate($template) {
-		$this->selectriNodeContentTemplate = $template;
-	}
-
+    public function setSelectriNodeContentTemplate(string $template) : void
+    {
+        $this->selectriNodeContentTemplate = $template;
+    }
 }

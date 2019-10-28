@@ -1,84 +1,74 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Hofff\Contao\LanguageRelations;
 
+use Contao\Database\Result;
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
+use function array_fill_keys;
+use function array_filter;
+use function is_array;
 
-/**
- * @author Oliver Hoff <oliver@hofff.com>
- */
-class Relations {
+class Relations
+{
+    /** @var string */
+    protected $relationTable;
 
-	/**
-	 * @var string
-	 */
-	protected $relationTable;
+    /** @var string */
+    protected $itemView;
 
-	/**
-	 * @var string
-	 */
-	protected $itemView;
+    /** @var string */
+    protected $relationView;
 
-	/**
-	 * @var string
-	 */
-	protected $relationView;
+    public function __construct(string $relationTable, string $itemView, string $relationView)
+    {
+        $this->relationTable = $relationTable;
+        $this->itemView      = $itemView;
+        $this->relationView  = $relationView;
+    }
 
-	/**
-	 * @param string $relationTable
-	 * @param string $itemView
-	 * @param string $relationView
-	 */
-	public function __construct($relationTable, $itemView, $relationView) {
-		$this->relationTable = $relationTable;
-		$this->itemView = $itemView;
-		$this->relationView = $relationView;
-	}
+    public function getRelationTable() : string
+    {
+        return $this->relationTable;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getRelationTable() {
-		return $this->relationTable;
-	}
+    public function getItemView() : string
+    {
+        return $this->itemView;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getItemView() {
-		return $this->itemView;
-	}
+    public function getRelationView() : string
+    {
+        return $this->relationView;
+    }
 
-	/**
-	 * @return string
-	 */
-	public function getRelationView() {
-		return $this->relationView;
-	}
+    /**
+     * Get the valid and non-ambiguous relations for each given page ID.
+     *
+     * If $primary is true, only primary relations are returned.
+     *
+     * If a single integer is passed, returns a map of rootPage -> page entries,
+     * where page represents the related page in the respective rootPage.
+     *
+     * If an array of integers is passed, returns a map of page -> array
+     * entries, where array is the same result as this method were called with
+     * the respective page as a single integer argument.
+     *
+     * @param int|array<integer> $items
+     * @param bool               $primary
+     * @param bool               $complete
+     *
+     * @return int[]|array[int[]]
+     */
+    public function getRelations($items, $primary = false, $complete = false) : array
+    {
+        $ids = $this->ids($items);
+        if (! $ids) {
+            return is_array($items) ? array_fill_keys($items, []) : [];
+        }
 
-	/**
-	 * Get the valid and non-ambiguous relations for each given page ID.
-	 *
-	 * If $primary is true, only primary relations are returned.
-	 *
-	 * If a single integer is passed, returns a map of rootPage -> page entries,
-	 * where page represents the related page in the respective rootPage.
-	 *
-	 * If an array of integers is passed, returns a map of page -> array
-	 * entries, where array is the same result as this method were called with
-	 * the respective page as a single integer argument.
-	 *
-	 * @param integer|array<integer> $items
-	 * @param boolean $primary
-	 * @param boolean $complete
-	 * @return array<integer, integer>|array<integer, array<integer, integer>>
-	 */
-	public function getRelations($items, $primary = false, $complete = false) {
-		if(!$ids = $this->ids($items)) {
-			return is_array($items) ? array_fill_keys($items, []) : [];
-		}
-
-		$sql = <<<SQL
+        $sql    = <<<SQL
 SELECT
 	item.item_id					AS item_id,
 	MAX(relation.related_item_id)	AS related_item_id,
@@ -107,78 +97,85 @@ GROUP BY
 HAVING
 	COUNT(relation.related_item_id) = 1
 SQL;
-		$result = $this->query(
-			$sql,
-			[
-				$this->itemView,
-				$this->relationView,
-				$this->wildcards($ids)
-			],
-			$ids
-		);
+        $result = $this->query(
+            $sql,
+            [
+                $this->itemView,
+                $this->relationView,
+                $this->wildcards($ids),
+            ],
+            $ids
+        );
 
-		$relations = array_fill_keys((array) $items, []);
+        $relations = array_fill_keys((array) $items, []);
 
-		while($result->next()) if(!$primary || $result->is_primary) {
-			$relations[$result->item_id][$result->related_root_page_id] = $result->related_item_id;
-		}
+        while ($result->next()) {
+            if ($primary && ! $result->is_primary) {
+                continue;
+            }
 
-		if(!$complete) {
-			foreach($relations as &$map) {
-				$map = array_filter($map, function($id) {
-					return $id !== null;
-				});
-			}
-			unset($map);
-		}
+            $relations[$result->item_id][$result->related_root_page_id] = $result->related_item_id;
+        }
 
-		return is_array($items) ? $relations : $relations[$items];
-	}
+        if (! $complete) {
+            foreach ($relations as &$map) {
+                $map = array_filter(
+                    $map,
+                    static function ($id) {
+                        return $id !== null;
+                    }
+                );
+            }
+            unset($map);
+        }
 
-	/**
-	 * Returns all pages that maintain a valid relation to the given page.
-	 *
-	 * The returned array is an identity map.
-	 *
-	 * @param integer $item
-	 * @return array<integer, integer>
-	 */
-	public function getItemsRelatedTo($item) {
-		if($item < 1) {
-			return [];
-		}
+        return is_array($items) ? $relations : $relations[$items];
+    }
 
-		$sql = 'SELECT item_id FROM %s WHERE related_item_id = ?';
-		$result = $this->query(
-			$sql,
-			[ $this->relationView ],
-			[ $item ]
-		);
+    /**
+     * Returns all pages that maintain a valid relation to the given page.
+     *
+     * The returned array is an identity map.
+     *
+     * @return int[]
+     */
+    public function getItemsRelatedTo(int $item) : array
+    {
+        if ($item < 1) {
+            return [];
+        }
 
-		$related = [];
-		while($result->next()) {
-			$related[$result->item_id] = $result->item_id;
-		}
+        $sql    = 'SELECT item_id FROM %s WHERE related_item_id = ?';
+        $result = $this->query(
+            $sql,
+            [$this->relationView],
+            [$item]
+        );
 
-		return $related;
-	}
+        $related = [];
+        while ($result->next()) {
+            $related[$result->item_id] = $result->item_id;
+        }
 
-	/**
-	 * Returns all items of the root page tree of the given page, that are
-	 * missing at least one relation into another root of their relation group.
-	 *
-	 * The returned array is a map of item IDs to a map of missing root IDs to
-	 * the roots language.
-	 *
-	 * @param integer $page
-	 * @return array<integer, array<integer, string>>
-	 */
-	public function getIncompleteRelatedItems($page) {
-		if($page < 1) {
-			return [];
-		}
+        return $related;
+    }
 
-		$sql = <<<SQL
+    /**
+     * Returns all items of the root page tree of the given page, that are
+     * missing at least one relation into another root of their relation group.
+     *
+     * The returned array is a map of item IDs to a map of missing root IDs to
+     * the roots language.
+     *
+     * @return int[][]
+     */
+    public function getIncompleteRelatedItems(int $page) : array
+    {
+        if ($page < 1) {
+            return [];
+        }
+
+        $sql    = <<<SQL
 SELECT
 	item.item_id				AS item_id,
 	group_root_page.id			AS missing_root_page_id,
@@ -210,42 +207,40 @@ WHERE
 	)
 	AND relation.item_id IS NULL
 SQL;
-		$result = $this->query(
-			$sql,
-			[
-				$this->itemView,
-				$this->relationView
-			],
-			[
-				$page
-			]
-		);
+        $result = $this->query(
+            $sql,
+            [
+                $this->itemView,
+                $this->relationView,
+            ],
+            [$page]
+        );
 
-		$incompletenesses = [];
-		while($result->next()) {
-			$incompletenesses[$result->item_id][$result->missing_root_page_id] = $result->missing_root_page_language;
-		}
+        $incompletenesses = [];
+        while ($result->next()) {
+            $incompletenesses[$result->item_id][$result->missing_root_page_id] = $result->missing_root_page_language;
+        }
 
-		return $incompletenesses;
-	}
+        return $incompletenesses;
+    }
 
-	/**
-	 * Returns all pages of the root page tree of the given page, that contain
-	 * multiple relations into the same language of their root's translation
-	 * group. These relations are called ambiguous and will be ignored by
-	 * ->getRelations.
-	 *
-	 * The returned array is an identity map.
-	 *
-	 * @param integer $page
-	 * @return array<integer, integer>
-	 */
-	public function getAmbiguousRelatedItems($page) {
-		if($page < 1) {
-			return [];
-		}
+    /**
+     * Returns all pages of the root page tree of the given page, that contain
+     * multiple relations into the same language of their root's translation
+     * group. These relations are called ambiguous and will be ignored by
+     * ->getRelations.
+     *
+     * The returned array is an identity map.
+     *
+     * @return int[]
+     */
+    public function getAmbiguousRelatedItems(int $page) : array
+    {
+        if ($page < 1) {
+            return [];
+        }
 
-		$sql = <<<SQL
+        $sql    = <<<SQL
 SELECT DISTINCT
 	item_id
 FROM
@@ -268,68 +263,71 @@ GROUP BY
 HAVING
 	COUNT(related_item_id) > 1
 SQL;
-		$result = $this->query(
-			$sql,
-			[ $this->relationView ],
-			[ $page ]
-		);
+        $result = $this->query(
+            $sql,
+            [$this->relationView],
+            [$page]
+        );
 
-		$ambiguities = [];
-		while($result->next()) {
-			$ambiguities[$result->item_id] = $result->item_id;
-		}
+        $ambiguities = [];
+        while ($result->next()) {
+            $ambiguities[$result->item_id] = $result->item_id;
+        }
 
-		return $ambiguities;
-	}
+        return $ambiguities;
+    }
 
-	/**
-	 * Creates relations from the given item to the given related items.
-	 *
-	 * CARE: Does not check the validity of the given relations!
-	 *
-	 * @param integer $item
-	 * @param integer|array<integer> $relatedItems
-	 * @return integer The number of created relations
-	 */
-	public function createRelations($item, $relatedItems) {
-		if($item < 1 || !$relatedItems = $this->ids($relatedItems)) {
-			return 0;
-		}
+    /**
+     * Creates relations from the given item to the given related items.
+     *
+     * CARE: Does not check the validity of the given relations!
+     *
+     * @param int|int[] $relatedItems
+     *
+     * @return int The number of created relations
+     */
+    public function createRelations(int $item, $relatedItems) : int
+    {
+        if ($item < 1) {
+            return 0;
+        }
+        $relatedItems = $this->ids($relatedItems);
+        if (! $relatedItems) {
+            return 0;
+        }
 
-		$sql = 'INSERT INTO %s (item_id, related_item_id) VALUES %s';
+        $sql = 'INSERT INTO %s (item_id, related_item_id) VALUES %s';
 
-		$params = [];
-		foreach($relatedItems as $relatedItem) {
-			$params[] = $item;
-			$params[] = $relatedItem;
-		}
+        $params = [];
+        foreach ($relatedItems as $relatedItem) {
+            $params[] = $item;
+            $params[] = $relatedItem;
+        }
 
-		$result = $this->query(
-			$sql,
-			[
-				$this->relationTable,
-				$this->wildcards($relatedItems, '(?,?)')
-			],
-			$params
-		);
+        $result = $this->query(
+            $sql,
+            [
+                $this->relationTable,
+                $this->wildcards($relatedItems, '(?,?)'),
+            ],
+            $params
+        );
 
-		return $result->affectedRows;
-	}
+        return $result->affectedRows;
+    }
 
-	/**
-	 * Create relations between the items that the given item is related to and
-	 * the given item itself, if none exists for them in the given item's
-	 * relation root already.
-	 *
-	 * @param integer $item
-	 * @return integer
-	 */
-	public function createReflectionRelations($item) {
-		if($item < 1) {
-			return 0;
-		}
+    /**
+     * Create relations between the items that the given item is related to and
+     * the given item itself, if none exists for them in the given item's
+     * relation root already.
+     */
+    public function createReflectionRelations(int $item) : int
+    {
+        if ($item < 1) {
+            return 0;
+        }
 
-		$sql = <<<SQL
+        $sql    = <<<SQL
 INSERT INTO
 	%s
 	(item_id, related_item_id)
@@ -349,35 +347,31 @@ WHERE
 	AND relation.is_valid
 	AND reflected_relation.item_id IS NULL
 SQL;
-		$result = $this->query(
-			$sql,
-			[
-				$this->relationTable,
-				$this->relationView,
-				$this->relationView
-			],
-			[
-				$item
-			]
-		);
+        $result = $this->query(
+            $sql,
+            [
+                $this->relationTable,
+                $this->relationView,
+                $this->relationView,
+            ],
+            [$item]
+        );
 
-		return $result->affectedRows;
-	}
+        return $result->affectedRows;
+    }
 
-	/**
-	 * Create relations between the items that the given item is related to and
-	 * themselfs, if none exists for them in their respective relation roots
-	 * already.
-	 *
-	 * @param integer $item
-	 * @return integer
-	 */
-	public function createIntermediateRelations($item) {
-		if($item < 1) {
-			return 0;
-		}
+    /**
+     * Create relations between the items that the given item is related to and
+     * themselfs, if none exists for them in their respective relation roots
+     * already.
+     */
+    public function createIntermediateRelations(int $item) : int
+    {
+        if ($item < 1) {
+            return 0;
+        }
 
-		$sql = <<<SQL
+        $sql    = <<<SQL
 INSERT INTO
 	%s
 	(item_id, related_item_id)
@@ -404,60 +398,63 @@ WHERE
 	AND left_relation.is_valid
 	AND intermediate_relation.item_id IS NULL
 SQL;
-		$result = $this->query(
-			$sql,
-			[
-				$this->relationTable,
-				$this->relationView,
-				$this->relationView,
-				$this->relationView
-			],
-			[
-				$item
-			]
-		);
+        $result = $this->query(
+            $sql,
+            [
+                $this->relationTable,
+                $this->relationView,
+                $this->relationView,
+                $this->relationView,
+            ],
+            [$item]
+        );
 
-		return $result->affectedRows;
-	}
+        return $result->affectedRows;
+    }
 
-	/**
-	 * Deletes all relations that orignate at one of the given items.
-	 *
-	 * @param integer|array<integer> $items
-	 * @return integer
-	 */
-	public function deleteRelationsFrom($items) {
-		if(!$items = $this->ids($items)) {
-			return 0;
-		}
+    /**
+     * Deletes all relations that orignate at one of the given items.
+     *
+     * @param int|int[] $items
+     */
+    public function deleteRelationsFrom($items) : int
+    {
+        $items = $this->ids($items);
+        if (! $items) {
+            return 0;
+        }
 
-		$sql = 'DELETE FROM %s WHERE item_id IN (%s)';
-		$result = $this->query(
-			$sql,
-			[
-				$this->relationTable,
-				$this->wildcards($items)
-			],
-			$items
-		);
+        $sql    = 'DELETE FROM %s WHERE item_id IN (%s)';
+        $result = $this->query(
+            $sql,
+            [
+                $this->relationTable,
+                $this->wildcards($items),
+            ],
+            $items
+        );
 
-		return $result->affectedRows;
-	}
+        return $result->affectedRows;
+    }
 
-	/**
-	 * Deletes all relations of the given items into the relation root of the
-	 * given page.
-	 *
-	 * @param integer|array<integer> $items
-	 * @param integer $page
-	 * @return integer
-	 */
-	public function deleteRelationsToRoot($items, $page) {
-		if($page < 1 || !$items = $this->ids($items)) {
-			return 0;
-		}
+    /**
+     * Deletes all relations of the given items into the relation root of the
+     * given page.
+     *
+     * @param int|int[] $items
+     * @param int       $page
+     */
+    public function deleteRelationsToRoot($items, $page) : int
+    {
+        if ($page < 1) {
+            return 0;
+        }
+        $items = $this->ids($items);
+        if (! $items) {
+            return 0;
+        }
 
-		$sql = <<<SQL
+        $sql      = <<<SQL
 DELETE
 	relation
 FROM
@@ -479,49 +476,52 @@ WHERE
 			page_1.id = ?
 	)
 SQL;
-		$params = $items;
-		$params[] = $page;
-		$result = $this->query(
-			$sql,
-			[
-				$this->relationTable,
-				$this->itemView,
-				$this->wildcards($items)
-			],
-			$params
-		);
+        $params   = $items;
+        $params[] = $page;
+        $result   = $this->query(
+            $sql,
+            [
+                $this->relationTable,
+                $this->itemView,
+                $this->wildcards($items),
+            ],
+            $params
+        );
 
-		return $result->affectedRows;
-	}
+        return $result->affectedRows;
+    }
 
-	/**
-	 * @param string $sql
-	 * @param array|null $placeholders
-	 * @param array|null $params
-	 * @return Result
-	 * @deprecated
-	 */
-	protected function query($sql, array $placeholders = null, array $params = null) {
-		return QueryUtil::query($sql, $placeholders, $params);
-	}
+    /**
+     * @deprecated
+     *
+     * @param mixed[]|null $placeholders
+     * @param mixed[]|null $params
+     */
+    protected function query(string $sql, ?array $placeholders = null, ?array $params = null) : Result
+    {
+        return QueryUtil::query($sql, $placeholders, $params);
+    }
 
-	/**
-	 * @param mixed $params
-	 * @param string $wildcard
-	 * @return string
-	 * @deprecated
-	 */
-	protected function wildcards($params, $wildcard = '?') {
-		return QueryUtil::wildcards($params, $wildcard);
-	}
+    /**
+     * @deprecated
+     *
+     * @param mixed  $params
+     * @param string $wildcard
+     */
+    protected function wildcards($params, $wildcard = '?') : string
+    {
+        return QueryUtil::wildcards($params, $wildcard);
+    }
 
-	/**
-	 * @param integer|array<integer> $ids
-	 * @return array<integer>
-	 * @deprecated
-	 */
-	protected function ids($ids) {
-		return QueryUtil::ids($ids);
-	}
-
+    /**
+     * @deprecated
+     *
+     * @param int|int[] $ids
+     *
+     * @return int[]
+     */
+    protected function ids($ids) : array
+    {
+        return QueryUtil::ids($ids);
+    }
 }
