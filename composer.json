@@ -18,7 +18,7 @@
     "contao/core-bundle": "^4.4",
     "hofff/contao-selectri": "^4.0.2",
     "hofff/contao-root-relations": "^3.0@dev",
-    "menatwork/contao-multicolumnwizard" : "^3.2",
+    "menatwork/contao-multicolumnwizard-bundle" : "^3.4",
     "symfony/dependency-injection": "^3.3 || ^4.0",
     "symfony/http-kernel": "^3.3 || ^4.0"
   },
