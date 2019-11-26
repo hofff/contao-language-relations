@@ -89,25 +89,26 @@ class RelationsDCABuilder
 
     protected function onsubmitCallback(DataContainer $dc) : void
     {
-        if (! isset($this->submittedRelations[$dc->id])) {
+        $id = (int) $dc->id;
+        if (! isset($this->submittedRelations[$id])) {
             return;
         }
 
-        $submittedRelations = $this->submittedRelations[$dc->id];
-        unset($this->submittedRelations[$dc->id]);
+        $submittedRelations = $this->submittedRelations[$id];
+        unset($this->submittedRelations[$id]);
 
         $makePrimary = array_keys(array_filter($submittedRelations, static function ($relation) {
             return (bool) $relation['primary'];
         }));
 
         $relations = $this->config->getRelations();
-        $relations->deleteRelationsFrom($dc->id);
-        $relations->deleteRelationsToRoot($makePrimary, $dc->id);
-        if (! $relations->createRelations($dc->id, array_keys($submittedRelations))) {
+        $relations->deleteRelationsFrom($id);
+        $relations->deleteRelationsToRoot($makePrimary, $id);
+        if (! $relations->createRelations($id, array_keys($submittedRelations))) {
             return;
         }
-        $relations->createReflectionRelations($dc->id);
-        $relations->createIntermediateRelations($dc->id);
+        $relations->createReflectionRelations($id);
+        $relations->createIntermediateRelations($id);
     }
 
     /**
@@ -127,20 +128,21 @@ class RelationsDCABuilder
     }
 
     /**
-     * @param string[] $value
+     * @param string $value
      *
      * @return null
      *
      * @throws Exception
      */
-    protected function saveRelationsCallback(array $value, DataContainer $dc)
+    protected function saveRelationsCallback(string $value, DataContainer $dc)
     {
         $value = StringUtil::deserialize($value, true);
 
-        $this->validateRelationUniquePerRoot($dc->id, array_keys($value));
-        $this->validateRelationRoots($dc->id, array_keys($value));
+        $id = (int) $dc->id;
+        $this->validateRelationUniquePerRoot($id, array_keys($value));
+        $this->validateRelationRoots($id, array_keys($value));
 
-        $this->submittedRelations[$dc->id] = $value;
+        $this->submittedRelations[$id] = $value;
 
         return null;
     }

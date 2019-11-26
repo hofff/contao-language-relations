@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\LanguageRelations;
 
-use Contao\Database\Result;
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
 use function array_fill_keys;
 use function array_filter;
@@ -63,7 +62,7 @@ class Relations
      */
     public function getRelations($items, $primary = false, $complete = false) : array
     {
-        $ids = $this->ids($items);
+        $ids = QueryUtil::ids($items);
         if (! $ids) {
             return is_array($items) ? array_fill_keys($items, []) : [];
         }
@@ -97,12 +96,12 @@ GROUP BY
 HAVING
 	COUNT(relation.related_item_id) = 1
 SQL;
-        $result = $this->query(
+        $result = QueryUtil::query(
             $sql,
             [
                 $this->itemView,
                 $this->relationView,
-                $this->wildcards($ids),
+                QueryUtil::wildcards($ids),
             ],
             $ids
         );
@@ -146,7 +145,7 @@ SQL;
         }
 
         $sql    = 'SELECT item_id FROM %s WHERE related_item_id = ?';
-        $result = $this->query(
+        $result = QueryUtil::query(
             $sql,
             [$this->relationView],
             [$item]
@@ -207,7 +206,7 @@ WHERE
 	)
 	AND relation.item_id IS NULL
 SQL;
-        $result = $this->query(
+        $result = QueryUtil::query(
             $sql,
             [
                 $this->itemView,
@@ -263,7 +262,7 @@ GROUP BY
 HAVING
 	COUNT(related_item_id) > 1
 SQL;
-        $result = $this->query(
+        $result = QueryUtil::query(
             $sql,
             [$this->relationView],
             [$page]
@@ -291,7 +290,7 @@ SQL;
         if ($item < 1) {
             return 0;
         }
-        $relatedItems = $this->ids($relatedItems);
+        $relatedItems = QueryUtil::ids($relatedItems);
         if (! $relatedItems) {
             return 0;
         }
@@ -304,11 +303,11 @@ SQL;
             $params[] = $relatedItem;
         }
 
-        $result = $this->query(
+        $result = QueryUtil::exec(
             $sql,
             [
                 $this->relationTable,
-                $this->wildcards($relatedItems, '(?,?)'),
+                QueryUtil::wildcards($relatedItems, '(?,?)'),
             ],
             $params
         );
@@ -347,7 +346,7 @@ WHERE
 	AND relation.is_valid
 	AND reflected_relation.item_id IS NULL
 SQL;
-        $result = $this->query(
+        $result = QueryUtil::exec(
             $sql,
             [
                 $this->relationTable,
@@ -398,7 +397,7 @@ WHERE
 	AND left_relation.is_valid
 	AND intermediate_relation.item_id IS NULL
 SQL;
-        $result = $this->query(
+        $result = QueryUtil::exec(
             $sql,
             [
                 $this->relationTable,
@@ -419,17 +418,17 @@ SQL;
      */
     public function deleteRelationsFrom($items) : int
     {
-        $items = $this->ids($items);
+        $items = QueryUtil::ids($items);
         if (! $items) {
             return 0;
         }
 
         $sql    = 'DELETE FROM %s WHERE item_id IN (%s)';
-        $result = $this->query(
+        $result = QueryUtil::exec(
             $sql,
             [
                 $this->relationTable,
-                $this->wildcards($items),
+                QueryUtil::wildcards($items),
             ],
             $items
         );
@@ -449,7 +448,7 @@ SQL;
         if ($page < 1) {
             return 0;
         }
-        $items = $this->ids($items);
+        $items = QueryUtil::ids($items);
         if (! $items) {
             return 0;
         }
@@ -478,50 +477,16 @@ WHERE
 SQL;
         $params   = $items;
         $params[] = $page;
-        $result   = $this->query(
+        $result   = QueryUtil::exec(
             $sql,
             [
                 $this->relationTable,
                 $this->itemView,
-                $this->wildcards($items),
+                QueryUtil::wildcards($items),
             ],
             $params
         );
 
         return $result->affectedRows;
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param mixed[]|null $placeholders
-     * @param mixed[]|null $params
-     */
-    protected function query(string $sql, ?array $placeholders = null, ?array $params = null) : Result
-    {
-        return QueryUtil::query($sql, $placeholders, $params);
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param mixed  $params
-     * @param string $wildcard
-     */
-    protected function wildcards($params, $wildcard = '?') : string
-    {
-        return QueryUtil::wildcards($params, $wildcard);
-    }
-
-    /**
-     * @deprecated
-     *
-     * @param int|int[] $ids
-     *
-     * @return int[]
-     */
-    protected function ids($ids) : array
-    {
-        return QueryUtil::ids($ids);
     }
 }
