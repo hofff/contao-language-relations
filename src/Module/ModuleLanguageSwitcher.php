@@ -60,7 +60,7 @@ class ModuleLanguageSwitcher extends Module
             $tpl->title    = $this->headline;
             $tpl->id       = $this->id;
             $tpl->link     = $this->name;
-            $tpl->href     = 'contao/main.php?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+            $tpl->href     = 'contao?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
             return $tpl->parse();
         }
 

@@ -14,3 +14,5 @@ $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][0]
     = 'Sprachenwechsler';
 $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][1]
     = 'Eine Navigation um zu anderen Sprachen dieser Seite zu wechseln.';
+
+$GLOBALS['TL_LANG']['MOD']['backend-language-switcher'] = 'Zwischen den Übersetzungen der Seiten springen';

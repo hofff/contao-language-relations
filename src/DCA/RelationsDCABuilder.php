@@ -128,8 +128,6 @@ class RelationsDCABuilder
     }
 
     /**
-     * @param string $value
-     *
      * @return null
      *
      * @throws Exception
@@ -374,7 +372,10 @@ SQL;
 
         $tpl->name      = $node->getAdditionalInputName('primary');
         $tpl->id        = $data->getWidget()->name . '_hofff_language_relations_primary_' . $node->getKey();
-        $tpl->isPrimary = $this->isRelated((int) $node->getKey(), (int) $jsOptions['qs']['hofff_language_relations_id']);
+        $tpl->isPrimary = $this->isRelated(
+            (int) $node->getKey(),
+            (int) $jsOptions['qs']['hofff_language_relations_id']
+        );
 
         return $tpl->parse();
     }

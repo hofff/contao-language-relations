@@ -14,3 +14,5 @@ $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][0]
     = 'Language switcher';
 $GLOBALS['TL_LANG']['FMD']['hofff_language_relations_language_switcher'][1]
     = 'A navigation menu linking to other languages of the current page.';
+
+$GLOBALS['TL_LANG']['MOD']['backend-language-switcher'] = 'Jump between the translations of the pages';

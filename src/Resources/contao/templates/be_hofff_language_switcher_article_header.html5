@@ -1,0 +1,9 @@
+<ul>
+  <?php foreach ($this->arrArticles as $article): ?>
+    <li>
+      <a <?php if ($article['isActive']) echo 'class="active" '; ?>title="" href="<?= $article['href']; ?>">
+        <?= $article['language']; ?> <span class="id">(ID: <?= $article['id'];?>)</span>
+      </a>
+    </li>
+  <?php endforeach; ?>
+</ul>

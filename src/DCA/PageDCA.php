@@ -4,18 +4,30 @@ declare(strict_types=1);
 
 namespace Hofff\Contao\LanguageRelations\DCA;
 
+use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\Database\Result;
 use Contao\DataContainer;
+use Contao\Input;
+use Contao\PageModel;
 use Hofff\Contao\LanguageRelations\Relations;
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
+use function array_keys;
+use function serialize;
 use function time;
+use function usort;
 
 class PageDCA
 {
     /** @var Relations */
     private $relations;
 
+    /** @var mixed[][] */
+    public static $pageCache = [];
+
+    /**
+     * Create a new instance.
+     */
     public function __construct()
     {
         $this->relations = new Relations(
@@ -56,7 +68,7 @@ class PageDCA
         $this->copyRelations((int) $dc->id, $insertID, $insertID);
     }
 
-    protected function copyRelations(int $original, int $copy, int $copyStart) : void
+    private function copyRelations(int $original, int $copy, int $copyStart) : void
     {
         $original = $this->getPageInfo($original);
         $copy     = $this->getPageInfo($copy);
@@ -118,7 +130,79 @@ class PageDCA
         }
     }
 
-    protected function getPageInfo(int $id) : Result
+    public function addPageTranslationLinks() : void
+    {
+        if (Input::get('act') !== 'edit' || ! $this->relations->getRelations(Input::get('id'))) {
+            return;
+        }
+
+        $GLOBALS['TL_CSS']['hofffcontaolanguagerelations_be'] = 'bundles/hofffcontaolanguagerelations/css/backend.css';
+        foreach (array_keys($GLOBALS['TL_DCA']['tl_page']['palettes']) as $key) {
+            //skip '__selector__
+            if ($key === '__selector__') {
+                continue;
+            }
+            $GLOBALS['TL_DCA']['tl_page']['palettes'][$key] = 'hofff_language_relations_page_links;' .
+                $GLOBALS['TL_DCA']['tl_page']['palettes'][$key];
+        }
+    }
+
+    /**
+     * Compare current page language against the stored once.
+     */
+    public function getLinkedPages() : string
+    {
+        //get the related languaged
+        $relations = $this->relations->getRelations(Input::get('id'));
+        //add the curent id
+        $relations[] = Input::get('id');
+        //get page details and sorting info
+        $this->collectPageDetails($relations);
+        usort($relations, static function ($a, $b) {
+            return static::$pageCache[$a]['rootIdSorting'] < static::$pageCache[$b]['rootIdSorting'] ? -1 : 1;
+        });
+        //build return array
+        $newValues = [];
+        foreach ($relations as $value) {
+            $newValues[] = [
+                'linkedPages'    => $value,
+                'value'      => '',
+            ];
+        }
+        return serialize($newValues);
+    }
+
+    /**
+     * @return string returns an empty string.
+     */
+    public function returnEmptyString() : string
+    {
+        return '';
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getTranslationPages() : array
+    {
+        $return = [];
+        $ids    = $this->relations->getRelations(Input::get('id'));
+        $ids[]  = Input::get('id');
+        foreach ($ids as $value) {
+            $template     = new BackendTemplate('be_hofff_language_switcher_page');
+            $page         = PageModel::findWithDetails($value)->row();
+            $page['href'] = Backend::addToUrl('do=page&act=edit&id=' . $value);
+            if (Input::get('id') === $value) {
+                $page['isActive'] = true;
+            }
+            $template->page = $page;
+            $return[$value] = $template->parse();
+        }
+
+        return $return;
+    }
+
+    private function getPageInfo(int $id) : Result
     {
         $sql = <<<SQL
 SELECT
@@ -137,5 +221,23 @@ WHERE
 	page.id = ?
 SQL;
         return QueryUtil::query($sql, null, [ $id ]);
+    }
+
+    /**
+     * @param int[] $pageIds
+     */
+    private function collectPageDetails(array $pageIds) : void
+    {
+        foreach ($pageIds as $value) {
+            if (static::$pageCache[$value]) {
+                continue;
+            }
+
+            static::$pageCache[$value]                  = PageModel::findWithDetails($value)->row();
+            static::$pageCache[$value]['rootIdSorting'] = QueryUtil::query(
+                'SELECT sorting FROM tl_page WHERE id = ?',
+                [static::$pageCache[$value]['rootId']]
+            )->sorting;
+        }
     }
 }

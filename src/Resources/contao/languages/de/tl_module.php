@@ -19,9 +19,13 @@ $GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_keep_qs'][1]
 
 $GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_labels'][0]
    = 'Beschriftung &amp; Sortierung';
+
 $GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_labels'][1]
-   = 'Die Sortierung wird für die Navigation übernommen. Die Beschriftung ist optional. Standardmäßig wird die Beschriftung einer Sprache in jener angezeigt.';
+   = 'Die Sortierung wird für die Navigation übernommen. Die Beschriftung ist optional. '
+    . 'Standardmäßig wird die Beschriftung einer Sprache in jener angezeigt.';
+
 $GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_language'][0]
     = 'Sprache';
+
 $GLOBALS['TL_LANG']['tl_module']['hofff_language_relations_label'][0]
     = 'Beschriftung';
