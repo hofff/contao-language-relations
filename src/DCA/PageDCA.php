@@ -91,8 +91,8 @@ class PageDCA
         } elseif ($original->root_page_id !== $copy->root_page_id && $original->group_id === $copy->group_id) {
             $relatedItems   = $this->relations->getRelations($original->id);
             $relatedItems[] = $original->id;
-            $this->relations->createRelations($copy->id, $relatedItems);
-            $this->relations->createReflectionRelations($copy->id);
+            $this->relations->createRelations((int) $copy->id, $relatedItems);
+            $this->relations->createReflectionRelations((int) $copy->id);
         }
 
         $copyChildren = QueryUtil::query(
@@ -114,7 +114,7 @@ class PageDCA
         }
 
         while ($originalChildren->next() && $copyChildren->next()) {
-            $this->copyRelations($originalChildren->id, $copyChildren->id, $copyStart);
+            $this->copyRelations((int) $originalChildren->id, (int) $copyChildren->id, $copyStart);
         }
     }
 
