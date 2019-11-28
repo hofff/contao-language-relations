@@ -53,7 +53,7 @@ class PageDCA
 
     public function oncopyCallback(int $insertID, DataContainer $dc) : void
     {
-        $this->copyRelations($dc->id, $insertID, $insertID);
+        $this->copyRelations((int) $dc->id, $insertID, $insertID);
     }
 
     protected function copyRelations(int $original, int $copy, int $copyStart) : void
