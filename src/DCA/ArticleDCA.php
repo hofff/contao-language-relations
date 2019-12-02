@@ -62,10 +62,8 @@ class ArticleDCA
 
     /**
      * Compare current page language against the stored once.
-     *
-     * @param array $varValue
      */
-    public function getLinkedArticles(array $varValue) : string
+    public function getLinkedArticles() : string
     {
         $objArticle = \ArticleModel::findByPk(Input::get('id'));
         //get the related pages
@@ -80,6 +78,7 @@ class ArticleDCA
         usort($arrPages, static function ($a, $b) {
             return static::$articleCache[$a]['rootIdSorting'] < static::$articleCache[$b]['rootIdSorting'] ? -1 : 1;
         });
+        $newValues = [];
         //build return array
         foreach ($arrPages as $value) {
             $newValues[] = [
