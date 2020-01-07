@@ -90,13 +90,14 @@ class GroupDCA
             return;
         }
 
-        $session                       = Session::getInstance()->getData();
+        $sessionService                = \System::getContainer()->get('session');
+        $session                       = $sessionService->all();
         $session['CURRENT']['IDS']     = $ids;
         $session['CURRENT']['tl_page'] = $fields;
-        Session::getInstance()->setData($session);
+        $sessionService->replace($session);
 
         Controller::redirect(
-            'contao/main.php?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN
+            'contao?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN
         );
     }
 
