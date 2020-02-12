@@ -10,7 +10,6 @@ use Contao\Database;
 use Contao\DataContainer;
 use Contao\Input;
 use Contao\Message;
-use Contao\Session;
 use Contao\StringUtil;
 use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;

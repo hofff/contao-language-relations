@@ -20,6 +20,7 @@ class ArticleDCA
     /** @var Relations */
     private $relations;
 
+    /** @var array<int, ArticleModel[]> */
     public static $articleCache = [];
 
     public function __construct()
@@ -56,7 +57,8 @@ class ArticleDCA
             if ($key === '__selector__') {
                 continue;
             }
-            $GLOBALS['TL_DCA']['tl_article']['palettes'][$key] = 'hofff_language_relations_article_links;' . $GLOBALS['TL_DCA']['tl_article']['palettes'][$key];
+            $GLOBALS['TL_DCA']['tl_article']['palettes'][$key] =
+                'hofff_language_relations_article_links;' . $GLOBALS['TL_DCA']['tl_article']['palettes'][$key];
         }
     }
 
