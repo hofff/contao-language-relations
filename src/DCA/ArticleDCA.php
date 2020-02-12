@@ -67,7 +67,7 @@ class ArticleDCA
      */
     public function getLinkedArticles() : string
     {
-        $objArticle = \ArticleModel::findByPk(Input::get('id'));
+        $objArticle = ArticleModel::findByPk(Input::get('id'));
         //get the related pages
         $arrPages = $this->relations->getRelations($objArticle->pid);
         //add the curent pid
@@ -155,9 +155,9 @@ class ArticleDCA
                 [Input::get('id')]
             )->pid;
 
-            $articleModel = \ArticleModel::findByPk($intCePid);
+            $articleModel = ArticleModel::findByPk($intCePid);
         } else {
-            $articleModel = \ArticleModel::findByPk(\Input::get('id'));
+            $articleModel = ArticleModel::findByPk(Input::get('id'));
         }
         //get the related pages
         $ids = $this->relations->getRelations($articleModel->pid);

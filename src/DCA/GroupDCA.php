@@ -89,7 +89,7 @@ class GroupDCA
             return;
         }
 
-        $sessionService                = \System::getContainer()->get('session');
+        $sessionService                = System::getContainer()->get('session');
         $session                       = $sessionService->all();
         $session['CURRENT']['IDS']     = $ids;
         $session['CURRENT']['tl_page'] = $fields;
