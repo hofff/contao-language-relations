@@ -20,8 +20,8 @@
     "hofff/contao-selectri": "^4.0.2",
     "hofff/contao-root-relations": "^3.0",
     "menatwork/contao-multicolumnwizard-bundle" : "^3.4",
-    "symfony/dependency-injection": "^3.3 || ^4.0",
-    "symfony/http-kernel": "^3.3 || ^4.0"
+    "symfony/dependency-injection": "^3.4.26 || ^4.2.7",
+    "symfony/http-kernel": "^3.4.26 || ^4.2.7"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.1",
