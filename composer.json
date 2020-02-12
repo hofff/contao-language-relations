@@ -17,7 +17,7 @@
     "ext-intl": "*",
     "contao/core-bundle": "^4.4",
     "discordier/justtextwidgets": "^1.2",
-    "hofff/contao-selectri": "^4.0.3",
+    "hofff/contao-selectri": "^4.0.5",
     "hofff/contao-root-relations": "^3.0",
     "menatwork/contao-multicolumnwizard-bundle" : "^3.4",
     "symfony/dependency-injection": "^3.4.26 || ^4.2.7",
