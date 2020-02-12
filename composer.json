@@ -18,7 +18,7 @@
     "contao/core-bundle": "^4.4",
     "discordier/justtextwidgets": "^1.2",
     "hofff/contao-selectri": "^4.0.2",
-    "hofff/contao-root-relations": "^3.0@dev",
+    "hofff/contao-root-relations": "^3.0",
     "menatwork/contao-multicolumnwizard-bundle" : "^3.4",
     "symfony/dependency-injection": "^3.3 || ^4.0",
     "symfony/http-kernel": "^3.3 || ^4.0"
@@ -37,8 +37,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-release/3.0": "3.0.x-dev",
-      "dev-support/2.x": "2.1.x-dev"
+      "dev-master": "3.0.x-dev"
     },
     "contao-manager-plugin": "Hofff\\Contao\\LanguageRelations\\ContaoManager\\Plugin"
   }
