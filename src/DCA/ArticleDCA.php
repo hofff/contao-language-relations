@@ -220,10 +220,8 @@ class ArticleDCA
             }
             static::$articleCache[$pageId] = $articleCollection->getModels();
             $page                          = QueryUtil::query(
-                <<<EOF
-                    SELECT * FROM tl_page WHERE id = (
-                    SELECT hofff_root_page_id FROM tl_page WHERE id = ? LIMIT 1) LIMIT 1
-                EOF,
+                'SELECT * FROM tl_page WHERE id = (
+                 SELECT hofff_root_page_id FROM tl_page WHERE id = ? LIMIT 1) LIMIT 1',
                 null,
                 [$pageId]
             );
