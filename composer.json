@@ -16,6 +16,12 @@
       "email": "christian@hofff.com",
       "homepage": "https://www.hofff.com",
       "role": "Developer"
+    },
+    {
+      "name": "Oliver Hoff",
+      "email": "oliver@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Creator"
     }
   ],
   "require": {
