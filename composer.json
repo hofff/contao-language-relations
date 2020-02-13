@@ -9,7 +9,13 @@
       "name": "Nicky Hoff",
       "email": "nick@hofff.com",
       "homepage": "https://www.hofff.com",
-      "role": "Manager"
+      "role": "Maintainer"
+    },
+    {
+      "name": "Christian Schiffler",
+      "email": "christian@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Developer"
     }
   ],
   "require": {
