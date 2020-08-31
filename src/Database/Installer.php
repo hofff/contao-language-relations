@@ -17,18 +17,16 @@ class Installer
      */
     public function hookSQLCompileCommands(array $queries) : array
     {
-        $tables = array_flip(Database::getInstance()->listTables(null, true));
-
-        if (! isset($tables['hofff_language_relations_page_item'])) {
+        if (! self::hasView('hofff_language_relations_page_item')) {
             $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getItemView());
         }
-        if (! isset($tables['hofff_language_relations_page_relation'])) {
+        if (! self::hasView('hofff_language_relations_page_relation')) {
             $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getRelationView());
         }
-        if (! isset($tables['hofff_language_relations_page_aggregate'])) {
+        if (! self::hasView('hofff_language_relations_page_aggregate')) {
             $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getAggregateView());
         }
-        if (! isset($tables['hofff_language_relations_page_tree'])) {
+        if (! self::hasView('hofff_language_relations_page_tree')) {
             $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getTreeView());
         }
 
@@ -145,5 +143,10 @@ JOIN
 	AS root_page
 	ON root_page.id = page.hofff_root_page_id
 SQL;
+    }
+
+    private static function hasView($view) : bool
+    {
+        return (bool) Database::getInstance()->prepare('SHOW TABLES LIKE ?')->execute($view)->numRows;
     }
 }
