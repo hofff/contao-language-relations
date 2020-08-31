@@ -6,7 +6,6 @@ namespace Hofff\Contao\LanguageRelations\Database;
 
 use Contao\Database;
 use Hofff\Contao\LanguageRelations\Util\StringUtil;
-use function array_flip;
 
 class Installer
 {
@@ -145,7 +144,7 @@ JOIN
 SQL;
     }
 
-    private static function hasView($view) : bool
+    private static function hasView(string $view) : bool
     {
         return (bool) Database::getInstance()->prepare('SHOW TABLES LIKE ?')->execute($view)->numRows;
     }

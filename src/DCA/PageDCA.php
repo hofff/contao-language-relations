@@ -63,9 +63,12 @@ class PageDCA
         return $tpl->parse();
     }
 
-    public function oncopyCallback(int $insertID, DataContainer $dc) : void
+    /**
+     * @param string|int $insertID
+     */
+    public function oncopyCallback($insertID, DataContainer $dc) : void
     {
-        $this->copyRelations((int) $dc->id, $insertID, $insertID);
+        $this->copyRelations((int) $dc->id, (int) $insertID, (int) $insertID);
     }
 
     private function copyRelations(int $original, int $copy, int $copyStart) : void

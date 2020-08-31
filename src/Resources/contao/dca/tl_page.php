@@ -60,7 +60,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['sql']['keys']['hofff_language_relations
     'index';
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_group_id']['sql'] =
-    'int(10) unsigned NOT NULL default \'0\'';
+    'int(10) unsigned default \'0\'';
 
 $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_info'] = [
     'label'                => &$GLOBALS['TL_LANG']['tl_page']['hofff_language_relations_info'],

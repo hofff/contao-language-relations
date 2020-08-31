@@ -211,9 +211,11 @@ SQL;
     }
 
     /**
+     * @param string|int $value
+     *
      * @return null
      */
-    public function saveRoots(int $value, DataContainer $dc)
+    public function saveRoots($value, DataContainer $dc)
     {
         $this->roots[$dc->id] = $value;
         return null;

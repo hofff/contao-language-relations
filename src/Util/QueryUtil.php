@@ -18,8 +18,10 @@ class QueryUtil
     /**
      * @param mixed[]|null $placeholders
      * @param mixed[]|null $params
+     *
+     * @return Result|Statement
      */
-    public static function query(string $sql, ?array $placeholders = null, ?array $params = null) : Result
+    public static function query(string $sql, ?array $placeholders = null, ?array $params = null)
     {
         $placeholders === null || $sql = vsprintf($sql, $placeholders);
         return Database::getInstance()->prepare($sql)->execute($params);
@@ -28,8 +30,10 @@ class QueryUtil
     /**
      * @param mixed[]|null $placeholders
      * @param mixed[]|null $params
+     *
+     * @return Result|Statement
      */
-    public static function exec(string $sql, ?array $placeholders = null, ?array $params = null) : Statement
+    public static function exec(string $sql, ?array $placeholders = null, ?array $params = null)
     {
         $placeholders === null || $sql = vsprintf($sql, $placeholders);
         return Database::getInstance()->prepare($sql)->execute($params);

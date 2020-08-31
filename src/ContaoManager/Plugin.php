@@ -17,7 +17,8 @@ final class Plugin implements BundlePluginInterface
     /** @return ConfigInterface[] */
     public function getBundles(ParserInterface $parser) : array
     {
-        return [BundleConfig::create(HofffContaoLanguageRelationsBundle::class)
+        return [
+            BundleConfig::create(HofffContaoLanguageRelationsBundle::class)
                 ->setLoadAfter([ContaoCoreBundle::class, HofffContaoRootRelationsBundle::class]),
         ];
     }
