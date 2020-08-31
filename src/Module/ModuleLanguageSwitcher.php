@@ -129,8 +129,10 @@ class ModuleLanguageSwitcher extends Module
 
         if ($this->hofff_language_relations_keep_qs) {
             foreach ($items as &$item) {
-                $item['href'] .= strpos($item['href'], '?') === false ? '?' : '&';
-                $item['href'] .= Environment::get('queryString');
+                if ($queryString = Environment::get('queryString')) {
+                    $item['href'] .= strpos($item['href'], '?') === false ? '?' : '&';
+                    $item['href'] .= $queryString;
+                }
             }
             unset($item);
         }
