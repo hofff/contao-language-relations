@@ -3,7 +3,7 @@
   "description": "Maintaining relations between translated pages.",
   "keywords": [ "utility", "translation", "page", "tree", "contao" ],
   "type": "contao-bundle",
-  "license": "LGPL-3.0+",
+  "license": "LGPL-3.0-or-later",
   "authors": [
     {
       "name": "Nicky Hoff",
@@ -14,6 +14,12 @@
     {
       "name": "Christian Schiffler",
       "email": "christian@hofff.com",
+      "homepage": "https://www.hofff.com",
+      "role": "Developer"
+    },
+    {
+      "name": "David Molineus",
+      "email": "david@hofff.com",
       "homepage": "https://www.hofff.com",
       "role": "Developer"
     },
