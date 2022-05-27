@@ -6,6 +6,7 @@ use Hofff\Contao\LanguageRelations\Database\Installer;
 use Hofff\Contao\LanguageRelations\DCA\GroupDCA;
 use Hofff\Contao\LanguageRelations\DCA\PageDCA;
 use Hofff\Contao\LanguageRelations\Module\ModuleLanguageSwitcher;
+use Hofff\Contao\LanguageRelations\Widget\TextOptionsWidget;
 
 $GLOBALS['BE_MOD']['design']['hofff_language_relations_group']['tables'][]
     = 'tl_hofff_language_relations_group';
@@ -33,3 +34,6 @@ $GLOBALS['TL_HOOKS']['loadDataContainer']['hofff_language_relations']
 
 $GLOBALS['TL_HOOKS']['sqlCompileCommands']['hofff_language_relations']
     = [ Installer::class, 'hookSQLCompileCommands' ];
+
+// Backend form fields
+$GLOBALS['BE_FFL']['languagerelatation_textoptions'] = TextOptionsWidget::class;
