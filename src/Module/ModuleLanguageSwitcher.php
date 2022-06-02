@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Hofff\Contao\LanguageRelations\Module;
 
 use Contao\BackendTemplate;
+use Contao\CoreBundle\Exception\RouteParametersException;
 use Contao\Environment;
 use Contao\FrontendTemplate;
 use Contao\Module;
@@ -104,9 +105,15 @@ class ModuleLanguageSwitcher extends Module
 
             $language = strtolower($page->rootLanguage);
 
+            try {
+                $url = $page->getFrontendUrl($params, $language);
+            } catch (RouteParametersException $exception) {
+                continue;
+            }
+
             $item              = [];
             $item['isActive']  = $page->id === $currentPage->id;
-            $item['href']      = $page->getFrontendUrl($params, $language);
+            $item['href']      = $url;
             $item['class']     = 'lang-' . $language;
             $item['link']      = $this->getLabel($language);
             $item['pageTitle'] = strip_tags(strlen($page->pageTitle) ? $page->pageTitle : $page->title);
