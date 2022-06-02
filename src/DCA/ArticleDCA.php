@@ -10,6 +10,7 @@ use Contao\BackendTemplate;
 use Contao\Input;
 use Hofff\Contao\LanguageRelations\Relations;
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
+
 use function array_keys;
 use function count;
 use function serialize;
@@ -17,11 +18,10 @@ use function usort;
 
 class ArticleDCA
 {
-    /** @var Relations */
-    private $relations;
+    private Relations $relations;
 
     /** @var array<int, ArticleModel[]> */
-    public static $articleCache = [];
+    public static array $articleCache = [];
 
     public function __construct()
     {
@@ -32,7 +32,10 @@ class ArticleDCA
         );
     }
 
-    public function addArticleTranslationHeaderCss() : void
+    /**
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public function addArticleTranslationHeaderCss(): void
     {
         if (Input::get('act') === 'edit') {
             return;
@@ -41,7 +44,10 @@ class ArticleDCA
         $GLOBALS['TL_CSS']['hofffcontaolanguagerelations_be'] = 'bundles/hofffcontaolanguagerelations/css/backend.css';
     }
 
-    public function addArticleTranslationLinks() : void
+    /**
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public function addArticleTranslationLinks(): void
     {
         if (Input::get('act') !== 'edit') {
             return;
@@ -51,12 +57,14 @@ class ArticleDCA
         if (! $this->relations->getRelations($articleModel->pid)) {
             return;
         }
+
         $GLOBALS['TL_CSS']['hofffcontaolanguagerelations_be'] = 'bundles/hofffcontaolanguagerelations/css/backend.css';
         foreach (array_keys($GLOBALS['TL_DCA']['tl_article']['palettes']) as $key) {
             //skip '__selector__
             if ($key === '__selector__') {
                 continue;
             }
+
             $GLOBALS['TL_DCA']['tl_article']['palettes'][$key] =
                 'hofff_language_relations_article_links;' . $GLOBALS['TL_DCA']['tl_article']['palettes'][$key];
         }
@@ -65,7 +73,7 @@ class ArticleDCA
     /**
      * Compare current page language against the stored once.
      */
-    public function getLinkedArticles() : string
+    public function getLinkedArticles(): string
     {
         $objArticle = ArticleModel::findByPk(Input::get('id'));
         //get the related pages
@@ -77,8 +85,10 @@ class ArticleDCA
         //find the position of the current article
         $intArticlePosition = $this->getArticlePosition($objArticle);
         //sort the pages
-        usort($arrPages, static function ($a, $b) {
-            return static::$articleCache[$a]['rootIdSorting'] < static::$articleCache[$b]['rootIdSorting'] ? -1 : 1;
+        usort($arrPages, static function ($articleA, $articleB) {
+            return static::$articleCache[$articleA]['rootIdSorting'] < static::$articleCache[$articleB]['rootIdSorting']
+                ? -1
+                : 1;
         });
         $newValues = [];
         //build return array
@@ -95,7 +105,7 @@ class ArticleDCA
     /**
      * @return string returns an empty string.
      */
-    public function returnEmptyString() : string
+    public function returnEmptyString(): string
     {
         return '';
     }
@@ -103,7 +113,7 @@ class ArticleDCA
     /**
      * @return string[]
      */
-    public function getTranslationArticles() : array
+    public function getTranslationArticles(): array
     {
         $return          = [];
         $articleModel    = ArticleModel::findByPk(Input::get('id'));
@@ -111,6 +121,7 @@ class ArticleDCA
         if ($articlePosition === null) {
             return $return;
         }
+
         //get the related pages
         $ids   = $this->relations->getRelations($articleModel->pid);
         $ids[] = $articleModel->pid;
@@ -119,10 +130,12 @@ class ArticleDCA
             if (! static::$articleCache[$value]) {
                 $this->collectArticlesFromPages([$value]);
             }
+
             //skip this page if no matching article is found
             if (! static::$articleCache[$value][$articlePosition]) {
                 continue;
             }
+
             $template            = new BackendTemplate('be_hofff_language_switcher_article');
             $article             = static::$articleCache[$value][$articlePosition]->row();
             $article['language'] = static::$articleCache[$value]['rootIdLanguage'];
@@ -130,9 +143,11 @@ class ArticleDCA
             if (Input::get('id') === $article['id']) {
                 $article['isActive'] = true;
             }
+
             $template->article      = $article;
             $return[$article['id']] = $template->parse();
         }
+
         return $return;
     }
 
@@ -140,12 +155,17 @@ class ArticleDCA
      * @param mixed[][] $add
      *
      * @return mixed[][]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    public function addArticleTranslations(array $add) : array
+    public function addArticleTranslations(array $add): array
     {
         if (Input::get('do') !== 'article') {
             return $add;
         }
+
         $articles = [];
         //find the current article
         if (Input::get('act') === 'paste' && (Input::get('mode') === 'copy' || Input::get('mode') === 'cut')) {
@@ -159,12 +179,14 @@ class ArticleDCA
         } else {
             $articleModel = ArticleModel::findByPk(Input::get('id'));
         }
+
         //get the related pages
         $ids = $this->relations->getRelations($articleModel->pid);
         //return if no related pages are found
         if (empty($ids)) {
             return $add;
         }
+
         $ids[] = $articleModel->pid;
         //get the articles of the related pages
         $this->collectArticlesFromPages($ids);
@@ -172,41 +194,50 @@ class ArticleDCA
         if ($intArticlePosition === null) {
             return $add;
         }
+
         //sort the pages
-        usort($ids, static function ($a, $b) {
-            return static::$articleCache[$a]['rootIdSorting'] < static::$articleCache[$b]['rootIdSorting'] ? -1 : 1;
+        usort($ids, static function ($articleA, $articleB) {
+            return static::$articleCache[$articleA]['rootIdSorting'] < static::$articleCache[$articleB]['rootIdSorting']
+                ? -1
+                : 1;
         });
         foreach ($ids as $value) {
             if (! static::$articleCache[$value]) {
                 $this->collectArticlesFromPages([$value]);
             }
+
             //skip this page if no matching article is found
             if (! static::$articleCache[$value][$intArticlePosition]) {
                 continue;
             }
+
             $articleRow             = static::$articleCache[$value][$intArticlePosition]->row();
             $articleRow['language'] = static::$articleCache[$value]['rootIdLanguage'];
             $articleRow['href']     = Backend::addToUrl('do=article&table=tl_content&id=' . $articleRow['id']);
             if (Input::get('id') === $articleRow['id']) {
                 $articleRow['isActive'] = true;
             }
+
             $articles[] = $articleRow;
         }
+
         //return if no realted articles could be found
         if (count($articles) <= 1) {
             return $add;
         }
+
         $objTemplate              = new BackendTemplate('be_hofff_language_switcher_article_header');
         $objTemplate->arrArticles = $articles;
 
         $add[$GLOBALS['TL_LANG']['tl_content']['belanguage_header']] = $objTemplate->parse();
+
         return $add;
     }
 
     /**
      * @param int[] $pageIds
      */
-    private function collectArticlesFromPages(array $pageIds) : void
+    private function collectArticlesFromPages(array $pageIds): void
     {
         foreach ($pageIds as $pageId) {
             //update cache if necessary
@@ -218,6 +249,7 @@ class ArticleDCA
             if ($articleCollection === null) {
                 continue;
             }
+
             static::$articleCache[$pageId] = $articleCollection->getModels();
             $page                          = QueryUtil::query(
                 'SELECT * FROM tl_page WHERE id = (
@@ -229,14 +261,16 @@ class ArticleDCA
             static::$articleCache[$pageId]['rootIdSorting']  = $page->sorting;
             static::$articleCache[$pageId]['rootIdLanguage'] = $page->language;
         }
+
         return;
     }
 
-    private function getArticlePosition(ArticleModel $articleModel) : ?int
+    private function getArticlePosition(ArticleModel $articleModel): ?int
     {
         if (! static::$articleCache[$articleModel->pid]) {
             $this->collectArticlesFromPages([$articleModel->pid]);
         }
+
         $articlePosition = null;
         foreach (static::$articleCache[$articleModel->pid] as $key => $article) {
             if ($article->id !== $articleModel->id) {
@@ -246,6 +280,7 @@ class ArticleDCA
             $articlePosition = $key;
             break;
         }
+
         return $articlePosition;
     }
 }

@@ -110,7 +110,7 @@ SQL;
             new View('hofff_language_relations_page_item', self::ITEM_VIEW),
             new View('hofff_language_relations_page_relation', self::RELATION_VIEW),
             new View('hofff_language_relations_page_aggregate', self::AGGREGATE_VIEW),
-            new VIEW('hofff_language_relations_page_tree', self::TREE_VIEW),
+            new View('hofff_language_relations_page_tree', self::TREE_VIEW),
         ];
     }
 

@@ -14,30 +14,30 @@ use Hofff\Contao\Selectri\Model\Data;
 use Hofff\Contao\Selectri\Model\Node;
 use Hofff\Contao\Selectri\Model\Tree\SQLAdjacencyTreeDataFactory;
 use ReflectionMethod;
-use const PHP_INT_MAX;
+
 use function array_filter;
 use function array_keys;
 use function call_user_func;
 
+use const PHP_INT_MAX;
+
 class RelationsDCABuilder
 {
-    /** @var RelationsDCABuilderConfig */
-    private $config;
+    private RelationsDCABuilderConfig $config;
 
     /** @var string[][] */
-    protected $submittedRelations;
+    protected array $submittedRelations;
 
     /** @var array<string, string> */
-    private $groupTitleCache;
+    private array $groupTitleCache;
 
     /** @var array<string, array<string>> */
-    private $rootsCache;
+    private array $rootsCache;
 
-    /** @var int */
-    private $relatedItem;
+    private int $relatedItem;
 
-    /** @var array<integer, integer> */
-    private $relatedItemOf;
+    /** @var array<int, int> */
+    private array $relatedItemOf;
 
     public function __construct(RelationsDCABuilderConfig $config)
     {
@@ -47,15 +47,17 @@ class RelationsDCABuilder
 
     /**
      * @param string[][] $dca
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public function build(array &$dca, string $fieldName = 'hofff_language_relations') : void
+    public function build(array &$dca, string $fieldName = 'hofff_language_relations'): void
     {
         System::loadLanguageFile('hofff_language_relations');
 
         $factory = $this->createFactory();
 
-        $dca['config']['onsubmit_callback'][] = function ($dc) : void {
-            $this->onsubmitCallback($dc);
+        $dca['config']['onsubmit_callback'][] = function ($dataContainer): void {
+            $this->onsubmitCallback($dataContainer);
         };
 
         $dca['fields'][$fieldName] = [
@@ -71,59 +73,62 @@ class RelationsDCABuilder
                 'class'                 => 'hofff-relations',
                 'data'                  => $factory,
             ],
-            'input_field_callback'  => function ($dc) use (&$dca, $fieldName, $factory) {
-                return $this->inputFieldCallback($dc, $dca, $fieldName, $factory);
+            'input_field_callback'  => function ($dataContainer) use (&$dca, $fieldName, $factory) {
+                return $this->inputFieldCallback($dataContainer, $dca, $fieldName, $factory);
             },
             'load_callback'         => [
-                function ($value, $dc) {
-                    return $this->loadRelationsCallback($value, $dc);
+                function ($value, $dataContainer) {
+                    return $this->loadRelationsCallback($value, $dataContainer);
                 },
             ],
             'save_callback'         => [
-                function ($value, $dc) {
-                    return $this->saveRelationsCallback($value, $dc);
+                function ($value, $dataContainer) {
+                    return $this->saveRelationsCallback($value, $dataContainer);
                 },
             ],
         ];
     }
 
-    protected function onsubmitCallback(DataContainer $dc) : void
+    protected function onsubmitCallback(DataContainer $dataContainer): void
     {
-        $id = (int) $dc->id;
-        if (! isset($this->submittedRelations[$id])) {
+        $rowId = (int) $dataContainer->id;
+        if (! isset($this->submittedRelations[$rowId])) {
             return;
         }
 
-        $submittedRelations = $this->submittedRelations[$id];
-        unset($this->submittedRelations[$id]);
+        $submittedRelations = $this->submittedRelations[$rowId];
+        unset($this->submittedRelations[$rowId]);
 
         $makePrimary = array_keys(array_filter($submittedRelations, static function ($relation) {
             return (bool) $relation['primary'];
         }));
 
         $relations = $this->config->getRelations();
-        $relations->deleteRelationsFrom($id);
-        $relations->deleteRelationsToRoot($makePrimary, $id);
-        if (! $relations->createRelations($id, array_keys($submittedRelations))) {
+        $relations->deleteRelationsFrom($rowId);
+        $relations->deleteRelationsToRoot($makePrimary, $rowId);
+        if (! $relations->createRelations($rowId, array_keys($submittedRelations))) {
             return;
         }
-        $relations->createReflectionRelations($id);
-        $relations->createIntermediateRelations($id);
+
+        $relations->createReflectionRelations($rowId);
+        $relations->createIntermediateRelations($rowId);
     }
 
     /**
-     * @param mixed         $value
-     * @param DataContainer $dc
+     * @param mixed $value
      *
      * @return int[]
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function loadRelationsCallback($value, $dc) : array
+    protected function loadRelationsCallback($value, DataContainer $dataContainer): array
     {
         $result = QueryUtil::query(
             'SELECT related_item_id FROM %s WHERE item_id = ?',
-            [ $this->config->getRelations()->getRelationTable() ],
-            [ $dc->id ]
+            [$this->config->getRelations()->getRelationTable()],
+            [$dataContainer->id]
         );
+
         return $result->fetchEach('related_item_id');
     }
 
@@ -132,15 +137,15 @@ class RelationsDCABuilder
      *
      * @throws Exception
      */
-    protected function saveRelationsCallback(string $value, DataContainer $dc)
+    protected function saveRelationsCallback(string $value, DataContainer $dataContainer)
     {
         $value = StringUtil::deserialize($value, true);
 
-        $id = (int) $dc->id;
-        $this->validateRelationUniquePerRoot($id, array_keys($value));
-        $this->validateRelationRoots($id, array_keys($value));
+        $rowId = (int) $dataContainer->id;
+        $this->validateRelationUniquePerRoot($rowId, array_keys($value));
+        $this->validateRelationRoots($rowId, array_keys($value));
 
-        $this->submittedRelations[$id] = $value;
+        $this->submittedRelations[$rowId] = $value;
 
         return null;
     }
@@ -149,8 +154,11 @@ class RelationsDCABuilder
      * @param int[] $relatedItems
      *
      * @throws Exception
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function validateRelationUniquePerRoot(int $item, array $relatedItems) : void
+    protected function validateRelationUniquePerRoot(int $item, array $relatedItems): void
     {
         if (! $relatedItems) {
             return;
@@ -188,8 +196,10 @@ SQL;
      * @param int[] $relatedItems
      *
      * @throws Exception
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    protected function validateRelationRoots(int $item, array $relatedItems) : void
+    protected function validateRelationRoots(int $item, array $relatedItems): void
     {
         if (! $relatedItems) {
             return;
@@ -229,19 +239,22 @@ SQL;
 
     /**
      * @param string[][][] $dca
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
     protected function inputFieldCallback(
-        DataContainer $dc,
+        DataContainer $dataContainer,
         array &$dca,
         string $fieldName,
         SQLAdjacencyTreeDataFactory $factory
-    ) : string {
-        $aggregate = $this->extractAggregateKey($dc);
+    ): string {
+        $aggregate = $this->extractAggregateKey($dataContainer);
 
         $title = $this->getGroupTitle($aggregate);
         if (! $title) {
             $tpl         = new BackendTemplate('hofff_language_relations_not_translated');
             $tpl->reason = $GLOBALS['TL_LANG']['hofff_language_relations']['noRelationGroup'];
+
             return $tpl->parse();
         }
 
@@ -249,6 +262,7 @@ SQL;
         if (! $roots) {
             $tpl         = new BackendTemplate('hofff_language_relations_not_translated');
             $tpl->reason = $GLOBALS['TL_LANG']['hofff_language_relations']['noRelatedContent'];
+
             return $tpl->parse();
         }
 
@@ -258,19 +272,19 @@ SQL;
         $field  = &$dca['fields'][$fieldName];
         $backup = $field;
 
-        $field['label'] = [ $title, &$field['label'][1] ];
+        $field['label'] = [$title, &$field['label'][1]];
 
         // set the postback param for speeding up ajax requests of the selectri widgets
         $field['eval']['jsOptions']['qs']['key']                         = 'selectriAJAXCallback';
-        $field['eval']['jsOptions']['qs']['hofff_language_relations_id'] = $dc->id;
+        $field['eval']['jsOptions']['qs']['hofff_language_relations_id'] = $dataContainer->id;
 
         // dont call me again, remove the input field callback, avoid infinite recursion
         unset($field['input_field_callback']);
 
         // call the row method again
-        $dcRowMethod = new ReflectionMethod($dc, 'row');
+        $dcRowMethod = new ReflectionMethod($dataContainer, 'row');
         $dcRowMethod->setAccessible(true);
-        $return = $dcRowMethod->invoke($dc, $dc->palette);
+        $return = $dcRowMethod->invoke($dataContainer, $dataContainer->palette);
 
         // restore the original dca
         $field = $backup;
@@ -278,12 +292,12 @@ SQL;
         return $return;
     }
 
-    protected function extractAggregateKey(DataContainer $dc) : string
+    protected function extractAggregateKey(DataContainer $dataContainer): string
     {
-        return $dc->activeRecord->{$this->config->getAggregateFieldName()};
+        return $dataContainer->activeRecord->{$this->config->getAggregateFieldName()};
     }
 
-    protected function getGroupTitle(string $aggregate) : string
+    protected function getGroupTitle(string $aggregate): string
     {
         if (isset($this->groupTitleCache[$aggregate])) {
             return $this->groupTitleCache[$aggregate];
@@ -291,8 +305,8 @@ SQL;
 
         $result = QueryUtil::query(
             'SELECT group_title, language FROM %s WHERE aggregate_id = ?',
-            [ $this->config->getAggregateView() ],
-            [ $aggregate ]
+            [$this->config->getAggregateView()],
+            [$aggregate]
         );
 
         $tpl           = new BackendTemplate('hofff_language_relations_node_label');
@@ -305,7 +319,7 @@ SQL;
     /**
      * @return string[]
      */
-    protected function getRoots(string $aggregate) : array
+    protected function getRoots(string $aggregate): array
     {
         if (isset($this->rootsCache[$aggregate])) {
             return $this->rootsCache[$aggregate];
@@ -327,22 +341,22 @@ WHERE
 SQL;
         $result = QueryUtil::query(
             $sql,
-            [ $this->config->getAggregateView(), $this->config->getAggregateView() ],
-            [ $aggregate ]
+            [$this->config->getAggregateView(), $this->config->getAggregateView()],
+            [$aggregate]
         );
         $roots  = $result->fetchEach('tree_root_id');
 
         return $this->rootsCache[$aggregate] = $roots;
     }
 
-    protected function createFactory() : SQLAdjacencyTreeDataFactory
+    protected function createFactory(): SQLAdjacencyTreeDataFactory
     {
         $factory = new SQLAdjacencyTreeDataFactory();
         $factory->getConfig()->setTable($this->config->getTreeView());
-        $factory->getConfig()->addColumns([ 'title', 'language' ]);
+        $factory->getConfig()->addColumns(['title', 'language']);
         $factory->getConfig()->addSearchColumns('title');
-        $factory->getConfig()->setLabelCallback([ $this, 'generateNodeLabel' ]);
-        $factory->getConfig()->setContentCallback([ $this, 'generateNodeContent' ]);
+        $factory->getConfig()->setLabelCallback([$this, 'generateNodeLabel']);
+        $factory->getConfig()->setContentCallback([$this, 'generateNodeContent']);
         $factory->getConfig()->setSelectableExpr('selectable');
 
         $callback = $this->config->getSelectriDataFactoryConfiguratorCallback();
@@ -353,14 +367,15 @@ SQL;
         return $factory;
     }
 
-    public function generateNodeLabel(Node $node) : string
+    public function generateNodeLabel(Node $node): string
     {
         $tpl = new BackendTemplate($this->config->getSelectriNodeLabelTemplate());
         $tpl->setData($node->getData());
+
         return $tpl->parse();
     }
 
-    public function generateNodeContent(Node $node, Data $data) : string
+    public function generateNodeContent(Node $node, Data $data): string
     {
         if (! $node->isSelectable()) {
             return '';
@@ -380,12 +395,13 @@ SQL;
         return $tpl->parse();
     }
 
-    protected function isRelated(int $item, int $relatedItem) : bool
+    protected function isRelated(int $item, int $relatedItem): bool
     {
         if ($relatedItem !== $this->relatedItem) {
             $this->relatedItem   = $relatedItem;
             $this->relatedItemOf = $this->config->getRelations()->getItemsRelatedTo($relatedItem);
         }
+
         return isset($this->relatedItemOf[$item]);
     }
 }

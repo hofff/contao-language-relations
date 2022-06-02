@@ -1,9 +1,12 @@
 /*
-!/.composer-require-checker.json
 !/.gitignore
-!/.travis.yml
+!/.composer-require-checker.json
+!/contao-module/
+!/runonce/
 !/src/
-!/build.xml
 !/README.md
 !/composer.json
-!/phpcs.xml.dist
+!phpcs.xml.dist
+!.phpcq.yaml.dist
+!/.github
+!/psalm.xml

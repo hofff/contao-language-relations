@@ -16,11 +16,12 @@ use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;
 use Hofff\Contao\LanguageRelations\Util\ContaoUtil;
 use Locale;
-use const PHP_INT_MAX;
+
 use function array_filter;
 use function array_flip;
 use function array_keys;
 use function array_map;
+use function assert;
 use function call_user_func;
 use function class_exists;
 use function explode;
@@ -35,13 +36,14 @@ use function strtoupper;
 use function substr;
 use function uasort;
 
+use const PHP_INT_MAX;
+
 class ModuleLanguageSwitcher extends Module
 {
-    /** @var bool */
-    protected $intlSupported;
+    protected bool $intlSupported;
 
     /** @var array<string, string> */
-    protected $labels;
+    protected array $labels;
 
     public function __construct(ModuleModel $module, string $column = 'main')
     {
@@ -53,7 +55,7 @@ class ModuleLanguageSwitcher extends Module
     /**
      * @see \Contao\Module::generate()
      */
-    public function generate() : string
+    public function generate(): string
     {
         if (TL_MODE === 'BE') {
             $tpl           = new BackendTemplate('be_wildcard');
@@ -62,6 +64,7 @@ class ModuleLanguageSwitcher extends Module
             $tpl->id       = $this->id;
             $tpl->link     = $this->name;
             $tpl->href     = 'contao?do=themes&amp;table=tl_module&amp;act=edit&amp;id=' . $this->id;
+
             return $tpl->parse();
         }
 
@@ -71,9 +74,13 @@ class ModuleLanguageSwitcher extends Module
     }
 
     /**
-     * @see \Contao\Module::compile()
+     * {@inheritDoc}
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function compile() : void
+    protected function compile(): void
     {
         $relations    = LanguageRelations::getRelationsInstance();
         $currentPage  = $GLOBALS['objPage'];
@@ -82,10 +89,11 @@ class ModuleLanguageSwitcher extends Module
         foreach ($relatedPages as $rootPageID => &$page) {
             $page = PageModel::findWithDetails($page ?? $rootPageID);
         }
+
         unset($page);
 
         if (! BE_USER_LOGGED_IN) {
-            $relatedPages = array_filter($relatedPages, static function ($page) {
+            $relatedPages = array_filter($relatedPages, static function (object $page) {
                 return $page->rootIsPublic;
             });
             $relatedPages = array_map(static function ($page) {
@@ -101,7 +109,7 @@ class ModuleLanguageSwitcher extends Module
 
         $items = [];
         foreach ($relatedPages as $rootPageID => $page) {
-            /** @var PageModel $page */
+            assert($page instanceof PageModel);
 
             $language = strtolower($page->rootLanguage);
 
@@ -136,11 +144,15 @@ class ModuleLanguageSwitcher extends Module
 
         if ($this->hofff_language_relations_keep_qs) {
             foreach ($items as &$item) {
-                if ($queryString = Environment::get('queryString')) {
-                    $item['href'] .= strpos($item['href'], '?') === false ? '?' : '&';
-                    $item['href'] .= $queryString;
+                $queryString = Environment::get('queryString');
+                if (! $queryString) {
+                    continue;
                 }
+
+                $item['href'] .= strpos($item['href'], '?') === false ? '?' : '&';
+                $item['href'] .= $queryString;
             }
+
             unset($item);
         }
 
@@ -159,7 +171,7 @@ class ModuleLanguageSwitcher extends Module
         $this->Template->items = $tpl->parse();
     }
 
-    protected function getRequestParams(PageModel $currentPage) : string
+    protected function getRequestParams(PageModel $currentPage): string
     {
         if (! $this->hofff_language_relations_keep_request_params) {
             return '';
@@ -171,7 +183,7 @@ class ModuleLanguageSwitcher extends Module
         return $params;
     }
 
-    protected function getLabel(string $language) : string
+    protected function getLabel(string $language): string
     {
         $labels = $this->getLabels();
 
@@ -190,8 +202,10 @@ class ModuleLanguageSwitcher extends Module
      * @param mixed[][] $items
      *
      * @return mixed[][]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    protected function executeHook(array $items) : array
+    protected function executeHook(array $items): array
     {
         $hooks = &$GLOBALS['TL_HOOKS']['hofff_language_relations_language_switcher'];
 
@@ -201,7 +215,7 @@ class ModuleLanguageSwitcher extends Module
 
         foreach ($hooks as $callback) {
             $items = call_user_func(
-                [ System::importStatic($callback[0]), $callback[1] ],
+                [System::importStatic($callback[0]), $callback[1]],
                 $items,
                 $this
             );
@@ -215,19 +229,20 @@ class ModuleLanguageSwitcher extends Module
      *
      * @return mixed[][]
      */
-    protected function sortItems(array $items) : array
+    protected function sortItems(array $items): array
     {
-        uasort($items, static function ($a, $b) {
-            return strnatcasecmp($a['language'], $b['language']);
+        uasort($items, static function ($itemA, $itemB) {
+            return strnatcasecmp($itemA['language'], $itemB['language']);
         });
 
         $labels = $this->getLabels();
         if ($labels) {
             $labels = array_flip(array_keys($labels));
-            uasort($items, static function ($a, $b) use ($labels) {
-                $a = $labels[$a['language']] ?? PHP_INT_MAX;
-                $b = $labels[$b['language']] ?? PHP_INT_MAX;
-                return $a - $b;
+            uasort($items, static function ($itemA, $itemB) use ($labels) {
+                $itemA = $labels[$itemA['language']] ?? PHP_INT_MAX;
+                $itemB = $labels[$itemB['language']] ?? PHP_INT_MAX;
+
+                return $itemA - $itemB;
             });
         }
 
@@ -235,9 +250,11 @@ class ModuleLanguageSwitcher extends Module
     }
 
     /**
-     * @param string[] $items
+     * @param string[][] $items
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    protected function injectAlternateLinks(array $items) : void
+    protected function injectAlternateLinks(array $items): void
     {
         foreach ($items as $item) {
             $GLOBALS['TL_HEAD'][] = sprintf(
@@ -251,7 +268,7 @@ class ModuleLanguageSwitcher extends Module
     /**
      * @return string[]
      */
-    protected function getLabels() : array
+    protected function getLabels(): array
     {
         if (isset($this->labels)) {
             return $this->labels;

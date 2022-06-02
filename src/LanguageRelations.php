@@ -25,16 +25,16 @@ use function array_keys;
  */
 class LanguageRelations
 {
-    /** @var Relations */
-    private static $relations;
+    private static Relations $relations;
 
-    public static function getRelationsInstance() : Relations
+    public static function getRelationsInstance(): Relations
     {
         isset(self::$relations) || self::$relations = new Relations(
             'tl_hofff_language_relations_page',
             'hofff_language_relations_page_item',
             'hofff_language_relations_page_relation'
         );
+
         return self::$relations;
     }
 
@@ -50,12 +50,12 @@ class LanguageRelations
      * entries, where array is the same result as this method were called with
      * the respective page as a single integer argument.
      *
-     * @param int|array<integer> $pages
-     * @param bool               $primary
+     * @param int|array<int> $pages
+     * @param bool           $primary
      *
      * @return int[]|array[]
      */
-    public static function getRelations($pages, $primary = false) : array
+    public static function getRelations($pages, $primary = false): array
     {
         return self::getRelationsInstance()->getRelations($pages, $primary);
     }
@@ -67,7 +67,7 @@ class LanguageRelations
      *
      * @return int[]
      */
-    public static function getPagesRelatedTo(int $page) : array
+    public static function getPagesRelatedTo(int $page): array
     {
         return self::getRelationsInstance()->getItemsRelatedTo($page);
     }
@@ -81,11 +81,12 @@ class LanguageRelations
      *
      * @return int[]
      */
-    public static function getIncompleteRelatedPages(int $page) : array
+    public static function getIncompleteRelatedPages(int $page): array
     {
         $incompletenesses = self::getRelationsInstance()->getIncompleteRelatedItems($page);
         $incompletenesses = array_keys($incompletenesses);
         $incompletenesses = array_combine($incompletenesses, $incompletenesses);
+
         return $incompletenesses;
     }
 
@@ -99,7 +100,7 @@ class LanguageRelations
      *
      * @return int[]
      */
-    public static function getAmbiguousRelatedPages(int $page) : array
+    public static function getAmbiguousRelatedPages(int $page): array
     {
         return self::getRelationsInstance()->getAmbiguousRelatedItems($page);
     }
@@ -109,11 +110,11 @@ class LanguageRelations
      *
      * CARE: Does not check the validity of the given relations!
      *
-     * @param int|array<integer> $translatedPages
+     * @param int|array<int> $translatedPages
      *
      * @return int The number of created relations
      */
-    public static function createRelations(int $page, $translatedPages) : int
+    public static function createRelations(int $page, $translatedPages): int
     {
         return self::getRelationsInstance()->createRelations($page, $translatedPages);
     }
@@ -123,7 +124,7 @@ class LanguageRelations
      * the given page itself, if none exists for them in the given page's root
      * page tree already.
      */
-    public static function createReflectionRelations(int $page) : int
+    public static function createReflectionRelations(int $page): int
     {
         return self::getRelationsInstance()->createReflectionRelations($page);
     }
@@ -132,7 +133,7 @@ class LanguageRelations
      * Create relations between the pages that the given page is related to and
      * themselfs, if none exists for them in their respective languages already.
      */
-    public static function createIntermediateRelations(int $page) : int
+    public static function createIntermediateRelations(int $page): int
     {
         return self::getRelationsInstance()->createIntermediateRelations($page);
     }
@@ -140,9 +141,9 @@ class LanguageRelations
     /**
      * Deletes all relations that orignate at one of the given pages.
      *
-     * @param int|array<integer> $pages
+     * @param int|array<int> $pages
      */
-    public static function deleteRelationsFrom($pages) : int
+    public static function deleteRelationsFrom($pages): int
     {
         return self::getRelationsInstance()->deleteRelationsFrom($pages);
     }
@@ -151,10 +152,10 @@ class LanguageRelations
          * Deletes all relations of the given pages into the root page tree of the
          * given root.
          *
-         * @param int|array<integer> $pages
-         * @param int                $root
+         * @param int|array<int> $pages
+         * @param int            $root
          */
-    public static function deleteRelationsToRoot($pages, $root) : int
+    public static function deleteRelationsToRoot($pages, $root): int
     {
         return self::getRelationsInstance()->deleteRelationsToRoot($pages, $root);
     }

@@ -11,7 +11,7 @@ class EnvironmentProxy extends Environment
     /**
      * @return mixed[]
      */
-    public static function getCache() : array
+    public static function getCache(): array
     {
         return self::$arrCache;
     }
@@ -19,7 +19,7 @@ class EnvironmentProxy extends Environment
     /**
      * @param mixed[] $cache
      */
-    public static function setCache(array $cache) : void
+    public static function setCache(array $cache): void
     {
         self::$arrCache = $cache;
     }
@@ -35,7 +35,7 @@ class EnvironmentProxy extends Environment
     /**
      * @param mixed $value
      */
-    public static function setCacheValue(string $key, $value) : void
+    public static function setCacheValue(string $key, $value): void
     {
         self::$arrCache[$key] = $value;
     }

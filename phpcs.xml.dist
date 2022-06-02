@@ -6,20 +6,34 @@
     <arg name="cache" value=".phpcs-cache"/>
     <arg name="colors"/>
 
+    <!-- Required for the SlevomatCodingStandard which utilizes composer dependencies -->
+    <autoload>vendor/autoload.php</autoload>
+
     <!-- Ignore warnings, show progress of the run and show sniff names -->
     <arg value="nps"/>
 
     <!-- Directories to be checked -->
     <file>src</file>
+    <exclude-pattern>src/Resources/contao/languages</exclude-pattern>
 
     <!-- Include full Doctrine Coding Standard -->
-    <rule ref="Doctrine"/>
+    <rule ref="Doctrine">
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousAbstractClassNaming"/>
+        <exclude name="SlevomatCodingStandard.Classes.SuperfluousTraitNaming.SuperfluousSuffix"/>
+        <exclude name="Squiz.NamingConventions.ValidVariableName.MemberNotCamelCaps"/>
+        <exclude name="SlevomatCodingStandard.TypeHints.ParameterTypeHint.MissingNativeTypeHint"/>
+    </rule>
 
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="120"/>
             <property name="absoluteLineLimit" value="120"/>
         </properties>
-        <exclude-pattern>languages/*</exclude-pattern>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
+        <properties>
+            <property name="enableObjectTypeHint" value="false" />
+        </properties>
     </rule>
 </ruleset>

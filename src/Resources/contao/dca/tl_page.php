@@ -9,7 +9,7 @@ use Hofff\Contao\LanguageRelations\Relations;
 use Hofff\Contao\Selectri\Util\Icons;
 
 call_user_func(
-    static function () : void {
+    static function (): void {
         [$callback, $columns] = Icons::getTableIconCallback('tl_page');
         Icons::setTableIconCallback(
             'hofff_language_relations_page_tree',
@@ -34,7 +34,7 @@ call_user_func(
     }
 );
 
-$GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][] = [PageDCA::class, 'oncopyCallback' ];
+$GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][] = [PageDCA::class, 'oncopyCallback'];
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = [PageDCA::class, 'addPageTranslationLinks'];
 
 /*
@@ -47,12 +47,14 @@ if ($_GET['do'] === 'hofff_language_relations_group') {
         if (! is_array($callback)) {
             continue;
         }
+
         [$class, $method] = $callback;
         if ($class === 'tl_page' && $method === 'updateSitemap') {
             unset($onsubmit[$i]);
             break;
         }
     }
+
     unset($onsubmit);
 }
 

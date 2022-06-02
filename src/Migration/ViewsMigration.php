@@ -9,7 +9,6 @@ use Contao\CoreBundle\Migration\MigrationResult;
 use Doctrine\DBAL\Connection;
 use Hofff\Contao\LanguageRelations\Database\Schema as DatabaseSchema;
 use Symfony\Component\Config\FileLocatorInterface;
-use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -17,7 +16,7 @@ use function time;
 
 final class ViewsMigration extends AbstractMigration
 {
-    const INSTALLED_FILE = '.installed/views';
+    public const INSTALLED_FILE = '.installed/views';
 
     private Connection $connection;
 
@@ -33,9 +32,9 @@ final class ViewsMigration extends AbstractMigration
         Filesystem $filesystem,
         FileLocatorInterface $fileLocator
     ) {
-        $this->connection = $connection;
-        $this->schema = $schema;
-        $this->filesystem = $filesystem;
+        $this->connection  = $connection;
+        $this->schema      = $schema;
+        $this->filesystem  = $filesystem;
         $this->fileLocator = $fileLocator;
     }
 
