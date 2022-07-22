@@ -17,16 +17,16 @@ class Installer
     public function hookSQLCompileCommands(array $queries) : array
     {
         if (! self::hasView('hofff_language_relations_page_item')) {
-            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getItemView());
+            $queries['ALTER_CHANGE']['hofff_0'] = StringUtil::tabsToSpaces($this->getItemView());
         }
         if (! self::hasView('hofff_language_relations_page_relation')) {
-            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getRelationView());
+            $queries['ALTER_CHANGE']['hofff_1'] = StringUtil::tabsToSpaces($this->getRelationView());
         }
         if (! self::hasView('hofff_language_relations_page_aggregate')) {
-            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getAggregateView());
+            $queries['ALTER_CHANGE']['hofff_2'] = StringUtil::tabsToSpaces($this->getAggregateView());
         }
         if (! self::hasView('hofff_language_relations_page_tree')) {
-            $queries['ALTER_CHANGE'][] = StringUtil::tabsToSpaces($this->getTreeView());
+            $queries['ALTER_CHANGE']['hofff_3'] = StringUtil::tabsToSpaces($this->getTreeView());
         }
 
         return $queries;
