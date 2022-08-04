@@ -47,6 +47,7 @@
     "symfony/config": "^4.4 || ^5.0",
     "symfony/dependency-injection": "^4.4 || ^5.0",
     "symfony/filesystem": "^4.4 || ^5.0",
+    "symfony/http-foundation": "^4.4 || ^5.0",
     "symfony/http-kernel": "^4.4 || ^5.0"
   },
   "require-dev": {
@@ -72,6 +73,7 @@
   },
   "extra": {
     "branch-alias": {
+      "dev-develop": "3.1.x-dev",
       "dev-master": "3.0.x-dev"
     },
     "contao-manager-plugin": "Hofff\\Contao\\LanguageRelations\\ContaoManager\\Plugin"

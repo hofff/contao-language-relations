@@ -34,6 +34,16 @@
     <rule ref="SlevomatCodingStandard.TypeHints.ParameterTypeHint">
         <properties>
             <property name="enableObjectTypeHint" value="false" />
+            <property name="enableMixedTypeHint" value="false" />
+            <property name="enableUnionTypeHint" value="false" />
+        </properties>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.TypeHints.ReturnTypeHint">
+        <properties>
+            <property name="enableObjectTypeHint" value="false" />
+            <property name="enableMixedTypeHint" value="false" />
+            <property name="enableUnionTypeHint" value="false" />
         </properties>
     </rule>
 </ruleset>

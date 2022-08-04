@@ -7,6 +7,7 @@ namespace Hofff\Contao\LanguageRelations\DCA;
 use Contao\Backend;
 use Contao\BackendTemplate;
 use Contao\Database\Result;
+use Contao\Database\Statement;
 use Contao\DataContainer;
 use Contao\Input;
 use Contao\PageModel;
@@ -62,6 +63,10 @@ class PageDCA
 
     public function inputFieldCallbackPageInfo(DataContainer $dataContainer): string
     {
+        if (! $dataContainer->activeRecord) {
+            return '';
+        }
+
         $tpl = new BackendTemplate('hofff_language_relations_page_info');
         $tpl->setData($dataContainer->activeRecord->row());
 
@@ -114,8 +119,9 @@ class PageDCA
                 [$original->group_id, $copy->id]
             );
         } elseif ($original->root_page_id !== $copy->root_page_id && $original->group_id === $copy->group_id) {
+            /** @psalm-var array<array-key, int|numeric-string> $relatedItems */
             $relatedItems   = $this->relations->getRelations($original->id);
-            $relatedItems[] = $original->id;
+            $relatedItems[] = (int) $original->id;
             $this->relations->createRelations((int) $copy->id, $relatedItems);
             $this->relations->createReflectionRelations((int) $copy->id);
         }
@@ -138,6 +144,7 @@ class PageDCA
             return;
         }
 
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($originalChildren->next() && $copyChildren->next()) {
             $this->copyRelations((int) $originalChildren->id, (int) $copyChildren->id, $copyStart);
         }
@@ -169,10 +176,11 @@ class PageDCA
      */
     public function getLinkedPages(): string
     {
-        //get the related languaged
+        //get the related language
+        /** @psalm-var int[] $relations */
         $relations = $this->relations->getRelations(Input::get('id'));
-        //add the curent id
-        $relations[] = Input::get('id');
+        //add the current id
+        $relations[] = (int) Input::get('id');
         //get page details and sorting info
         $this->collectPageDetails($relations);
         usort($relations, static function ($itemA, $itemB) {
@@ -204,11 +212,19 @@ class PageDCA
     public function getTranslationPages(): array
     {
         $return = [];
-        $ids    = $this->relations->getRelations(Input::get('id'));
-        $ids[]  = Input::get('id');
+
+        /** @psalm-var array<array-key, int|string> $ids */
+        $ids   = $this->relations->getRelations(Input::get('id'));
+        $ids[] = Input::get('id');
         foreach ($ids as $value) {
-            $template     = new BackendTemplate('be_hofff_language_switcher_page');
-            $page         = PageModel::findWithDetails($value)->row();
+            $template = new BackendTemplate('be_hofff_language_switcher_page');
+            $page     = PageModel::findWithDetails($value);
+
+            if ($page === null) {
+                continue;
+            }
+
+            $page         = $page->row();
             $page['href'] = Backend::addToUrl('do=page&act=edit&id=' . $value);
             if (Input::get('id') === $value) {
                 $page['isActive'] = true;
@@ -221,7 +237,8 @@ class PageDCA
         return $return;
     }
 
-    private function getPageInfo(int $pageId): Result
+    /** @return Result|Statement */
+    private function getPageInfo(int $pageId)
     {
         $sql = <<<SQL
 SELECT
@@ -253,7 +270,12 @@ SQL;
                 continue;
             }
 
-            static::$pageCache[$value]                  = PageModel::findWithDetails($value)->row();
+            $page = PageModel::findWithDetails($value);
+            if ($page === null) {
+                continue;
+            }
+
+            static::$pageCache[$value]                  = $page->row();
             static::$pageCache[$value]['rootIdSorting'] = QueryUtil::query(
                 'SELECT sorting FROM tl_page WHERE id = ?',
                 [static::$pageCache[$value]['rootId']]

@@ -25,19 +25,19 @@ class RelationsDCABuilder
 {
     private RelationsDCABuilderConfig $config;
 
-    /** @var string[][] */
+    /** @var array<numeric-string|int, array<numeric-string|int,mixed>> */
     protected array $submittedRelations;
 
     /** @var array<string, string> */
-    private array $groupTitleCache;
+    private array $groupTitleCache = [];
 
     /** @var array<string, array<string>> */
-    private array $rootsCache;
+    private array $rootsCache = [];
 
-    private int $relatedItem;
+    private int $relatedItem = 0;
 
     /** @var array<int, int> */
-    private array $relatedItemOf;
+    private array $relatedItemOf = [];
 
     public function __construct(RelationsDCABuilderConfig $config)
     {
@@ -56,7 +56,7 @@ class RelationsDCABuilder
 
         $factory = $this->createFactory();
 
-        $dca['config']['onsubmit_callback'][] = function ($dataContainer): void {
+        $dca['config']['onsubmit_callback'][] = function (DataContainer $dataContainer): void {
             $this->onsubmitCallback($dataContainer);
         };
 
@@ -73,17 +73,27 @@ class RelationsDCABuilder
                 'class'                 => 'hofff-relations',
                 'data'                  => $factory,
             ],
-            'input_field_callback'  => function ($dataContainer) use (&$dca, $fieldName, $factory) {
+            'input_field_callback'  => function (DataContainer $dataContainer) use (
+                &$dca,
+                $fieldName,
+                $factory
+            ): string {
                 return $this->inputFieldCallback($dataContainer, $dca, $fieldName, $factory);
             },
             'load_callback'         => [
-                function ($value, $dataContainer) {
+                /**
+                 * @param mixed $value
+                 *
+                 * @return int[]
+                 */
+                function ($value, DataContainer $dataContainer): array {
                     return $this->loadRelationsCallback($value, $dataContainer);
                 },
             ],
             'save_callback'         => [
-                function ($value, $dataContainer) {
-                    return $this->saveRelationsCallback($value, $dataContainer);
+                /** @param mixed $value */
+                function ($value, DataContainer $dataContainer): void {
+                    $this->saveRelationsCallback($value, $dataContainer);
                 },
             ],
         ];
@@ -99,8 +109,8 @@ class RelationsDCABuilder
         $submittedRelations = $this->submittedRelations[$rowId];
         unset($this->submittedRelations[$rowId]);
 
-        $makePrimary = array_keys(array_filter($submittedRelations, static function ($relation) {
-            return (bool) $relation['primary'];
+        $makePrimary = array_keys(array_filter($submittedRelations, static function (array $relation): bool {
+            return (bool) ($relation['primary'] ?? false);
         }));
 
         $relations = $this->config->getRelations();
@@ -129,15 +139,14 @@ class RelationsDCABuilder
             [$dataContainer->id]
         );
 
+        /** @psalm-suppress PossiblyUndefinedMethod */
         return $result->fetchEach('related_item_id');
     }
 
     /**
-     * @return null
-     *
      * @throws Exception
      */
-    protected function saveRelationsCallback(string $value, DataContainer $dataContainer)
+    protected function saveRelationsCallback(string $value, DataContainer $dataContainer): void
     {
         $value = StringUtil::deserialize($value, true);
 
@@ -146,8 +155,6 @@ class RelationsDCABuilder
         $this->validateRelationRoots($rowId, array_keys($value));
 
         $this->submittedRelations[$rowId] = $value;
-
-        return null;
     }
 
     /**
@@ -238,7 +245,7 @@ SQL;
     }
 
     /**
-     * @param string[][][] $dca
+     * @param array<string,array<string,mixed>> $dca
      *
      * @SuppressWarnings(PHPMD.Superglobals)
      */
@@ -344,7 +351,8 @@ SQL;
             [$this->config->getAggregateView(), $this->config->getAggregateView()],
             [$aggregate]
         );
-        $roots  = $result->fetchEach('tree_root_id');
+        /** @psalm-suppress PossiblyUndefinedMethod */
+        $roots = $result->fetchEach('tree_root_id');
 
         return $this->rootsCache[$aggregate] = $roots;
     }

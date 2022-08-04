@@ -5,24 +5,25 @@ declare(strict_types=1);
 namespace Hofff\Contao\LanguageRelations\DCA;
 
 use Hofff\Contao\LanguageRelations\Relations;
+use RuntimeException;
 
 /** @SuppressWarnings(PHPMD.LongVariable) */
 class RelationsDCABuilderConfig
 {
-    protected Relations $relations;
+    protected ?Relations $relations = null;
 
-    protected string $aggregateFieldName;
+    protected string $aggregateFieldName = '';
 
-    protected string $aggregateView;
+    protected string $aggregateView = '';
 
-    protected string $treeView;
+    protected string $treeView = '';
 
     /** @var callable|null */
     protected $selectriDataFactoryConfiguratorCallback;
 
-    protected string $selectriNodeLabelTemplate;
+    protected string $selectriNodeLabelTemplate = '';
 
-    protected string $selectriNodeContentTemplate;
+    protected string $selectriNodeContentTemplate = '';
 
     public function __construct()
     {
@@ -32,6 +33,10 @@ class RelationsDCABuilderConfig
 
     public function getRelations(): Relations
     {
+        if ($this->relations === null) {
+            throw new RuntimeException();
+        }
+
         return $this->relations;
     }
 

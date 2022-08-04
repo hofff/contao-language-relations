@@ -16,6 +16,7 @@ use function sprintf;
  * Copyright: The widget was taken from discordier/justtextwidgets and licensed under the LGPL-3.0-or-later
  *
  * @See https://github.com/discordier/justtextwidgets/blob/master/src/Widgets/JustATextOption.php
+ * @psalm-suppress PropertyNotSetInConstructor
  */
 final class TextOptionsWidget extends Widget
 {

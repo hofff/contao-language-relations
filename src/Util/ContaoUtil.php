@@ -6,13 +6,14 @@ namespace Hofff\Contao\LanguageRelations\Util;
 
 use Contao\Model;
 
+use function defined;
 use function time;
 
 class ContaoUtil
 {
     public static function isPublished(Model $model): bool
     {
-        if (BE_USER_LOGGED_IN) {
+        if (defined('BE_USER_LOGGED_IN') && BE_USER_LOGGED_IN) {
             return true;
         }
 

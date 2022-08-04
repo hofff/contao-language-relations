@@ -10,6 +10,10 @@ use Hofff\Contao\Selectri\Util\Icons;
 
 call_user_func(
     static function (): void {
+        /**
+         * @psalm-suppress InvalidArrayOffset
+         * @psalm-suppress InvalidArrayAccess
+         */
         [$callback, $columns] = Icons::getTableIconCallback('tl_page');
         Icons::setTableIconCallback(
             'hofff_language_relations_page_tree',

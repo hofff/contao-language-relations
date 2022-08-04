@@ -24,6 +24,7 @@ use function array_map;
 use function assert;
 use function call_user_func;
 use function class_exists;
+use function defined;
 use function explode;
 use function is_array;
 use function sprintf;
@@ -38,18 +39,33 @@ use function uasort;
 
 use const PHP_INT_MAX;
 
+/**
+ * @property string|bool                       $hofff_language_relations_keep_request_params
+ * @property string|bool                       $hofff_language_relations_hide_current
+ * @property string|bool                       $hofff_language_relations_keep_qs
+ * @property string|list<array<string,string>> $hofff_language_relations_labels
+ * @psalm-suppress PropertyNotSetInConstructor
+ */
 class ModuleLanguageSwitcher extends Module
 {
     protected bool $intlSupported;
 
     /** @var array<string, string> */
-    protected array $labels;
+    protected array $labels = [];
 
     public function __construct(ModuleModel $module, string $column = 'main')
     {
         parent::__construct($module, $column);
         $this->intlSupported = class_exists('Locale');
         $this->strTemplate   = 'mod_hofff_language_relations_language_switcher';
+
+        foreach (StringUtil::deserialize($this->hofff_language_relations_labels, true) as $row) {
+            if (! strlen($row['language'])) {
+                continue;
+            }
+
+            $this->labels[$row['language']] = $row['label'];
+        }
     }
 
     /**
@@ -57,7 +73,7 @@ class ModuleLanguageSwitcher extends Module
      */
     public function generate(): string
     {
-        if (TL_MODE === 'BE') {
+        if (defined('TL_MODE') && TL_MODE === 'BE') {
             $tpl           = new BackendTemplate('be_wildcard');
             $tpl->wildcard = '### LANGUAGE SWITCHER ###';
             $tpl->title    = $this->headline;
@@ -79,6 +95,7 @@ class ModuleLanguageSwitcher extends Module
      * @SuppressWarnings(PHPMD.Superglobals)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function compile(): void
     {
@@ -87,19 +104,28 @@ class ModuleLanguageSwitcher extends Module
         $relatedPages = $relations->getRelations($currentPage->id, false, true);
 
         foreach ($relatedPages as $rootPageID => &$page) {
-            $page = PageModel::findWithDetails($page ?? $rootPageID);
+            $page = PageModel::findWithDetails((int) ($page ?: $rootPageID));
         }
 
         unset($page);
+        /** @psalm-var array<numeric-string|int|PageModel|null> $relatedPages */
 
-        if (! BE_USER_LOGGED_IN) {
-            $relatedPages = array_filter($relatedPages, static function (object $page) {
-                return $page->rootIsPublic;
+        if (! defined('BE_USER_LOGGED_IN') || ! BE_USER_LOGGED_IN) {
+            $relatedPages = array_filter($relatedPages, static function ($page): bool {
+                if (! $page instanceof PageModel) {
+                    return false;
+                }
+
+                return (bool) $page->rootIsPublic;
             });
-            $relatedPages = array_map(static function ($page) {
+            $relatedPages = array_map(static function ($page): ?PageModel {
+                if (! $page instanceof PageModel) {
+                    return null;
+                }
+
                 return ContaoUtil::isPublished($page)
                     ? $page
-                    : PageModel::findWithDetails($page->hofff_root_page_id);
+                    : PageModel::findWithDetails((int) $page->hofff_root_page_id);
             }, $relatedPages);
         }
 
@@ -116,7 +142,7 @@ class ModuleLanguageSwitcher extends Module
             try {
                 $url = $page->getFrontendUrl($params, $language);
             } catch (RouteParametersException $exception) {
-                continue;
+                $url = '';
             }
 
             $item              = [];
@@ -131,6 +157,7 @@ class ModuleLanguageSwitcher extends Module
             $item['accesskey'] = '';
             $item['tabindex']  = '';
             $item['nofollow']  = false;
+            $item['model']     = $page;
 
             if ($item['isActive']) {
                 $item['href']   = Environment::get('request');
@@ -178,9 +205,8 @@ class ModuleLanguageSwitcher extends Module
         }
 
         [$params] = explode('?', Environment::get('request'), 2);
-        $params   = (string) substr($params, strlen($currentPage->alias) + 1);
 
-        return $params;
+        return substr($params, strlen($currentPage->alias) + 1);
     }
 
     protected function getLabel(string $language): string
@@ -270,20 +296,6 @@ class ModuleLanguageSwitcher extends Module
      */
     protected function getLabels(): array
     {
-        if (isset($this->labels)) {
-            return $this->labels;
-        }
-
-        $labels = [];
-
-        foreach (StringUtil::deserialize($this->hofff_language_relations_labels, true) as $row) {
-            if (! strlen($row['language'])) {
-                continue;
-            }
-
-            $labels[$row['language']] = $row['label'];
-        }
-
-        return $this->labels = $labels;
+        return $this->labels;
     }
 }

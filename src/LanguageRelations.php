@@ -29,6 +29,7 @@ class LanguageRelations
 
     public static function getRelationsInstance(): Relations
     {
+        /** @psalm-suppress RedundantPropertyInitializationCheck */
         isset(self::$relations) || self::$relations = new Relations(
             'tl_hofff_language_relations_page',
             'hofff_language_relations_page_item',
@@ -53,7 +54,7 @@ class LanguageRelations
      * @param int|array<int> $pages
      * @param bool           $primary
      *
-     * @return int[]|array[]
+     * @return string[]|int[]|array<string[]|int[]>
      */
     public static function getRelations($pages, $primary = false): array
     {
@@ -116,7 +117,7 @@ class LanguageRelations
      */
     public static function createRelations(int $page, $translatedPages): int
     {
-        return self::getRelationsInstance()->createRelations($page, $translatedPages);
+        return self::getRelationsInstance()->createRelations($page, (array) $translatedPages);
     }
 
     /**

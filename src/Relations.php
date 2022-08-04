@@ -8,6 +8,7 @@ use Hofff\Contao\LanguageRelations\Util\QueryUtil;
 
 use function array_fill_keys;
 use function array_filter;
+use function array_map;
 use function is_array;
 
 class Relations
@@ -52,11 +53,11 @@ class Relations
      * entries, where array is the same result as this method were called with
      * the respective page as a single integer argument.
      *
-     * @param int|array<int> $items
-     * @param bool           $primary
-     * @param bool           $complete
+     * @param string|int|array<string|int> $items
+     * @param bool                         $primary
+     * @param bool                         $complete
      *
-     * @return int[]|array[int[]]
+     * @return array<int,int>|array<array<int,int>>
      */
     public function getRelations($items, $primary = false, $complete = false): array
     {
@@ -104,30 +105,26 @@ SQL;
             $ids
         );
 
-        $relations = array_fill_keys((array) $items, []);
+        $relations = array_fill_keys(array_map('intval', (array) $items), []);
 
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             if ($primary && ! $result->is_primary) {
                 continue;
             }
 
-            $relations[$result->item_id][$result->related_root_page_id] = $result->related_item_id;
+            $relations[(int) $result->item_id][(int) $result->related_root_page_id] = (int) $result->related_item_id;
         }
 
         if (! $complete) {
             foreach ($relations as &$map) {
-                $map = array_filter(
-                    $map,
-                    static function ($relationId) {
-                        return $relationId !== null;
-                    }
-                );
+                $map = array_filter($map);
             }
 
             unset($map);
         }
 
-        return is_array($items) ? $relations : $relations[$items];
+        return is_array($items) ? $relations : ($relations[$items] ?? []);
     }
 
     /**
@@ -151,6 +148,7 @@ SQL;
         );
 
         $related = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $related[$result->item_id] = $result->item_id;
         }
@@ -215,6 +213,7 @@ SQL;
         );
 
         $incompletenesses = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $incompletenesses[$result->item_id][$result->missing_root_page_id] = $result->missing_root_page_language;
         }
@@ -268,6 +267,7 @@ SQL;
         );
 
         $ambiguities = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $ambiguities[$result->item_id] = $result->item_id;
         }
@@ -280,7 +280,7 @@ SQL;
      *
      * CARE: Does not check the validity of the given relations!
      *
-     * @param int|int[] $relatedItems
+     * @param array<array-key,int|numeric-string> $relatedItems
      *
      * @return int The number of created relations
      */
@@ -440,8 +440,8 @@ SQL;
      * Deletes all relations of the given items into the relation root of the
      * given page.
      *
-     * @param int|int[] $items
-     * @param int       $page
+     * @param int|numeric-string|list<int|numeric-string> $items
+     * @param int                                         $page
      */
     public function deleteRelationsToRoot($items, $page): int
     {

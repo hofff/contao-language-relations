@@ -6,19 +6,24 @@ namespace Hofff\Contao\LanguageRelations\DCA;
 
 use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\DC_Table;
 use Contao\Input;
 use Contao\Message;
 use Contao\StringUtil;
 use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;
 use Hofff\Contao\LanguageRelations\Util\EnvironmentProxy;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 use function array_filter;
 use function array_map;
 use function array_unique;
 use function array_unshift;
+use function assert;
 use function count;
 use function rtrim;
 use function sprintf;
@@ -36,6 +41,10 @@ class GroupDCA
 
     public function keySelectriAJAXCallback(DataContainer $dataContainer): string
     {
+        if (! $dataContainer instanceof DC_Table) {
+            throw new BadRequestException();
+        }
+
         $key = 'isAjaxRequest';
 
         // the X-Requested-With gets deleted on ajax requests by selectri widget,
@@ -64,6 +73,7 @@ class GroupDCA
             return $root >= 1;
         });
         $roots  = array_unique($roots);
+        $ids    = null;
 
         switch ($_GET['filter']) {
             case 'incomplete':
@@ -89,20 +99,26 @@ class GroupDCA
         }
 
         if (! $ids) {
-            Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
+            Message::addConfirmation($msg ?? $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
             Controller::redirect(System::getReferer());
 
             return;
         }
 
-        $sessionService                = System::getContainer()->get('session');
+        $sessionService = System::getContainer()->get('session');
+        assert($sessionService instanceof SessionInterface);
+
         $session                       = $sessionService->all();
         $session['CURRENT']['IDS']     = $ids;
         $session['CURRENT']['tl_page'] = $fields;
         $sessionService->replace($session);
 
+        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+        assert($tokenManager instanceof ContaoCsrfTokenManager);
+
         Controller::redirect(
-            'contao?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN
+            'contao?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt='
+            . $tokenManager->getDefaultTokenValue()
         );
     }
 

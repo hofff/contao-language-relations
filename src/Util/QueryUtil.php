@@ -52,9 +52,9 @@ class QueryUtil
     }
 
     /**
-     * @param int|int[] $ids
+     * @param string|int|array<string|int> $ids
      *
-     * @return int[]
+     * @return array<string|int>
      */
     public static function ids($ids): array
     {
