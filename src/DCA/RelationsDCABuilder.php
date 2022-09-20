@@ -301,7 +301,7 @@ SQL;
 
     protected function extractAggregateKey(DataContainer $dataContainer): string
     {
-        return $dataContainer->activeRecord->{$this->config->getAggregateFieldName()};
+        return (string) $dataContainer->activeRecord->{$this->config->getAggregateFieldName()};
     }
 
     protected function getGroupTitle(string $aggregate): string
