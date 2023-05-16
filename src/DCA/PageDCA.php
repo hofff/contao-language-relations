@@ -49,9 +49,9 @@ class PageDCA
                 continue;
             }
 
-            $palette                                                     .= ';{hofff_language_relations_legend}';
-            $_GET['do'] === 'hofff_language_relations_group' && $palette .= ',hofff_language_relations_info';
-            $palette                                                     .= ',hofff_language_relations';
+            $palette                                                             .= ';{hofff_language_relations_legend}';
+            ($_GET['do'] ?? '') === 'hofff_language_relations_group' && $palette .= ',hofff_language_relations_info';
+            $palette                                                             .= ',hofff_language_relations';
         }
         unset($palette, $palettes);
     }
