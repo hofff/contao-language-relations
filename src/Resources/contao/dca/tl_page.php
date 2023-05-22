@@ -45,7 +45,7 @@ $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = [PageDCA::class, 
  * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module
  * https://github.com/hofff/contao-language-relations/issues/2
  */
-if ($_GET['do'] === 'hofff_language_relations_group') {
+if (isset($_GET['do']) && $_GET['do'] === 'hofff_language_relations_group') {
     $onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
     foreach ($onsubmit as $i => $callback) {
         if (! is_array($callback)) {
