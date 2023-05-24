@@ -209,8 +209,8 @@ class ArticleDCA
     private function collectArticlesFromPages(array $pageIds) : void
     {
         foreach ($pageIds as $pageId) {
-            //update cache if necessary
-            if (static::$articleCache[$pageId]) {
+            // Update cache if necessary.
+            if (!empty(static::$articleCache[$pageId])) {
                 continue;
             }
 
