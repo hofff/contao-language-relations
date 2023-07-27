@@ -24,7 +24,7 @@ class PageDCA
 {
     private Relations $relations;
 
-    /** @var mixed[][] */
+    /** @var array<int|string,array<string,mixed>|null> */
     public static array $pageCache = [];
 
     /**
