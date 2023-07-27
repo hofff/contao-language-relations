@@ -59,7 +59,7 @@ final class TextOptionsWidget extends Widget
         }
 
         $strClass = ($this->strClass !== '' ? ' class="' . $this->strClass . '"' : '');
-        $strStyle = ($this->arrAttributes['style'] !== '' ? ' style="' . $this->arrAttributes['style'] . '"' : '');
+        $strStyle = ($this->arrAttributes['style'] ?? null ? ' style="' . $this->arrAttributes['style'] . '"' : '');
 
         return $this->checkOptGroup($this->arrOptions, $strClass, $strStyle);
     }
