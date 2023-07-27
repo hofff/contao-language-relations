@@ -14,6 +14,7 @@ use Contao\PageModel;
 use Hofff\Contao\LanguageRelations\Relations;
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
 
+use function array_key_exists;
 use function array_keys;
 use function serialize;
 use function time;
@@ -228,11 +229,9 @@ class PageDCA
                 continue;
             }
 
-            $page         = $page->row();
-            $page['href'] = Backend::addToUrl('do=page&act=edit&id=' . $value);
-            if (Input::get('id') === $value) {
-                $page['isActive'] = true;
-            }
+            $page             = $page->row();
+            $page['href']     = Backend::addToUrl('do=page&act=edit&id=' . $value);
+            $page['isActive'] = (int) Input::get('id') === (int) $value;
 
             $template->page = $page;
             $return[$value] = $template->parse();
@@ -270,9 +269,11 @@ SQL;
     private function collectPageDetails(array $pageIds): void
     {
         foreach ($pageIds as $value) {
-            if (static::$pageCache[$value]) {
+            if (array_key_exists($value, static::$pageCache)) {
                 continue;
             }
+
+            static::$pageCache[$value] = null;
 
             $page = PageModel::findWithDetails($value);
             if ($page === null) {
