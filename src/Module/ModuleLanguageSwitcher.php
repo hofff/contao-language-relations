@@ -104,6 +104,7 @@ class ModuleLanguageSwitcher extends Module
         $relatedPages = $relations->getRelations($currentPage->id, false, true);
 
         foreach ($relatedPages as $rootPageID => &$page) {
+            /** @psalm-suppress RiskyCast */
             $page = PageModel::findWithDetails((int) ($page ?: $rootPageID));
         }
 

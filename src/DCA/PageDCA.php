@@ -53,9 +53,13 @@ class PageDCA
                 continue;
             }
 
-            $palette                                                             .= ';{hofff_language_relations_legend}';
-            ($_GET['do'] ?? '') === 'hofff_language_relations_group' && $palette .= ',hofff_language_relations_info';
-            $palette                                                             .= ',hofff_language_relations';
+            $palette .= ';{hofff_language_relations_legend}';
+
+            if (($_GET['do'] ?? '') === 'hofff_language_relations_group') {
+                $palette .= ',hofff_language_relations_info';
+            }
+
+            $palette .= ',hofff_language_relations';
         }
 
         unset($palette, $palettes);
@@ -161,7 +165,7 @@ class PageDCA
 
         $GLOBALS['TL_CSS']['hofffcontaolanguagerelations_be'] = 'bundles/hofffcontaolanguagerelations/css/backend.css';
         foreach (array_keys($GLOBALS['TL_DCA']['tl_page']['palettes']) as $key) {
-            //skip '__selector__
+            /** @psalm-suppress TypeDoesNotContainType */
             if ($key === '__selector__') {
                 continue;
             }

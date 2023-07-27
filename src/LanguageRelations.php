@@ -153,8 +153,8 @@ class LanguageRelations
          * Deletes all relations of the given pages into the root page tree of the
          * given root.
          *
-         * @param int|array<int> $pages
-         * @param int            $root
+         * @param int|list<int|numeric-string> $pages
+         * @param int                          $root
          */
     public static function deleteRelationsToRoot($pages, $root): int
     {

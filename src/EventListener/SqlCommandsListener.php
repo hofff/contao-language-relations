@@ -22,22 +22,23 @@ final class SqlCommandsListener
     }
 
     /**
-     * @param array<string,string> $queries
+     * @param array<string,array<string,string>> $queries
      *
-     * @return array<string,string>
+     * @return array<string,array<string,string>>
      */
     public function __invoke(array $queries): array
     {
         $existingViews = $this->connection->getSchemaManager()->listViews();
+        $plattform     = $this->connection->getDatabasePlatform();
 
         foreach ($this->schema->views() as $view) {
             if (isset($existingViews[$view->getName()])) {
                 continue;
             }
 
-            $queries['hofff-contao-language-relations'][$view->getName()] = $this->connection->getDatabasePlatform()->getCreateViewSQL(
+            $queries['hofff-contao-language-relations'][$view->getName()] = $plattform->getCreateViewSQL(
                 $view->getName(),
-                $view->getSql()
+                $view->getSql(),
             );
         }
 

@@ -63,7 +63,7 @@ class ArticleDCA
 
         $GLOBALS['TL_CSS']['hofffcontaolanguagerelations_be'] = 'bundles/hofffcontaolanguagerelations/css/backend.css';
         foreach (array_keys($GLOBALS['TL_DCA']['tl_article']['palettes']) as $key) {
-            //skip '__selector__
+            /** @psalm-suppress TypeDoesNotContainType */
             if ($key === '__selector__') {
                 continue;
             }
