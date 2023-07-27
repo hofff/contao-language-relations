@@ -189,7 +189,10 @@ class PageDCA
         //get page details and sorting info
         $this->collectPageDetails($relations);
         usort($relations, static function ($itemA, $itemB) {
-            return static::$pageCache[$itemA]['rootIdSorting'] < static::$pageCache[$itemB]['rootIdSorting'] ? -1 : 1;
+            $sortingA = static::$pageCache[$itemA]['rootIdSorting'] ?? -1;
+            $sortingB = static::$pageCache[$itemB]['rootIdSorting'] ?? -1;
+
+            return $sortingA < $sortingB ? -1 : 1;
         });
         //build return array
         $newValues = [];
