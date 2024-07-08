@@ -232,9 +232,7 @@ class ArticleDCA
             $articleRow             = static::$articleCache[$pageId]['articles'][$intArticlePosition]->row();
             $articleRow['language'] = static::$articleCache[$pageId]['rootIdLanguage'];
             $articleRow['href']     = Backend::addToUrl('do=article&table=tl_content&id=' . $articleRow['id']);
-            if (Input::get('id') === $articleRow['id']) {
-                $articleRow['isActive'] = true;
-            }
+            $articleRow['isActive'] = (Input::get('id') === $articleRow['id']);
 
             $articles[] = $articleRow;
         }
