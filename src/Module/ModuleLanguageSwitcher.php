@@ -16,6 +16,7 @@ use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;
 use Hofff\Contao\LanguageRelations\Util\ContaoUtil;
 use Locale;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 use function array_filter;
 use function array_flip;
@@ -143,6 +144,8 @@ class ModuleLanguageSwitcher extends Module
             try {
                 $url = $page->getFrontendUrl($params, $language);
             } catch (RouteParametersException $exception) {
+                $url = '';
+            } catch (ResourceNotFoundException $exception) {
                 $url = '';
             }
 
