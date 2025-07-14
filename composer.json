@@ -1,9 +1,15 @@
 {
   "name": "hofff/contao-language-relations",
   "description": "Maintaining relations between translated pages.",
-  "keywords": [ "utility", "translation", "page", "tree", "contao" ],
-  "type": "contao-bundle",
   "license": "LGPL-3.0-or-later",
+  "type": "contao-bundle",
+  "keywords": [
+    "utility",
+    "translation",
+    "page",
+    "tree",
+    "contao"
+  ],
   "authors": [
     {
       "name": "Nicky Hoff",
@@ -31,20 +37,23 @@
     }
   ],
   "require": {
-    "php": "^7.2",
+    "php": "^7.4 || ^8.0",
     "ext-intl": "*",
-    "contao/core-bundle": "^4.4",
-    "discordier/justtextwidgets": "^1.2",
-    "hofff/contao-selectri": "^4.0.5",
+    "contao/core-bundle": "^4.9",
+    "doctrine/dbal": "^2.11 || ^3.0",
     "hofff/contao-root-relations": "^3.0",
-    "menatwork/contao-multicolumnwizard-bundle" : "^3.4",
-    "symfony/dependency-injection": "^3.4.26 || ^4.2.7",
-    "symfony/http-kernel": "^3.4.26 || ^4.2.7"
+    "hofff/contao-selectri": "^4.0.5",
+    "menatwork/contao-multicolumnwizard-bundle": "^3.4",
+    "symfony/config": "^4.4 || ^5.0",
+    "symfony/dependency-injection": "^4.4 || ^5.0",
+    "symfony/filesystem": "^4.4 || ^5.0",
+    "symfony/http-foundation": "^4.4 || ^5.0",
+    "symfony/http-kernel": "^4.4 || ^5.0"
   },
   "require-dev": {
     "contao/manager-plugin": "^2.1",
-    "doctrine/coding-standard": "^5.0",
-    "slevomat/coding-standard": "^4.8.6"
+    "doctrine/coding-standard": "^9.0",
+    "phpcq/runner-bootstrap": "^1.0@dev"
   },
   "conflict": {
     "contao/manager-plugin": "<2.1 || >= 3.0"
@@ -54,8 +63,18 @@
       "Hofff\\Contao\\LanguageRelations\\": "src/"
     }
   },
+  "config": {
+    "allow-plugins": {
+      "contao-components/installer": false,
+      "contao/manager-plugin": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "contao-community-alliance/composer-plugin": true,
+      "php-http/discovery": true
+    }
+  },
   "extra": {
     "branch-alias": {
+      "dev-develop": "3.1.x-dev",
       "dev-master": "3.0.x-dev"
     },
     "contao-manager-plugin": "Hofff\\Contao\\LanguageRelations\\ContaoManager\\Plugin"

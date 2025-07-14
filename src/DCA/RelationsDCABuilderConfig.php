@@ -5,29 +5,25 @@ declare(strict_types=1);
 namespace Hofff\Contao\LanguageRelations\DCA;
 
 use Hofff\Contao\LanguageRelations\Relations;
+use RuntimeException;
 
+/** @SuppressWarnings(PHPMD.LongVariable) */
 class RelationsDCABuilderConfig
 {
-    /** @var Relations */
-    protected $relations;
+    protected ?Relations $relations = null;
 
-    /** @var string */
-    protected $aggregateFieldName;
+    protected string $aggregateFieldName = '';
 
-    /** @var string */
-    protected $aggregateView;
+    protected string $aggregateView = '';
 
-    /** @var string */
-    protected $treeView;
+    protected string $treeView = '';
 
     /** @var callable|null */
     protected $selectriDataFactoryConfiguratorCallback;
 
-    /** @var string */
-    protected $selectriNodeLabelTemplate;
+    protected string $selectriNodeLabelTemplate = '';
 
-    /** @var string */
-    protected $selectriNodeContentTemplate;
+    protected string $selectriNodeContentTemplate = '';
 
     public function __construct()
     {
@@ -35,72 +31,76 @@ class RelationsDCABuilderConfig
         $this->selectriNodeContentTemplate = 'hofff_language_relations_node_content';
     }
 
-    public function getRelations() : Relations
+    public function getRelations(): Relations
     {
+        if ($this->relations === null) {
+            throw new RuntimeException();
+        }
+
         return $this->relations;
     }
 
-    public function setRelations(Relations $relations) : void
+    public function setRelations(Relations $relations): void
     {
         $this->relations = $relations;
     }
 
-    public function getAggregateFieldName() : string
+    public function getAggregateFieldName(): string
     {
         return $this->aggregateFieldName;
     }
 
-    public function setAggregateFieldName(string $aggregateFieldName) : void
+    public function setAggregateFieldName(string $aggregateFieldName): void
     {
         $this->aggregateFieldName = $aggregateFieldName;
     }
 
-    public function getAggregateView() : string
+    public function getAggregateView(): string
     {
         return $this->aggregateView;
     }
 
-    public function setAggregateView(string $aggregateView) : void
+    public function setAggregateView(string $aggregateView): void
     {
         $this->aggregateView = $aggregateView;
     }
 
-    public function getTreeView() : string
+    public function getTreeView(): string
     {
         return $this->treeView;
     }
 
-    public function setTreeView(string $treeView) : void
+    public function setTreeView(string $treeView): void
     {
         $this->treeView = $treeView;
     }
 
-    public function getSelectriDataFactoryConfiguratorCallback() : ?callable
+    public function getSelectriDataFactoryConfiguratorCallback(): ?callable
     {
         return $this->selectriDataFactoryConfiguratorCallback;
     }
 
-    public function setSelectriDataFactoryConfiguratorCallback(?callable $callback) : void
+    public function setSelectriDataFactoryConfiguratorCallback(?callable $callback): void
     {
         $this->selectriDataFactoryConfiguratorCallback = $callback;
     }
 
-    public function getSelectriNodeLabelTemplate() : string
+    public function getSelectriNodeLabelTemplate(): string
     {
         return $this->selectriNodeLabelTemplate;
     }
 
-    public function setSelectriNodeLabelTemplate(string $template) : void
+    public function setSelectriNodeLabelTemplate(string $template): void
     {
         $this->selectriNodeLabelTemplate = $template;
     }
 
-    public function getSelectriNodeContentTemplate() : string
+    public function getSelectriNodeContentTemplate(): string
     {
         return $this->selectriNodeContentTemplate;
     }
 
-    public function setSelectriNodeContentTemplate(string $template) : void
+    public function setSelectriNodeContentTemplate(string $template): void
     {
         $this->selectriNodeContentTemplate = $template;
     }

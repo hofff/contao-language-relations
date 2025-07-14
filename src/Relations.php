@@ -5,20 +5,19 @@ declare(strict_types=1);
 namespace Hofff\Contao\LanguageRelations;
 
 use Hofff\Contao\LanguageRelations\Util\QueryUtil;
+
 use function array_fill_keys;
 use function array_filter;
+use function array_map;
 use function is_array;
 
 class Relations
 {
-    /** @var string */
-    protected $relationTable;
+    protected string $relationTable;
 
-    /** @var string */
-    protected $itemView;
+    protected string $itemView;
 
-    /** @var string */
-    protected $relationView;
+    protected string $relationView;
 
     public function __construct(string $relationTable, string $itemView, string $relationView)
     {
@@ -27,17 +26,17 @@ class Relations
         $this->relationView  = $relationView;
     }
 
-    public function getRelationTable() : string
+    public function getRelationTable(): string
     {
         return $this->relationTable;
     }
 
-    public function getItemView() : string
+    public function getItemView(): string
     {
         return $this->itemView;
     }
 
-    public function getRelationView() : string
+    public function getRelationView(): string
     {
         return $this->relationView;
     }
@@ -54,13 +53,13 @@ class Relations
      * entries, where array is the same result as this method were called with
      * the respective page as a single integer argument.
      *
-     * @param int|array<integer> $items
-     * @param bool               $primary
-     * @param bool               $complete
+     * @param string|int|array<string|int> $items
+     * @param bool                         $primary
+     * @param bool                         $complete
      *
-     * @return int[]|array[int[]]
+     * @return array<int,int>|array<array<int,int>>
      */
-    public function getRelations($items, $primary = false, $complete = false) : array
+    public function getRelations($items, $primary = false, $complete = false): array
     {
         $ids = QueryUtil::ids($items);
         if (! $ids) {
@@ -106,29 +105,26 @@ SQL;
             $ids
         );
 
-        $relations = array_fill_keys((array) $items, []);
+        $relations = array_fill_keys(array_map('intval', (array) $items), []);
 
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             if ($primary && ! $result->is_primary) {
                 continue;
             }
 
-            $relations[$result->item_id][$result->related_root_page_id] = $result->related_item_id;
+            $relations[(int) $result->item_id][(int) $result->related_root_page_id] = (int) $result->related_item_id;
         }
 
         if (! $complete) {
             foreach ($relations as &$map) {
-                $map = array_filter(
-                    $map,
-                    static function ($id) {
-                        return $id !== null;
-                    }
-                );
+                $map = array_filter($map);
             }
+
             unset($map);
         }
 
-        return is_array($items) ? $relations : $relations[$items];
+        return is_array($items) ? $relations : ($relations[$items] ?? []);
     }
 
     /**
@@ -138,7 +134,7 @@ SQL;
      *
      * @return int[]
      */
-    public function getItemsRelatedTo(int $item) : array
+    public function getItemsRelatedTo(int $item): array
     {
         if ($item < 1) {
             return [];
@@ -152,6 +148,7 @@ SQL;
         );
 
         $related = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $related[$result->item_id] = $result->item_id;
         }
@@ -168,7 +165,7 @@ SQL;
      *
      * @return int[][]
      */
-    public function getIncompleteRelatedItems(int $page) : array
+    public function getIncompleteRelatedItems(int $page): array
     {
         if ($page < 1) {
             return [];
@@ -216,6 +213,7 @@ SQL;
         );
 
         $incompletenesses = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $incompletenesses[$result->item_id][$result->missing_root_page_id] = $result->missing_root_page_language;
         }
@@ -233,7 +231,7 @@ SQL;
      *
      * @return int[]
      */
-    public function getAmbiguousRelatedItems(int $page) : array
+    public function getAmbiguousRelatedItems(int $page): array
     {
         if ($page < 1) {
             return [];
@@ -269,6 +267,7 @@ SQL;
         );
 
         $ambiguities = [];
+        /** @psalm-suppress PossiblyUndefinedMethod */
         while ($result->next()) {
             $ambiguities[$result->item_id] = $result->item_id;
         }
@@ -281,15 +280,16 @@ SQL;
      *
      * CARE: Does not check the validity of the given relations!
      *
-     * @param int|int[] $relatedItems
+     * @param array<array-key,int|numeric-string> $relatedItems
      *
      * @return int The number of created relations
      */
-    public function createRelations(int $item, $relatedItems) : int
+    public function createRelations(int $item, $relatedItems): int
     {
         if ($item < 1) {
             return 0;
         }
+
         $relatedItems = QueryUtil::ids($relatedItems);
         if (! $relatedItems) {
             return 0;
@@ -320,7 +320,7 @@ SQL;
      * the given item itself, if none exists for them in the given item's
      * relation root already.
      */
-    public function createReflectionRelations(int $item) : int
+    public function createReflectionRelations(int $item): int
     {
         if ($item < 1) {
             return 0;
@@ -364,7 +364,7 @@ SQL;
      * themselfs, if none exists for them in their respective relation roots
      * already.
      */
-    public function createIntermediateRelations(int $item) : int
+    public function createIntermediateRelations(int $item): int
     {
         if ($item < 1) {
             return 0;
@@ -416,7 +416,7 @@ SQL;
      *
      * @param int|int[] $items
      */
-    public function deleteRelationsFrom($items) : int
+    public function deleteRelationsFrom($items): int
     {
         $items = QueryUtil::ids($items);
         if (! $items) {
@@ -440,14 +440,15 @@ SQL;
      * Deletes all relations of the given items into the relation root of the
      * given page.
      *
-     * @param int|int[] $items
-     * @param int       $page
+     * @param int|numeric-string|list<int|numeric-string> $items
+     * @param int                                         $page
      */
-    public function deleteRelationsToRoot($items, $page) : int
+    public function deleteRelationsToRoot($items, $page): int
     {
         if ($page < 1) {
             return 0;
         }
+
         $items = QueryUtil::ids($items);
         if (! $items) {
             return 0;

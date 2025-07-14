@@ -9,7 +9,11 @@ use Hofff\Contao\LanguageRelations\Relations;
 use Hofff\Contao\Selectri\Util\Icons;
 
 call_user_func(
-    static function () : void {
+    static function (): void {
+        /**
+         * @psalm-suppress InvalidArrayOffset
+         * @psalm-suppress InvalidArrayAccess
+         */
         [$callback, $columns] = Icons::getTableIconCallback('tl_page');
         Icons::setTableIconCallback(
             'hofff_language_relations_page_tree',
@@ -34,25 +38,27 @@ call_user_func(
     }
 );
 
-$GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][] = [PageDCA::class, 'oncopyCallback' ];
+$GLOBALS['TL_DCA']['tl_page']['config']['oncopy_callback'][] = [PageDCA::class, 'oncopyCallback'];
 $GLOBALS['TL_DCA']['tl_page']['config']['onload_callback'][] = [PageDCA::class, 'addPageTranslationLinks'];
 
 /*
  * FIXME OH: this is a temp workaround to speed up saving of edit all in translation group be module
  * https://github.com/hofff/contao-language-relations/issues/2
  */
-if ($_GET['do'] === 'hofff_language_relations_group') {
+if (isset($_GET['do']) && $_GET['do'] === 'hofff_language_relations_group') {
     $onsubmit = &$GLOBALS['TL_DCA']['tl_page']['config']['onsubmit_callback'];
     foreach ($onsubmit as $i => $callback) {
         if (! is_array($callback)) {
             continue;
         }
+
         [$class, $method] = $callback;
         if ($class === 'tl_page' && $method === 'updateSitemap') {
             unset($onsubmit[$i]);
             break;
         }
     }
+
     unset($onsubmit);
 }
 
@@ -79,7 +85,7 @@ $GLOBALS['TL_DCA']['tl_page']['fields']['hofff_language_relations_page_links'] =
             'linkedPages' => [
                 'label'              => null,
                 'exclude'            => true,
-                'inputType'          => 'justtextoption',
+                'inputType'          => 'languagerelatation_textoptions',
                 'options_callback'   => [PageDCA::class, 'getTranslationPages'],
                 'eval' => [
                     'hideHead'       => true,

@@ -20,7 +20,7 @@ $GLOBALS['TL_DCA']['tl_article']['fields']['hofff_language_relations_article_lin
             'linkedArticles' => [
                 'label'              => null,
                 'exclude'            => true,
-                'inputType'          => 'justtextoption',
+                'inputType'          => 'languagerelatation_textoptions',
                 'options_callback'   => [ArticleDCA::class, 'getTranslationArticles'],
                 'eval' => [
                     'hideHead'       => true,

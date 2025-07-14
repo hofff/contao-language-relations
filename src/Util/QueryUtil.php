@@ -7,6 +7,7 @@ namespace Hofff\Contao\LanguageRelations\Util;
 use Contao\Database;
 use Contao\Database\Result;
 use Contao\Database\Statement;
+
 use function array_filter;
 use function count;
 use function rtrim;
@@ -24,6 +25,7 @@ class QueryUtil
     public static function query(string $sql, ?array $placeholders = null, ?array $params = null)
     {
         $placeholders === null || $sql = vsprintf($sql, $placeholders);
+
         return Database::getInstance()->prepare($sql)->execute($params);
     }
 
@@ -36,6 +38,7 @@ class QueryUtil
     public static function exec(string $sql, ?array $placeholders = null, ?array $params = null)
     {
         $placeholders === null || $sql = vsprintf($sql, $placeholders);
+
         return Database::getInstance()->prepare($sql)->execute($params);
     }
 
@@ -43,20 +46,20 @@ class QueryUtil
      * @param mixed  $params
      * @param string $wildcard
      */
-    public static function wildcards($params, $wildcard = '?') : string
+    public static function wildcards($params, $wildcard = '?'): string
     {
         return rtrim(str_repeat($wildcard . ',', count((array) $params)), ',');
     }
 
     /**
-     * @param int|int[] $ids
+     * @param string|int|array<string|int> $ids
      *
-     * @return int[]
+     * @return array<string|int>
      */
-    public static function ids($ids) : array
+    public static function ids($ids): array
     {
-        return array_filter((array) $ids, static function ($id) {
-            return $id >= 1;
+        return array_filter((array) $ids, static function ($rowId) {
+            return $rowId >= 1;
         });
     }
 }

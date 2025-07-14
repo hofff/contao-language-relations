@@ -6,18 +6,24 @@ namespace Hofff\Contao\LanguageRelations\DCA;
 
 use Contao\BackendTemplate;
 use Contao\Controller;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use Contao\Database;
 use Contao\DataContainer;
+use Contao\DC_Table;
 use Contao\Input;
 use Contao\Message;
 use Contao\StringUtil;
 use Contao\System;
 use Hofff\Contao\LanguageRelations\LanguageRelations;
 use Hofff\Contao\LanguageRelations\Util\EnvironmentProxy;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
+
 use function array_filter;
 use function array_map;
 use function array_unique;
 use function array_unshift;
+use function assert;
 use function count;
 use function rtrim;
 use function sprintf;
@@ -26,15 +32,19 @@ use function str_repeat;
 class GroupDCA
 {
     /** @var string[]|int[] */
-    private $roots;
+    private array $roots;
 
     public function __construct()
     {
         $this->roots = [];
     }
 
-    public function keySelectriAJAXCallback(DataContainer $dc) : string
+    public function keySelectriAJAXCallback(DataContainer $dataContainer): string
     {
+        if (! $dataContainer instanceof DC_Table) {
+            throw new BadRequestException();
+        }
+
         $key = 'isAjaxRequest';
 
         // the X-Requested-With gets deleted on ajax requests by selectri widget,
@@ -43,7 +53,7 @@ class GroupDCA
         $$key = EnvironmentProxy::getCacheValue($key);
         EnvironmentProxy::setCacheValue($key, true);
 
-        $return = $dc->editAll(Input::get('hofff_language_relations_id'));
+        $return = $dataContainer->editAll(Input::get('hofff_language_relations_id'));
 
         // this would never be reached, but we clean up the env
         EnvironmentProxy::setCacheValue($key, $$key);
@@ -51,15 +61,19 @@ class GroupDCA
         return $return;
     }
 
-    public function keyEditRelations() : void
+    /**
+     * @SuppressWarnings(PHPMD.Superglobals)
+     */
+    public function keyEditRelations(): void
     {
-        $fields = [ 'hofff_language_relations_info', 'hofff_language_relations' ];
+        $fields = ['hofff_language_relations_info', 'hofff_language_relations'];
         $roots  = (array) $_GET['roots'];
         $roots  = array_map('intval', $roots);
         $roots  = array_filter($roots, static function ($root) {
             return $root >= 1;
         });
         $roots  = array_unique($roots);
+        $ids    = null;
 
         switch ($_GET['filter']) {
             case 'incomplete':
@@ -80,30 +94,40 @@ class GroupDCA
                     )->execute($roots);
                     $ids       = $result->fetchEach('id');
                 }
+
                 break;
         }
 
         if (! $ids) {
-            Message::addConfirmation($msg ?: $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
+            Message::addConfirmation($msg ?? $GLOBALS['TL_LANG']['tl_hofff_language_relations_group']['noPagesToEdit']);
             Controller::redirect(System::getReferer());
+
             return;
         }
 
-        $sessionService                = System::getContainer()->get('session');
+        $sessionService = System::getContainer()->get('session');
+        assert($sessionService instanceof SessionInterface);
+
         $session                       = $sessionService->all();
         $session['CURRENT']['IDS']     = $ids;
         $session['CURRENT']['tl_page'] = $fields;
         $sessionService->replace($session);
 
+        $tokenManager = System::getContainer()->get('contao.csrf.token_manager');
+        assert($tokenManager instanceof ContaoCsrfTokenManager);
+
         Controller::redirect(
-            'contao?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt=' . REQUEST_TOKEN
+            'contao?do=hofff_language_relations_group&table=tl_page&act=editAll&fields=1&rt='
+            . $tokenManager->getDefaultTokenValue()
         );
     }
 
     /**
      * @param mixed[] $row
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function groupGroup(string $group, ?string $mode, string $field, array $row, DataContainer $dc) : string
+    public function groupGroup(string $group, ?string $mode, string $field, array $row): string
     {
         return $row['title'];
     }
@@ -111,7 +135,7 @@ class GroupDCA
     /**
      * @param mixed[] $row
      */
-    public function labelGroup(array $row, string $label) : string
+    public function labelGroup(array $row): string
     {
         $sql    = 'SELECT * FROM tl_page WHERE hofff_language_relations_group_id = ? ORDER BY title';
         $result = Database::getInstance()->prepare($sql)->execute($row['id']);
@@ -132,8 +156,10 @@ class GroupDCA
 
     /**
      * @return string[][]
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
      */
-    public function getRootsOptions() : array
+    public function getRootsOptions(): array
     {
         $sql    = <<<SQL
 SELECT
@@ -174,9 +200,9 @@ SQL;
         return $options;
     }
 
-    public function onsubmitGroup(DataContainer $dc) : void
+    public function onsubmitGroup(DataContainer $dataContainer): void
     {
-        if (! isset($this->roots[$dc->id])) {
+        if (! isset($this->roots[$dataContainer->id])) {
             return;
         }
 
@@ -184,29 +210,32 @@ SQL;
             ->prepare(
                 'UPDATE tl_page SET hofff_language_relations_group_id=NULL WHERE hofff_language_relations_group_id=?'
             )
-            ->execute($dc->id);
+            ->execute($dataContainer->id);
 
-        $roots = StringUtil::deserialize($this->roots[$dc->id], true);
+        $roots = StringUtil::deserialize($this->roots[$dataContainer->id], true);
         if (! $roots) {
             return;
         }
 
         $wildcards = rtrim(str_repeat('?,', count($roots)), ',');
         $sql       = 'UPDATE tl_page SET hofff_language_relations_group_id=? WHERE id IN (' . $wildcards . ')';
-        array_unshift($roots, $dc->id);
+        array_unshift($roots, $dataContainer->id);
         Database::getInstance()->prepare($sql)->execute($roots);
     }
 
     /**
      * @param mixed         $value
-     * @param DataContainer $dc
+     * @param DataContainer $dataContainer
      *
      * @return mixed[]
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function loadRoots($value, $dc) : array
+    public function loadRoots($value, $dataContainer): array
     {
         $sql    = 'SELECT id FROM tl_page WHERE hofff_language_relations_group_id=? AND type=? ORDER BY title';
-        $result = Database::getInstance()->prepare($sql)->execute($dc->id, 'root');
+        $result = Database::getInstance()->prepare($sql)->execute($dataContainer->id, 'root');
+
         return $result->fetchEach('id');
     }
 
@@ -215,9 +244,10 @@ SQL;
      *
      * @return null
      */
-    public function saveRoots($value, DataContainer $dc)
+    public function saveRoots($value, DataContainer $dataContainer)
     {
-        $this->roots[$dc->id] = $value;
+        $this->roots[$dataContainer->id] = $value;
+
         return null;
     }
 }
