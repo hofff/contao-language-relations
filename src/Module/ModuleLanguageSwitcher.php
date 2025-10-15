@@ -135,6 +135,7 @@ class ModuleLanguageSwitcher extends Module
 
         $params = $this->getRequestParams($currentPage);
 
+        $forceLanguage = System::getContainer()->getParameter('contao.legacy_routing');
         $items = [];
         foreach ($relatedPages as $rootPageID => $page) {
             assert($page instanceof PageModel);
@@ -142,7 +143,7 @@ class ModuleLanguageSwitcher extends Module
             $language = strtolower($page->rootLanguage);
 
             try {
-                $url = $page->getFrontendUrl($params, $language);
+                $url = $page->getFrontendUrl($params, $forceLanguage ? $language : null);
             } catch (RouteParametersException $exception) {
                 $url = '';
             } catch (ResourceNotFoundException $exception) {
